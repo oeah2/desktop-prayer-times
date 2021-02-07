@@ -1,0 +1,4 @@
+[num_cities]:2
+[city]:Lippstadt;diyanet;10188.json;0;;0.000000;0.000000
+[city]:Moers;diyanet;9541.JSON;1;;0.000000;0.000000
+[language]:en
