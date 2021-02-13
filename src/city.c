@@ -36,7 +36,7 @@ CLOSE_FILE:
     return c;
 }
 
-City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude)
+City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude, size_t asr_juristic, size_t adjust_high_lats)
 {
     if(c && name) {
         c->name = malloc(strlen(name) + 1);
@@ -49,6 +49,8 @@ City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, si
                 .method = method,
                 .latitude = latitude,
                 .longitude = longitude,
+                .asr_juristic = asr_juristic,
+                .adjust_high_lats = adjust_high_lats,
             };
         } else {
             goto ERR_NAME;
@@ -125,4 +127,17 @@ City* city_vdelete(size_t num, City* c)
         c = 0;
     }
     return c;
+}
+
+bool city_is_equal(City a, City b)
+{
+    return  a.adjust_high_lats == b.adjust_high_lats &&
+            a.asr_juristic == b.asr_juristic &&
+            //!strcmp(a.filename, b.filename) &&
+            //a.file_times == b.file_times &&
+            //a.id == b.id &&
+            a.latitude == b.latitude &&
+            a.longitude == b.longitude &&
+            a.method == b.method &&
+            a.pr_time_provider == b.pr_time_provider;
 }

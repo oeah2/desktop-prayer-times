@@ -6,6 +6,7 @@
 #include <string.h>
 //#define NDEBUG 1
 #include <assert.h>
+#include "Salah_times_calc.h"
 
 typedef struct City City;
 /** \brief struct city contains the informations to process the diyanet prayer times. Create yourself a local variable with correct values, then once use init_diyanet and afterwards calculate prayer times only with city_id
@@ -20,7 +21,9 @@ struct City {
     char* name;
     char* filename;
     size_t id, pr_time_provider;
-    size_t method;
+    size_t method;                                      // must be element of enum ST_calculation_method
+    size_t asr_juristic;                                // must be element of enum ST_juristic_method
+    size_t adjust_high_lats;                            // must be element of enum ST_adjusting_method
     double latitude, longitude;
 };
 
@@ -44,7 +47,7 @@ City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider,
  * \return pointer to initialized city
  *
  */
-City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude);
+City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude, size_t asr_juristic, size_t adjust_high_lats);
 
 /** \brief Destroys city element, without freeing c
  *
@@ -96,5 +99,13 @@ City* city_vnew(size_t num, char const (*name)[num], size_t pr_time_provider[num
  */
 
 City* city_vdelete(size_t num, City* c);
+
+/** \brief Compare two cities for equality
+ *
+ * \return true if equal
+ *
+ */
+
+bool city_is_equal(City a, City b);
 
 #endif // CITY_H_INCLUDED
