@@ -1,16 +1,16 @@
 #include "config.h"
 
-static enum config_specifiers {spec_num_cities, spec_city, spec_lang, spec_num};
+enum config_specifiers {
+    spec_num_cities,
+    spec_city,
+    spec_lang,
+    spec_num
+};
+
 static char const*const config_format_specifiers[] = {
     [spec_num_cities] = "[num_cities]",
     [spec_city] = "[city]",
     [spec_lang] = "[language]",
-};
-
-static char const*const format_config[] = {
-    [spec_city] = "%s;%s;%u",               // Cityname, calc-method, path to file, city_id
-    [spec_num_cities] = "%u",
-    [spec_lang] = "%s",                     // Filename
 };
 
 static int config_parse_string(char *string_in, Config* cfg)
@@ -53,13 +53,15 @@ static int config_parse_string(char *string_in, Config* cfg)
             char* method_str = strtok(0, delimiters);
             double longitude = strtof(strtok(0, delimiters), 0);
             double latitude = strtof(strtok(0, delimiters), 0);
+            size_t juristic = strtoul(strtok(0, delimiters), 0, 10);
+            size_t adjust_method = strtoul(strtok(0, delimiters), 0, 10);
             size_t method = 0;
-            for(size_t i = 0; i < calculation_method_num; i++) {
-                if(!strcmp(method_str, method_names[i]))
+            for(size_t i = 0; i < ST_cm_num; i++) {
+                if(!strcmp(method_str, ST_cm_names[i]))
                     method = i;
             }
 
-            current_city = city_init_calc(current_city, name, provider, method, id, longitude, latitude);
+            current_city = city_init_calc(current_city, name, provider, method, id, longitude, latitude, juristic, adjust_method);
         }
         assert(current_city);
         cfg->counter_parsed_cities++;
@@ -112,7 +114,7 @@ int config_read(char const*const filename, Config* cfg)
     return EXIT_SUCCESS;
 }
 
-int config_save(char const*const filename, Config const* cfg)
+int config_save(char const*const filename, Config const*const cfg)
 {
     if(!cfg->config_changed) return EXIT_FAILURE;
 
@@ -126,34 +128,21 @@ int config_save(char const*const filename, Config const* cfg)
     fprintf(cfg_file, "%s:%zu\n", config_format_specifiers[spec_num_cities], cfg->num_cities);
 
     for(size_t i = 0; i < cfg->num_cities; i++) {
-        char* format = "%s:%s;%s;%s;%zu;%s;%f;%f\n";    // City-Name; Provider-Name; Filename; ID; Method-Name; Longitude; Latitude
+        char* format = "%s:%s;%s;%s;%zu;%s;%f;%f;%zu;%zu\n";    // City-Name; Provider-Name; Filename; ID; Method-Name; Longitude; Latitude
         City* curr_city = &cfg->cities[i];
-        switch(cfg->cities[i].pr_time_provider) {
-        case prov_diyanet:
-            fprintf(cfg_file,
-                    format,
-                    config_format_specifiers[spec_city],
-                    curr_city->name,
-                    provider_names[curr_city->pr_time_provider],
-                    curr_city->filename,
-                    curr_city->id,
-                    "",
-                    0,
-                    0);
-            break;
-        case prov_calc:
-            fprintf(cfg_file,
-                    format,
-                    config_format_specifiers[spec_city],
-                    curr_city->name,
-                    provider_names[curr_city->pr_time_provider],
-                    "",
-                    curr_city->id,
-                    method_names[curr_city->method],
-                    curr_city->longitude,
-                    curr_city->latitude);
-            break;
-        }
+
+        fprintf(cfg_file,
+                format,
+                config_format_specifiers[spec_city],
+                curr_city->name,
+                provider_names[curr_city->pr_time_provider],
+                curr_city->filename ? curr_city->filename : " ",
+                curr_city->id,
+                curr_city->pr_time_provider == prov_calc ? ST_cm_names[curr_city->method] : " ",
+                curr_city->longitude,
+                curr_city->latitude,
+                curr_city->asr_juristic,
+                curr_city->adjust_high_lats);
     }
 
     fprintf(cfg_file, "%s:%s\n", config_format_specifiers[spec_lang], cfg->lang);
@@ -161,79 +150,6 @@ int config_save(char const*const filename, Config const* cfg)
     fclose(cfg_file);
     return EXIT_SUCCESS;
 }
-
-/**********************
-** Binary read and save currently not implemented.
-*********************/
-
-/*
-int config_save_binary(char const*const filename, Config cfg)
-{
-    assert(filename);
-    if(!filename) return -EFAULT;
-    //if(!cfg) return -EFAULT;
-
-    FILE* file = fopen(filename, "wb");
-    assert(file);
-    if(!file) return -EFAULT;
-
-    int err = 0;
-    for(size_t i = 0; i < cfg.num_cities; i++) {
-        cfg.cities[i].file_times = 0;
-    }
-
-    City* cities = cfg.cities;
-    cfg.cities = 0;
-    char *city_names[cfg.num_cities];
-    char *file_names[cfg.num_cities];
-
-    for(size_t i = 0; i < cfg.num_cities; i++) {
-        city_names[i] = cities[i].name;
-        cities[i].name = 0;
-        file_names[i] = cities[i].filename;
-        cities[i].filename = 0;
-    }
-
-    if(fwrite(&cfg, sizeof(cfg), 1, file) != sizeof(cfg)) { // Save struct Config
-        err = ferror(file);
-        goto RET_FILE;
-    }
-    if(fwrite(cities, sizeof(City), cfg.num_cities, file) != cfg.num_cities * sizeof(City)) { // Save array of Struct City
-        err = ferror(file);
-        goto RET_FILE;
-    }
-
-    goto RET_FILE;
-
-RET_FILE:
-    fclose(file);
-    return err;
-}
-
-int config_read_binary(char const*const filename, Config* cfg)
-{
-    assert(filename && cfg);
-    if(!filename) return -EFAULT;
-    if(!cfg) return -EFAULT;
-
-    FILE* file = fopen(filename, "rb");
-    int err = 0;
-    if(fread(cfg, sizeof(Config), 1, file) != sizeof(Config)) {
-        err = ferror(file);
-        goto RET_FILE;
-    }
-
-    return err;
-
-    for(size_t i = 0; i < cfg->num_cities; i++) {
-        cfg->cities[i].filename;
-    }
-
-RET_FILE:
-    fclose(file);
-    return err;
-}
-*/
 
 Config* config_init(Config* cfg)
 {
@@ -247,40 +163,75 @@ Config* config_init(Config* cfg)
     return cfg;
 }
 
-size_t config_find_next_id(Config const* cfg)
+static bool is_id_valid(size_t city_id, Config const*const cfg)     /**< return true if ID is existing in cfg, false otherwise */
 {
-    size_t next_id = 0;
-    if(cfg && cfg->num_cities) {
-        next_id = cfg->cities[cfg->num_cities - 1].id + 1;
+    for(size_t i = 0; i < cfg->num_cities; i++) {
+        if(cfg->cities[i].id == city_id) return true;
     }
-    return next_id;
+    return false;
 }
 
-
-int config_add_city(City c, Config* cfg)
+size_t config_find_idpos(size_t city_id, Config const*const cfg)
 {
-    int ret = EXIT_FAILURE;
-    if(cfg) {
-        cfg->cities = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
-        cfg->cities[cfg->num_cities] = c;
-        cfg->num_cities++;
-        cfg->counter_parsed_cities++;
-        cfg->config_changed = true;
+    size_t ret = -1;
+    if(is_id_valid(city_id, cfg)) {
+        for(size_t i = 0; i < cfg->num_cities; i++) {
+            if(cfg->cities[i].id == city_id) return i;
+        }
     }
     return ret;
 }
 
-Config* config_remove_city(size_t city_id, Config* cfg)
+size_t config_find_next_id(Config const*const cfg)
 {
-    /*    if(cfg) {
-            for(size_t i = 0; i < cfg->num_cities; i++) {
-                if(cfg->cities[i].id == city_id) {
-
-                }
-            }
+    size_t next_id = 0;
+    for(size_t i = 0; i <= cfg->num_cities; i++) {
+        if(!is_id_valid(i, cfg)) {
+            next_id = i;
+            break;
         }
-    */
-    return cfg;
+    }
+    return next_id;
+}
+
+int config_add_city(City c, Config* cfg)
+{
+    int ret = EXIT_FAILURE;
+    if(cfg && !is_id_valid(c.id, cfg)) {
+        City* new_pointer = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
+        if(!new_pointer) return EXIT_FAILURE;
+        cfg->cities = new_pointer;
+        cfg->cities[cfg->num_cities] = c;
+        cfg->num_cities++;
+        cfg->counter_parsed_cities++;
+        cfg->config_changed = true;
+        ret = EXIT_SUCCESS;
+    }
+    return ret;
+}
+
+int config_remove_city(size_t city_id, Config* cfg)
+{
+    int ret = EXIT_FAILURE;
+    if(cfg && is_id_valid(city_id, cfg)) {
+        City buffer[cfg->num_cities - 1];
+        for(size_t i = 0, counter = 0; i < cfg->num_cities; i++) {       // Copy cities to array
+            if(cfg->cities[i].id == city_id) continue;
+            buffer[counter] = cfg->cities[i];
+            counter++;
+        }
+        cfg->num_cities--;
+        City* new_pointer = realloc(cfg->cities, cfg->num_cities * sizeof(City));     // Shrink size, should not fail
+        if(!new_pointer) return EXIT_FAILURE;
+        cfg->cities = new_pointer;
+
+        for(size_t i = 0; i < cfg->num_cities; i++) {           // Copy array back to config
+            cfg->cities[i] = buffer[i];
+        }
+        cfg->config_changed = true;
+        ret = EXIT_SUCCESS;
+    }
+    return ret;
 }
 
 Config* config_clear(Config* cfg)

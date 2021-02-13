@@ -12,7 +12,8 @@
 typedef struct Config Config;
 
 struct Config {
-    size_t /*pr_time_providers,*/ num_cities, counter_parsed_cities;
+    size_t num_cities;
+    size_t counter_parsed_cities;
     City* cities;
     char lang[5];
     bool config_changed;
@@ -36,11 +37,7 @@ int config_read(char const*const filename, Config* cfg);
  *
  */
 
-int config_save(char const*const filename, Config const* cfg);
-
-int config_save_binary(char const*const filename, Config cfg);
-
-int config_read_binary(char const*const filename, Config* cfg);
+int config_save(char const*const filename, Config const*const cfg);
 
 /** \brief Initialize config, if no config shall be read from file
  *
@@ -51,6 +48,15 @@ int config_read_binary(char const*const filename, Config* cfg);
 
 Config* config_init(Config* cfg);
 
+/** \brief Find position of City id
+ *
+ * \param city_id size_t id of city
+ * \param cfg Config const*const
+ * \return size_t position of city
+ *
+ */
+size_t config_find_idpos(size_t city_id, Config const*const cfg);
+
 /** \brief Returns next free id for cities
  *
  * \param cfg pointer to struct Config, containing configuration of application
@@ -58,7 +64,7 @@ Config* config_init(Config* cfg);
  *
  */
 
-size_t config_find_next_id(Config const* cfg);
+size_t config_find_next_id(Config const*const cfg);
 
 /** \brief Add city to config. User shall verify id of city is not already assigned to other city. Use find_next_id if possible
  *
@@ -78,7 +84,7 @@ int config_add_city(City c, Config* cfg);
  *
  */
 
-Config* config_remove_city(size_t city_id, Config* cfg);
+int config_remove_city(size_t city_id, Config* cfg);
 
 /** \brief Clear config. Frees memory of cities and than calls @f config_init.
  *
