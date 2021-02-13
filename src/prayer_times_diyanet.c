@@ -96,14 +96,11 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
 GET_PRAYER_TIMES:
     if(!fgets(buffer, buffer_length, file_times)) {
         perror("Error reading file.");
-        assert(0);
-        return ENOFILE;
     }
 
-    if(EOF == fgetc(file_times) && feof(file_times) && !strlen(buffer)) {
+    if(EOF == fgetc(file_times) && feof(file_times)) {
         /* end of file reached, update file */
         perror("End of file reached.");
-        assert(0);
         return EOF;
     }
 
@@ -123,47 +120,31 @@ GET_PRAYER_TIMES:
     return EXIT_SUCCESS;
 }
 
-int diyanet_get_todays_prayers(Config* cfg, size_t city_id, prayer prayer_times[prayers_num])
+int diyanet_get_todays_prayers(City city, prayer prayer_times[prayers_num])
 {
-    if(!cfg ||!prayer_times) {
+    if(!prayer_times) {
         return EXIT_FAILURE;
     }
-    size_t pos = 0;
-    for(size_t i = 0; i < cfg->num_cities; i++) {
-        if(cfg->cities[i].id == city_id) {
-            pos = i;
-            rewind(cfg->cities[i].file_times);
-            break;
-        }
-    }
-
-    return diyanet_get_prayer_times_for_date(cfg->cities[pos].file_times, prayer_times, 0);
+    rewind(city.file_times);
+    return diyanet_get_prayer_times_for_date(city.file_times, prayer_times, 0);
 }
 
-int diyanet_get_preview_for_date(Config* cfg, size_t city_id, prayer prayer_times[prayers_num], struct tm date)
+int diyanet_get_preview_for_date(City city, prayer prayer_times[prayers_num], struct tm date)
 {
-    if(!cfg || !prayer_times) {
+    if(!prayer_times) {
         return EXIT_FAILURE;
     }
     date.tm_hour = 0;
     date.tm_min = 0;
     date.tm_sec = 0;
 
-    size_t pos = 0;
-    for(size_t i = 0; i < cfg->num_cities; i++) {
-        if(cfg->cities[i].id == city_id) {
-            pos = i;
-            rewind(cfg->cities[i].file_times);
-            break;
-        }
-    }
-
-    return diyanet_get_prayer_times_for_date(cfg->cities[pos].file_times, prayer_times, mktime(&date));
+    rewind(city.file_times);
+    return diyanet_get_prayer_times_for_date(city.file_times, prayer_times, mktime(&date));
 }
 
-int diyanet_get_preview_prayers(Config* cfg, size_t city_id, size_t days, prayer prayer_times[days][prayers_num])
+int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days][prayers_num])
 {
-    if(!cfg || !prayer_times || !days) {
+    if(!prayer_times || !days) {
         return EXIT_FAILURE;
     }
     double const secs_per_day = 60*60*24;
@@ -181,18 +162,10 @@ int diyanet_get_preview_prayers(Config* cfg, size_t city_id, size_t days, prayer
     tm.tm_min = 0;
     tm.tm_sec = 0;
 
-    size_t pos = 0;
-    for(size_t i = 0; i < cfg->num_cities; i++) {
-        if(cfg->cities[i].id == city_id) {
-            pos = i;
-            rewind(cfg->cities[i].file_times);
-            break;
-        }
-    }
-
+    rewind(city.file_times);
     for(size_t i = 0; i < days; i++) {
-        if(diyanet_get_prayer_times_for_date(cfg->cities[pos].file_times, prayer_times[i], mktime(&tm) + secs_per_day * (i + 1)) == EXIT_FAILURE) {
-            ret = EXIT_FAILURE;
+        ret = diyanet_get_prayer_times_for_date(city.file_times, prayer_times[i], mktime(&tm) + secs_per_day * (i + 1));
+        if(ret == EXIT_FAILURE || ret == EOF) {
             break;
         }
     }

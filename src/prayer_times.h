@@ -1,6 +1,18 @@
 #ifndef PRAYER_TIMES_H_INCLUDED
 #define PRAYER_TIMES_H_INCLUDED
 
+/*-------------------------------------------------
+        User Interface:
+    - diyanet_get_todays_prayers
+    - diyanet_get_preview_for_date
+    - diyanet_get_preview_prayers
+    - calc_get_todays_prayers
+    - calc_get_preview_for_date
+    - calc_get_preview_prayers
+
+
+--------------------------------------------------*/
+
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,28 +21,42 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <math.h>
 #include "config.h"
 #include "city.h"
+
+
 typedef struct Config Config; // This needs to be added here, because city.h also includes config. Due to include guards, this could otherwise not be used.
 
 
-enum prayers {pr_fajr, pr_fajr_end, pr_sunrise, pr_dhuhr, pr_asr, pr_sunset, pr_maghreb, pr_ishaa, prayers_num}; /**< enum for indexing prayers */
-enum pr_time_providers {prov_diyanet, prov_calc, prov_num}; /**< enum for indexing prayer times providers */
-enum calculation_method {
-    jafari, 	// Ithna Ashari
-    karachi,	// University of Islamic Sciences, Karachi
-    ISNA,   	// Islamic Society of North America (ISNA)
-    MWL,    	// Muslim World League (MWL)
-    makkah, 	// Umm al-Qura, Makkah
-    egypt,  	// Egyptian General Authority of Survey
-    custom, 	// Custom Setting
+enum prayers {    /**< enum for indexing prayers */
+    pr_fajr,
+    pr_fajr_end,
+    pr_sunrise,
+    pr_dhuhr,
+    pr_asr,
+    pr_sunset,
+    pr_maghreb,
+    pr_ishaa,
 
-    calculation_method_num,
+    prayers_num
 };
+
+enum pr_time_providers { /**< enum for indexing prayer times providers */
+    prov_diyanet,
+    prov_calc,
+
+    prov_num
+};
+
+//extern enum ST_calculation_method;
+//extern enum ST_juristic_method;
+//extern enum ST_adjusting_method;
+
 
 extern char const*const prayer_names[prayers_num]; /**< Referenced to prayer names */
 extern char const*const provider_names[prov_num]; /**< Referencing to prayer times providers names */
-extern char const*const method_names[calculation_method_num];
+extern char const*const ST_cm_names[ST_cm_num];
 
 typedef struct prayer prayer;
 
@@ -60,7 +86,7 @@ void prayer_print_times(char const*const city_name, prayer times[prayers_num]);
  * \return EXIT_FAILURE upon failure, EXIT_SUCCESS otherwise
  *
  */
-int diyanet_get_todays_prayers(Config* cfg, size_t city_id, prayer prayer_times[prayers_num]);
+int diyanet_get_todays_prayers(City city, prayer prayer_times[prayers_num]);
 
 /** \brief Calculates prayer times for given date
  *
@@ -70,7 +96,7 @@ int diyanet_get_todays_prayers(Config* cfg, size_t city_id, prayer prayer_times[
  * \return EXIT_FAILURE upon failure, EXIT_SUCCESS otherwise
  *
  */
-int diyanet_get_preview_for_date(Config* cfg, size_t city_id, prayer prayer_times[prayers_num], struct tm date);
+int diyanet_get_preview_for_date(City city, prayer prayer_times[prayers_num], struct tm date);
 
 /** \brief Calculates prayer times for given @p days days
  *
@@ -80,9 +106,23 @@ int diyanet_get_preview_for_date(Config* cfg, size_t city_id, prayer prayer_time
  * \return EXIT_FAILURE upon failure, EXIT_SUCCESS otherwise
  *
  */
-int diyanet_get_preview_prayers(Config* cfg, size_t city_id, size_t days, prayer prayer_times[days][prayers_num]);
+int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days][prayers_num]);
 
 
-typedef int calc_function(Config*, size_t city_id, prayer[prayers_num]);/**< typedef for the calculation functions. This will be used in the further code to allow the usage of different methods. */
+/** \brief Calculate prayer time for given city using different calculation methods specified in cfg.
+ *
+ * \param
+ * \param
+ * \return
+ *
+ */
+
+int calc_get_todays_prayers(City city, prayer prayer_times[prayers_num]);
+
+int calc_get_preview_for_date(City city, prayer prayer_times[prayers_num], struct tm date);
+
+int calc_get_preview_prayers(City city, size_t days, prayer prayer_times[days][prayers_num]);
+
+typedef int calc_function(City, prayer[prayers_num]);/**< typedef for the calculation functions. This will be used in the further code to allow the usage of different methods. */
 
 #endif // PRAYER_TIMES_H_INCLUDED
