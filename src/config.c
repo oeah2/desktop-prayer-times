@@ -1,4 +1,11 @@
 #include "config.h"
+#include "socket.h"
+
+
+enum Version {
+    VERSION_MAIN_MAJOR = 0,
+    VERSION_MAIN_MINOR = 1,
+};
 
 enum config_specifiers {
     spec_num_cities,
@@ -53,15 +60,15 @@ static int config_parse_string(char *string_in, Config* cfg)
             char* method_str = strtok(0, delimiters);
             double longitude = strtof(strtok(0, delimiters), 0);
             double latitude = strtof(strtok(0, delimiters), 0);
-            size_t juristic = strtoul(strtok(0, delimiters), 0, 10);
-            size_t adjust_method = strtoul(strtok(0, delimiters), 0, 10);
+            size_t asr_juristic = strtoul(strtok(0, delimiters), 0, 10);
+            size_t adjust_high_lats_method = strtoul(strtok(0, delimiters), 0, 10);
             size_t method = 0;
             for(size_t i = 0; i < ST_cm_num; i++) {
                 if(!strcmp(method_str, ST_cm_names[i]))
                     method = i;
             }
 
-            current_city = city_init_calc(current_city, name, provider, method, id, longitude, latitude, juristic, adjust_method);
+            current_city = city_init_calc(current_city, name, provider, method, id, longitude, latitude, asr_juristic, adjust_high_lats_method);
         }
         assert(current_city);
         cfg->counter_parsed_cities++;
@@ -73,11 +80,14 @@ static int config_parse_string(char *string_in, Config* cfg)
         assert(cfg->cities);
         break;
     case spec_lang:
+        cfg->lang = strtoul(str_result, 0, 10);
+        #ifdef OLDCODE
         if(str_result && (!strcmp(str_result, "\n") || !strcmp(str_result, ""))) {
             strcpy(cfg->lang,str_result);
         } else {
             strcpy(cfg->lang, "en");
         }
+        #endif
         break;
     default:
         return EXIT_FAILURE;
@@ -128,7 +138,7 @@ int config_save(char const*const filename, Config const*const cfg)
     fprintf(cfg_file, "%s:%zu\n", config_format_specifiers[spec_num_cities], cfg->num_cities);
 
     for(size_t i = 0; i < cfg->num_cities; i++) {
-        char* format = "%s:%s;%s;%s;%zu;%s;%f;%f;%zu;%zu\n";    // City-Name; Provider-Name; Filename; ID; Method-Name; Longitude; Latitude
+        char* format = "%s:%s;%s;%s;%zu;%s;%f;%f;%zu;%zu\n";    // [City]: City-Name; Provider-Name; Filename; ID; Method-Name; Longitude; Latitude; Asr-Juristic; Adjust high latitudes method
         City* curr_city = &cfg->cities[i];
 
         fprintf(cfg_file,
@@ -145,7 +155,7 @@ int config_save(char const*const filename, Config const*const cfg)
                 curr_city->adjust_high_lats);
     }
 
-    fprintf(cfg_file, "%s:%s\n", config_format_specifiers[spec_lang], cfg->lang);
+    fprintf(cfg_file, "%s:%zu\n", config_format_specifiers[spec_lang], cfg->lang);
 
     fclose(cfg_file);
     return EXIT_SUCCESS;
@@ -156,7 +166,7 @@ Config* config_init(Config* cfg)
     if(cfg) {
         cfg->cities = 0;
         cfg->counter_parsed_cities = 0;
-        strcpy(cfg->lang, "en");
+        cfg->lang = LANG_EN;
         cfg->num_cities = 0;
         cfg->config_changed = false;
     }
@@ -240,4 +250,19 @@ Config* config_clear(Config* cfg)
         free(cfg->cities);
     }
     return config_init(cfg);
+}
+
+bool config_check_update(void) {
+    char const*const host = "raw.githubusercontent.com";
+    char* file = "/oeah2/desktop-prayer-times/main/version?token=AL2O77C4ZEI2TPBFSCUO4H3AGDA2W";
+
+    socket_init();
+    char* current_version = http_get(host, file);
+    socket_deinit();
+    float current_version_f = strtod(current_version, 0);
+    float sw_version = (float) VERSION_MAIN_MAJOR + VERSION_MAIN_MINOR / 10;
+    if(current_version_f > sw_version) {
+        return true;
+    }
+    return false;
 }
