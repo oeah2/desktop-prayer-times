@@ -1,16 +1,18 @@
 #include "city.h"
+#include "prayer_times.h"
 
 City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider, char const*const filename, size_t id)
 {
     if(c && name && filename) {
-        c->file_times = fopen(filename, "r");
-        if(c->file_times) {
-            c->filename = malloc(strlen(filename) + 1);
-            if(c->filename) {
-                c->name = malloc(strlen(name) + 1);
-                if(c->name) {
-                    strcpy(c->name, name);
-                    strcpy(c->filename, filename);
+        c->filename = malloc(strlen(filename) + 1);
+        if(c->filename) {
+            c->name = malloc(strlen(name) + 1);
+            if(c->name) {
+                strcpy(c->name, name);
+                strcpy(c->filename, filename);
+                c->file_times = fopen(filename, "r");
+INIT_STRUCT:
+                if(c->file_times) {
                     *c = (City) {
                         .name = c->name,
                         .filename = c->filename,
@@ -19,19 +21,20 @@ City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider,
                         .pr_time_provider = pr_time_provider,
                     };
                 } else {
-                    goto FREE_FILENAME;
+                    diyanet_update_file(c, false);
+                    goto INIT_STRUCT;
                 }
             } else {
-                goto CLOSE_FILE;
+                goto FREE_FILENAME;
             }
         }
     }
     return c;
 
-FREE_FILENAME:
-    free(c->filename);
 CLOSE_FILE:
     fclose(c->file_times);
+FREE_FILENAME:
+    free(c->filename);
     c = 0;
     return c;
 }
