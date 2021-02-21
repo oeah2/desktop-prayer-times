@@ -12,37 +12,26 @@
 
 extern calc_function* calc_functions[];
 
-enum Version {
-    VERSION_MAIN_MAJOR = 0,
-    VERSION_MAIN_MINOR = 1,
-};
-
 int main(int argc, char** argv)
 {
     Config config = {0};
-    char *config_file = "Config.cfg.txt";
+    char* config_file = "Config.cfg";
     prayer prayer_times[prayers_num];
 
-    int res = config_read(config_file, &config);
-    assert(res == EXIT_SUCCESS);
-    if(res == EXIT_FAILURE) {
+    if(config_read(config_file, &config) == EXIT_FAILURE) {
         config = *config_init(&config);
         // Do further initialization to add cities etc.
     }
 
-    setlocale(LC_ALL, config.lang);
+    setlocale(LC_ALL, lang_names[config.lang]);
 
-    /* Um den Code in der Loop einfacher zu halten */
-    calc_function* calc_func = 0;
-    City* curr_city = 0;
-
+#if ADD_TESTCITIES
     enum CityIDs {
         ID_LP = 0,
         ID_LP_calc = 1,
         ID_unknown = 6,
     };
 
-#if TESTCITY
     City newCity = *city_init_calc(&newCity, "TestCity", prov_calc, ST_cm_Makkah, ID_unknown, 0, 0);
     config_add_city(newCity, &config);
     config_remove_city(ID_unknown, &config);
@@ -53,26 +42,32 @@ int main(int argc, char** argv)
     config_add_city(lp_calc, &config);
 #endif
 
-    //config_remove_city(6, &config);
+#if TEST_REMOVE_CITY
+    config_remove_city(ID_LP_calc, &config);
+#endif // TEST_REMOVE_CITY
 
+    calc_function* calc_func = 0;
+    City* curr_city = 0;
+    bool update_done = false;
     for(size_t i = 0; i < config.num_cities; i++) {
-        int ret = 0;
         assert(calc_functions[config.cities[i].pr_time_provider]);
         curr_city = &config.cities[i];
         calc_func = calc_functions[curr_city->pr_time_provider];
 CALC_TIMES:
-        ret = calc_func(config.cities[i], prayer_times);
-        switch(ret) {
+        switch(calc_func(config.cities[i], prayer_times)) {
         case ENOFILE:   // In case of no file, the behaviour is the same like with EOF
         case EOF:
+            perror("Main: end of file reached!");
+#define ACTIVATE_WHEN_FILEUPDATE_IS_IMPLEMENTED 1
+#if ACTIVATE_WHEN_FILEUPDATE_IS_IMPLEMENTED
             /*******************************
                 Implement update of file
             ********************************/
-            perror("Main: end of file reached!");
-#if ACTIVATE_WHEN_FILEUPDATE_IS_IMPLEMENTED
+            diyanet_update_file(&(config.cities[i]), false);
             goto CALC_TIMES;
-#endif
+#else
             break;
+#endif // ACTIVATE_WHEN_FILEUPDATE_IS_IMPLEMENTED
         case EFAULT:
             // Should not occur, prayer times of past
             break;

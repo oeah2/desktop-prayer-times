@@ -1,4 +1,5 @@
 #include "prayer_times.h"
+#include "socket.h"
 
 static char const*const diyanet_format_keywords[prayers_num] = {
     [pr_fajr] = "Imsak",
@@ -125,6 +126,9 @@ int diyanet_get_todays_prayers(City city, prayer prayer_times[prayers_num])
     if(!prayer_times) {
         return EXIT_FAILURE;
     }
+    if(!city.file_times) {
+        return ENOFILE;
+    }
     rewind(city.file_times);
     return diyanet_get_prayer_times_for_date(city.file_times, prayer_times, 0);
 }
@@ -170,4 +174,31 @@ int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days
         }
     }
     return ret;
+}
+
+int diyanet_update_file(City* city, bool preserve_old_data) {
+    char const*const host = "ezanvakti.herokuapp.com";
+    char filename[strlen(city->filename)];
+    strcpy(filename, city->filename);
+    char* filename_without_type = strtok(filename, ".");
+    size_t buff_len = strlen("/vakitler/") + strlen(filename_without_type) + 1;
+    assert(buff_len);
+    char buffer[buff_len];
+    strcpy(buffer, "/vakitler/");
+    strcat(buffer, filename_without_type);
+
+    socket_init();
+    puts("File update called");
+    char* ret = http_get(host, buffer);
+    char* mode = preserve_old_data ? "a" : "w";     // Append file or not
+    if(city->file_times)
+        city->file_times = freopen(city->filename, mode, city->file_times);
+    else
+        city->file_times = fopen(city->filename, "w");
+    fputs(ret, city->file_times);
+    fflush(city->file_times);
+    socket_deinit();
+
+    city->file_times = freopen(city->filename, "r", city->file_times);  // reopen for reading
+    return 0;
 }

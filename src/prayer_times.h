@@ -108,6 +108,7 @@ int diyanet_get_preview_for_date(City city, prayer prayer_times[prayers_num], st
  */
 int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days][prayers_num]);
 
+int diyanet_update_file(City* city, bool preserve_old_data);
 
 /** \brief Calculate prayer time for given city using different calculation methods specified in cfg.
  *
