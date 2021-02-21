@@ -8,14 +8,15 @@
 #include <errno.h>
 #include "prayer_times.h"
 #include "city.h"
+#include "lang.h"
 
 typedef struct Config Config;
 
 struct Config {
     size_t num_cities;
     size_t counter_parsed_cities;
+    size_t lang;
     City* cities;
-    char lang[5];
     bool config_changed;
 };
 
