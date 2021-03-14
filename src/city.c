@@ -4,6 +4,8 @@
 City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider, char const*const filename, size_t id)
 {
     if(c && name && filename) {
+        static size_t retry;
+        retry = 0;  // Reset for next city
         c->filename = malloc(strlen(filename) + 1);
         if(c->filename) {
             c->name = malloc(strlen(name) + 1);
@@ -21,19 +23,23 @@ INIT_STRUCT:
                         .pr_time_provider = pr_time_provider,
                     };
                 } else {
-                    diyanet_update_file(c, false);
-                    goto INIT_STRUCT;
+                    if(retry <= 3) {
+                        retry++;
+                        diyanet_update_file(c, false);
+                        goto INIT_STRUCT;
+                    } else {
+                        goto ERR_FREE_NAME;
+                    }
                 }
             } else {
-                goto FREE_FILENAME;
+                goto ERR_FREE_FILENAME;
             }
         }
     }
     return c;
-
-CLOSE_FILE:
-    fclose(c->file_times);
-FREE_FILENAME:
+ERR_FREE_NAME:
+    free(c->name);
+ERR_FREE_FILENAME:
     free(c->filename);
     c = 0;
     return c;
@@ -136,9 +142,11 @@ bool city_is_equal(City a, City b)
 {
     return  a.adjust_high_lats == b.adjust_high_lats &&
             a.asr_juristic == b.asr_juristic &&
-            //!strcmp(a.filename, b.filename) &&
-            //a.file_times == b.file_times &&
-            //a.id == b.id &&
+#ifdef ARE_THESE_TESTS_OF_ANY_BENEFIT
+            !strcmp(a.filename, b.filename) &&
+            a.file_times == b.file_times &&
+            a.id == b.id &&
+#endif // ARE_THESE_TESTS_OF_ANY_BENEFIT
             a.latitude == b.latitude &&
             a.longitude == b.longitude &&
             a.method == b.method &&

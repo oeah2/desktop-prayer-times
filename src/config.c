@@ -1,12 +1,6 @@
 #include "config.h"
 #include "socket.h"
 
-
-enum Version {
-    VERSION_MAIN_MAJOR = 0,
-    VERSION_MAIN_MINOR = 1,
-};
-
 enum config_specifiers {
     spec_num_cities,
     spec_city,
@@ -20,6 +14,14 @@ static char const*const config_format_specifiers[] = {
     [spec_lang] = "[language]",
 };
 
+/** \brief parses a line of the config string
+ * \details This function scans @p string_in for valid specifiers from @p config_format_specifiers. Depending on the specifier different parsings are done. Either cities are added, or other configurations are applied.
+ *
+ * \param string_in char* Line of string to be parsed
+ * \param cfg Config* to which the changes shall be applied
+ * \return int EXIT_FAILURE upon failure, EXIT_SUCCESS otherwise
+ *
+ */
 static int config_parse_string(char *string_in, Config* cfg)
 {
     assert(string_in);
@@ -81,13 +83,13 @@ static int config_parse_string(char *string_in, Config* cfg)
         break;
     case spec_lang:
         cfg->lang = strtoul(str_result, 0, 10);
-        #ifdef OLDCODE
+#ifdef OLDCODE
         if(str_result && (!strcmp(str_result, "\n") || !strcmp(str_result, ""))) {
             strcpy(cfg->lang,str_result);
         } else {
             strcpy(cfg->lang, "en");
         }
-        #endif
+#endif
         break;
     default:
         return EXIT_FAILURE;
@@ -173,7 +175,14 @@ Config* config_init(Config* cfg)
     return cfg;
 }
 
-static bool is_id_valid(size_t city_id, Config const*const cfg)     /**< return true if ID is existing in cfg, false otherwise */
+/** \brief Returns true if ID is existing in cfg, false otherwise
+ *
+ * \param city_id size_t
+ * \param cfg Config const*const
+ * \return bool
+ *
+ */
+static bool is_id_valid(size_t city_id, Config const*const cfg)
 {
     for(size_t i = 0; i < cfg->num_cities; i++) {
         if(cfg->cities[i].id == city_id) return true;
@@ -252,13 +261,12 @@ Config* config_clear(Config* cfg)
     return config_init(cfg);
 }
 
-bool config_check_update(void) {
+bool config_check_update(void)
+{
     char const*const host = "raw.githubusercontent.com";
     char* file = "/oeah2/desktop-prayer-times/main/version?token=AL2O77C4ZEI2TPBFSCUO4H3AGDA2W";
 
-    socket_init();
-    char* current_version = http_get(host, file);
-    socket_deinit();
+    char* current_version = http_get(host, file, 0);
     float current_version_f = strtod(current_version, 0);
     float sw_version = (float) VERSION_MAIN_MAJOR + VERSION_MAIN_MINOR / 10;
     if(current_version_f > sw_version) {

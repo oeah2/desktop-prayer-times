@@ -24,6 +24,7 @@
 #include <math.h>
 #include "config.h"
 #include "city.h"
+#include "lang.h"
 
 
 typedef struct Config Config; // This needs to be added here, because city.h also includes config. Due to include guards, this could otherwise not be used.
@@ -108,22 +109,75 @@ int diyanet_get_preview_for_date(City city, prayer prayer_times[prayers_num], st
  */
 int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days][prayers_num]);
 
-int diyanet_update_file(City* city, bool preserve_old_data);
-
-/** \brief Calculate prayer time for given city using different calculation methods specified in cfg.
+/** \brief Updates prayer times file for given City
  *
- * \param
- * \param
- * \return
+ * \param city City* whose file shall be updated
+ * \param preserve_old_data bool if true, prayer times of past are preserved.
+ * \return int EXIT_FAILURE upon failure, EXIT_SUCCESS otherwise
  *
  */
+int diyanet_update_file(City* city, bool preserve_old_data);
 
+/** \brief Returns a string containing all countries and their codes. The user needs to free the returned string
+ *
+ * \param lang enum Languages language of the country names
+ * \return char* String containing all countries and their codes in the format "country,code;"
+ *
+ */
+char* diyanet_get_country_codes(enum Languages lang);
+
+/** \brief Returns a string containing all provinces of given country
+ *
+ * \param country_code size_t country for which the provinces shall be given
+ * \param lang enum Languages language of the province names
+ * \return char* string containing all provinces and their codes in the format "province,code;"
+ *
+ */
+char* diyanet_get_provinces(size_t country_code, enum Languages lang);
+
+/** \brief Returns a string containing all cities of a given province.
+ *  \details Call this function only after first calling diyanet_get_provinces.
+ *  Otherwise there is no way to determine to which province or country the given cities belong.
+ *
+ * \param province_code size_t
+ * \param lang enum Languages
+ * \return char*
+ *
+ */
+char* diyanet_get_cities(size_t province_code, enum Languages lang);
+
+/** \brief Calculate prayer time for given city
+ * \details The parameters used for calculation are given in city.
+ *
+ * \param city City for which the prayer times shall be calculated
+ * \param prayer_times[prayers_num] prayer array of struct prayer. The array must contain at least @p prayers_num elements
+ * \return int EXIT_FAILURE on failure, EXIT_SUCCESS otherwise
+ *
+ */
 int calc_get_todays_prayers(City city, prayer prayer_times[prayers_num]);
 
+/** \brief Calculates prayer times for a given date
+ * \details The parameters used for calculation are given in city.
+ *
+ * \param city City for which the prayer times shall be calculated
+ * \param prayer_times[prayers_num] prayer array of struct prayer. The array must contain at least @p prayers_num elements
+ * \return int EXIT_FAILURE on failure, EXIT_SUCCESS otherwise
+ *
+ */
 int calc_get_preview_for_date(City city, prayer prayer_times[prayers_num], struct tm date);
 
+/** \brief Calculates prayer times for number of @p days starting from today
+ * \details The parameters used for calculation are given in city.
+ *
+ * \param city City for which the prayer times shall be calculated
+ * \param days size_t number of days starting from today, for which the prayer times shall be calculated
+ * \param prayer_times[prayers_num] prayer array of struct prayer. The array must contain at least @p prayers_num elements
+ * \return int EXIT_FAILURE on failure, EXIT_SUCCESS otherwise
+ *
+ */
 int calc_get_preview_prayers(City city, size_t days, prayer prayer_times[days][prayers_num]);
 
 typedef int calc_function(City, prayer[prayers_num]);/**< typedef for the calculation functions. This will be used in the further code to allow the usage of different methods. */
+typedef int preview_function(City, prayer[prayers_num], struct tm date); /**< typedef for preview functions */
 
 #endif // PRAYER_TIMES_H_INCLUDED

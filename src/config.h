@@ -10,12 +10,18 @@
 #include "city.h"
 #include "lang.h"
 
+enum Version {
+    VERSION_MAIN_MAJOR = 0,
+    VERSION_MAIN_MINOR = 1,
+};
+
 typedef struct Config Config;
 
 struct Config {
     size_t num_cities;
     size_t counter_parsed_cities;
     size_t lang;
+    size_t displayed_cityID;
     City* cities;
     bool config_changed;
 };

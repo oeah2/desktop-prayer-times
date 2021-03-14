@@ -105,7 +105,6 @@ City* city_vdelete(size_t num, City* c);
  * \return true if equal
  *
  */
-
 bool city_is_equal(City a, City b);
 
 #endif // CITY_H_INCLUDED

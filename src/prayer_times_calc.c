@@ -15,6 +15,14 @@ char const*const ST_cm_names[ST_cm_num] = {
         Wrapper functions
 *****************************/
 
+/** \brief Convert prayer times from double to struct prayer
+ *
+ * \param date struct tm date of prayer
+ * \param pr size_t element of enum prayers, defining which prayer is being converted
+ * \param prayer_double double prayer time in double format
+ * \return prayer
+ *
+ */
 static prayer convert_to_prayer(struct tm date, size_t pr, double prayer_double)
 {
     intPair time = ST_float_time_decompose(prayer_double);
@@ -27,6 +35,15 @@ static prayer convert_to_prayer(struct tm date, size_t pr, double prayer_double)
     return ret;
 }
 
+/** \brief Convert prayer times from double to struct prayer
+ * \details Fajr_end and Sunrise is identical for calculation. Therefore an individual assignment has been done here.
+ *
+ * \param date struct tm date of prayer
+ * \param prayer_times[prayers_num] prayer destination array
+ * \param prayer_double[ST_prayer_num] double source array
+ * \return void
+ *
+ */
 static void convert_double_to_prayer(struct tm date, prayer prayer_times[prayers_num], double prayer_double[ST_prayer_num])
 {
     prayer_times[pr_fajr]       = convert_to_prayer(date, pr_fajr,      prayer_double[ST_prayer_fajr]);
@@ -62,6 +79,7 @@ int calc_get_preview_for_date(City city, prayer prayer_times[prayers_num], struc
     double times_double[prayers_num] = {0};
     time_t time_date = mktime(&date);
     ST_get_prayer_times_t(time_date, city.latitude, city.longitude, city.method, city.asr_juristic, city.adjust_high_lats, times_double);
+    convert_double_to_prayer(date, prayer_times, times_double);
 
     return EXIT_SUCCESS;
 }

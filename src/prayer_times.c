@@ -31,4 +31,9 @@ void prayer_print_times(char const*const city_name, prayer times[prayers_num])
 calc_function* calc_functions[] = {
     [prov_diyanet] =  diyanet_get_todays_prayers,
     [prov_calc] = calc_get_todays_prayers,
+}; /**< Array of function pointers. During calculation, one of these is being called, depending on the configuration of the city */
+
+preview_function* preview_functions[] = {
+    [prov_diyanet] = diyanet_get_preview_for_date,
+    [prov_calc] = calc_get_preview_for_date,
 };
