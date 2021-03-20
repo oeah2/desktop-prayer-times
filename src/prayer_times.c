@@ -37,3 +37,45 @@ preview_function* preview_functions[] = {
     [prov_diyanet] = diyanet_get_preview_for_date,
     [prov_calc] = calc_get_preview_for_date,
 };
+
+int sprint_prayer_time(prayer time, size_t buff_len, char dest[buff_len])
+{
+    char* format = (time.time_at.tm_min < 10) ? "%d:0%d" : "%d:%d";
+    return sprintf_s(dest, buff_len, format, time.time_at.tm_hour, time.time_at.tm_min);
+}
+
+int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int minutes, int seconds)
+{
+    char* format = 0;
+    if(seconds < 10 && minutes < 10) format = "%d:0%d:0%d";
+    else if(seconds < 10 && minutes >= 10) format = "%d:%d:0%d";
+    else if(seconds >= 10 && minutes < 10) format = "%d:0%d:%d";
+    else if(seconds >= 10 && minutes >= 10) format = "%d:%d:%d";
+    assert(format);
+    return sprintf_s(dest, buff_len, format, hours, minutes, seconds);
+}
+
+int sprint_prayer_date(prayer time, size_t buff_len, char dest[buff_len], bool hijri)
+{
+    if(!hijri)
+        return sprintf_s(dest, buff_len, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+    else
+        return sprintf_s(dest, buff_len, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+}
+
+int prayer_calc_remaining_time(prayer next, int* hours, int* minutes, int* seconds)
+{
+    time_t now = 0, remaining = 0;
+    int ret = EXIT_FAILURE;
+    now = time(0);
+
+    time_t prayer = mktime(&next.time_at);
+    remaining = difftime(prayer, now);
+    if(remaining > 0) {
+        *hours = remaining / (60*60);
+        *minutes = (remaining - *hours * 60 * 60) / 60;
+        *seconds = remaining - *hours * 60 * 60 - *minutes * 60;
+        ret = EXIT_SUCCESS;
+    }
+    return ret;
+}

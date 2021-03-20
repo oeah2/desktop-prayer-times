@@ -27,7 +27,41 @@ Author: Ahmet Öztürk
   <!-- interface-name Desktop Prayer Times -->
   <!-- interface-description A desktop tool to display islamic prayer times -->
   <!-- interface-authors Ahmet \303\226zt\303\274rk -->
-  <object class="GtkDialog">
+  <object class="GtkAboutDialog" id="dlg_about">
+    <property name="can-focus">False</property>
+    <property name="destroy-with-parent">True</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">False</property>
+    <property name="program-name">Desktop Prayer Times</property>
+    <property name="version">0.1</property>
+    <property name="website">https://github.com/oeah2/desktop-prayer-times</property>
+    <property name="authors">Ahmet Öztürk</property>
+    <property name="logo">Graphics\Logo_small.png</property>
+    <property name="license-type">gpl-3-0</property>
+    <signal name="response" handler="on_dlg_about_response" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
     <property name="type-hint">dialog</property>
     <child internal-child="vbox">
@@ -40,10 +74,151 @@ Author: Ahmet Öztürk
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
+              <object class="GtkButton" id="button2">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button4">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button5">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+                <signal name="activate" handler="gtk_widget_hide" object="dlg_settings" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <!-- n-columns=3 n-rows=3 -->
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
               <placeholder/>
             </child>
             <child>
               <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-10">button2</action-widget>
+      <action-widget response="-5">button4</action-widget>
+      <action-widget response="-6">button5</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileFilter" id="filefilter1">
+    <patterns>
+      <pattern>*.cfg</pattern>
+    </patterns>
+  </object>
+  <object class="GtkFileChooserDialog" id="dlg_loadfile">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Datei auswählen</property>
+    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">False</property>
+    <property name="filter">filefilter1</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="dlg_loadfile_ok_btn">
+                <property name="label">gtk-open</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="can-default">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -55,11 +230,73 @@ Author: Ahmet Öztürk
         <child>
           <placeholder/>
         </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-5">dlg_loadfile_ok_btn</action-widget>
+      <action-widget response="-6">button1</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileChooserDialog" id="dlg_savefile">
+    <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Datei wählen</property>
+    <property name="type-hint">dialog</property>
+    <property name="deletable">False</property>
+    <property name="do-overwrite-confirmation">True</property>
+    <property name="filter">filefilter1</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="dlg_savefile_ok_btn">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button3">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <placeholder/>
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-5">dlg_savefile_ok_btn</action-widget>
+      <action-widget response="-6">button3</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkImage" id="img-go-back">
     <property name="visible">True</property>
@@ -108,54 +345,23 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-preferences</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="menuitm_load">
                         <property name="label">gtk-open</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
+                        <signal name="activate" handler="on_menuitm_load_activate" object="dlg_loadfile" swapped="no"/>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-save</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="menuitm_saveas">
                         <property name="label">gtk-save-as</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorMenuItem">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-quit</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
+                        <signal name="activate" handler="on_menuitm_saveas_activate" object="dlg_savefile" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -173,51 +379,16 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-preferences</property>
+                      <object class="GtkMenuItem" id="menuitm_settings">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">_Einstellungen</property>
                         <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-copy</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-paste</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-delete</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="use-underline">True</property>
-                        <property name="use-stock">True</property>
+                        <signal name="activate" handler="on_menuitm_settings_activate" object="dlg_settings" swapped="no"/>
                       </object>
                     </child>
                   </object>
                 </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Ansicht</property>
-                <property name="use-underline">True</property>
               </object>
             </child>
             <child>
@@ -231,13 +402,13 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="menuitm_about">
                         <property name="label">gtk-about</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
-                        <signal name="activate" handler="gtk_widget_show" object="window_about" swapped="yes"/>
+                        <signal name="activate" handler="gtk_widget_show" object="dlg_about" swapped="yes"/>
                       </object>
                     </child>
                   </object>
@@ -269,7 +440,6 @@ Author: Ahmet Öztürk
                     <property name="image">img-go-back</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
-                    <signal name="clicked" handler="on_btn_prev_city_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -299,7 +469,6 @@ Author: Ahmet Öztürk
                     <property name="image">img-go-forward</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
-                    <signal name="clicked" handler="on_btn_next_city_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -327,7 +496,6 @@ Author: Ahmet Öztürk
                     <property name="image">img-go-back-2</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
-                    <signal name="clicked" handler="on_btn_prev_date_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -357,7 +525,6 @@ Author: Ahmet Öztürk
                     <property name="image">img-go-forward-2</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
-                    <signal name="clicked" handler="on_btn_next_date_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -528,6 +695,7 @@ Author: Ahmet Öztürk
           <object class="GtkLabel" id="label_hicridate">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="tooltip-text" translatable="yes">Hijri date</property>
             <property name="margin-top">5</property>
             <property name="label" translatable="yes">Hicri Date</property>
           </object>
@@ -541,6 +709,7 @@ Author: Ahmet Öztürk
           <object class="GtkLabel" id="label_remaining_time">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="tooltip-text" translatable="yes">Remaining time to next prayer</property>
             <property name="margin-top">5</property>
             <property name="label" translatable="yes">Remaining time</property>
           </object>
@@ -569,15 +738,14 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
       </object>
     </child>
   </object>
-  <object class="GtkAboutDialog" id="window_about">
+  <object class="GtkDialog" id="dlg_calc_error">
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Warning!</property>
+    <property name="window-position">center</property>
+    <property name="default-width">300</property>
+    <property name="default-height">75</property>
     <property name="type-hint">dialog</property>
-    <property name="program-name">Desktop Prayer Times</property>
-    <property name="version">0.1</property>
-    <property name="website">https://github.com/oeah2/desktop-prayer-times</property>
-    <property name="authors">Ahmet Öztürk</property>
-    <property name="logo">Graphics\Logo_small.png</property>
-    <property name="license-type">gpl-3-0</property>
+    <property name="transient-for">window_main</property>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -587,6 +755,35 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           <object class="GtkButtonBox">
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="dlg_calc_error_retry">
+                <property name="label" translatable="yes">Retry</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <signal name="clicked" handler="dlg_calc_error_retry_btn_clicked" object="dlg_calc_error" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="dlg_calc_error_ok">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+                <signal name="clicked" handler="on_dlg_calc_error_ok_clicked" object="dlg_calc_error" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -594,8 +791,42 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
             <property name="position">0</property>
           </packing>
         </child>
-        <child>
-          <placeholder/>
+        <child type="center">
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="xpad">30</property>
+                <property name="ypad">10</property>
+                <property name="stock">gtk-dialog-error</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Error calculating prayer times!</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
     </child>

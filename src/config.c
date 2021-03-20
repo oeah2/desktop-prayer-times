@@ -5,6 +5,7 @@ enum config_specifiers {
     spec_num_cities,
     spec_city,
     spec_lang,
+    spec_pos,
     spec_num
 };
 
@@ -12,6 +13,7 @@ static char const*const config_format_specifiers[] = {
     [spec_num_cities] = "[num_cities]",
     [spec_city] = "[city]",
     [spec_lang] = "[language]",
+    [spec_pos] = "[pos]",
 };
 
 /** \brief parses a line of the config string
@@ -91,6 +93,11 @@ static int config_parse_string(char *string_in, Config* cfg)
         }
 #endif
         break;
+    case spec_pos:
+        cfg->last_window_posX = strtoul(str_result, 0, 10);
+        cfg->last_window_posY = strtoul(strtok(0, delimiters), 0, 10);
+        assert(cfg->last_window_posX && cfg->last_window_posY);
+        break;
     default:
         return EXIT_FAILURE;
     }
@@ -121,6 +128,7 @@ int config_read(char const*const filename, Config* cfg)
     }
 
     cfg->config_changed = false;
+    cfg->cfg_filename = filename;
 
     fclose(cfg_file);
     return EXIT_SUCCESS;
@@ -158,6 +166,7 @@ int config_save(char const*const filename, Config const*const cfg)
     }
 
     fprintf(cfg_file, "%s:%zu\n", config_format_specifiers[spec_lang], cfg->lang);
+    fprintf(cfg_file, "%s:%d;%d\n", config_format_specifiers[spec_pos], cfg->last_window_posX, cfg->last_window_posY);
 
     fclose(cfg_file);
     return EXIT_SUCCESS;
