@@ -2,8 +2,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <unistd.h>
 #ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <openssl/applink.c>
+#else
+#define __USE_XOPEN2K
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
 #endif
 #include <openssl/bio.h>
 #include <openssl/err.h>
