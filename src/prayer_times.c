@@ -1,4 +1,5 @@
 #include "prayer_times.h"
+#include <stdio.h>
 
 char const*const prayer_names[prayers_num] = {
     [pr_fajr] = "Morgengebet",
@@ -41,7 +42,11 @@ preview_function* preview_functions[] = {
 int sprint_prayer_time(prayer time, size_t buff_len, char dest[buff_len])
 {
     char* format = (time.time_at.tm_min < 10) ? "%d:0%d" : "%d:%d";
+#ifdef _C11
     return sprintf_s(dest, buff_len, format, time.time_at.tm_hour, time.time_at.tm_min);
+#else
+    return sprintf(dest, format, time.time_at.tm_hour, time.time_at.tm_min);
+#endif
 }
 
 int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int minutes, int seconds)
@@ -52,15 +57,27 @@ int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int
     else if(seconds >= 10 && minutes < 10) format = "%d:0%d:%d";
     else if(seconds >= 10 && minutes >= 10) format = "%d:%d:%d";
     assert(format);
+#ifdef _C11
     return sprintf_s(dest, buff_len, format, hours, minutes, seconds);
+#else
+    return sprintf(dest, format, hours, minutes, seconds);
+#endif
 }
 
 int sprint_prayer_date(prayer time, size_t buff_len, char dest[buff_len], bool hijri)
 {
     if(!hijri)
+#ifdef _C11
         return sprintf_s(dest, buff_len, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+#else
+    	return sprintf(dest, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+#endif
     else
+#ifdef _C11
         return sprintf_s(dest, buff_len, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+#else
+    	return sprintf(dest, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+#endif
 }
 
 int prayer_calc_remaining_time(prayer next, int* hours, int* minutes, int* seconds)
