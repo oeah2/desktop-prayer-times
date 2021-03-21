@@ -42,6 +42,22 @@ static struct tm diyanet_mk_prayer_time(char* hr, char* date)
     }
     return tm;
 }
+
+static struct tm diyanet_mk_hijri_date(char* string_in) {
+    char* current_pos = string_in;
+    do {
+        current_pos++;
+    } while(!isdigit(*current_pos));
+
+    struct tm tm = {0};
+    if(sscanf(current_pos, "%d.%d.%d", &tm.tm_mday, &tm.tm_mon, &tm.tm_year) != 3) {       // 3 numbers to be detected
+        perror("Error: mk_prayer_time could not parse date");
+        exit(EXIT_FAILURE);
+    }
+
+    return tm;
+}
+
 #else
 /** \brief Creates struct tm for given @p date and @p hr
  *
@@ -101,9 +117,12 @@ static int diyanet_parse_prayer_times(char* str, prayer times[prayers_num], size
         str[pos_end - str +1] = '\0';
         char* pos_date = strstr(str, "MiladiTarihKisa\"");
         assert(pos_date);
+        char* pos_hijri = strstr(str, "HicriTarihKisa");
+        assert(pos_hijri);
 
         for(size_t i = 0; i < prayers_num; i++) {
             times[i].time_at = diyanet_mk_prayer_time(pos_prayers[i], pos_date);
+            times[i].hicri_date = diyanet_mk_hijri_date(pos_hijri);
             times[i].name = prayer_names[i];
         }
         ret = EXIT_SUCCESS;
@@ -205,7 +224,7 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
 
     cJSON* json = cJSON_Parse(file_content);
     if(!json) {
-        ret = EXIT_FAILURE;
+        ret = EFAULT;
         perror("Error parsing JSON");
         goto FREE_JSON;
     }
@@ -224,10 +243,14 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
                 }
                 if(difftime(date, mktime(&tag)) >= secs_per_day)
                     continue;
+                char* hijri_date = cJSON_GetStringValue(cJSON_GetObjectItem(element, "HicriTarihKisa"));
+                struct tm hijri = {0};
+                sscanf(hijri_date, "%d.%d.%d", &hijri.tm_mday, &hijri.tm_mon, &hijri.tm_year);
                 for(size_t i = 0; i < prayers_num; i++) {
                     cJSON* json_prayer  = cJSON_GetObjectItem(element, diyanet_format_keywords[i]);
                     times[i].time_at = diyanet_mk_prayer_time(cJSON_GetStringValue(json_prayer), cJSON_GetStringValue(json_date));
                     times[i].name = prayer_names[i];
+                    times[i].hicri_date = hijri;
                 }
                 ret = EXIT_SUCCESS;
                 break;
@@ -236,7 +259,7 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
     }
 
 FREE_JSON:
-    free(json);
+    cJSON_Delete(json);
 FREE_FILE_CONTENT:
     free(file_content);
     return ret;
@@ -252,12 +275,20 @@ int diyanet_get_todays_prayers(City city, prayer prayer_times[prayers_num])
     if(!city.file_times) {
         return ENOFILE;
     }
+    static bool first_event = true;
     rewind(city.file_times);
     switch(diyanet_get_prayer_times_for_date(city.file_times, prayer_times, 0)) {
     case ENOFILE:
+    case EFAULT:    // will be thrown if file is corrupt
     case EOF:
-        diyanet_update_file(&city, false);
-        return diyanet_get_todays_prayers(city, prayer_times);
+        if(first_event) {
+            first_event = false;
+            diyanet_update_file(&city, false);
+            return diyanet_get_todays_prayers(city, prayer_times);
+        } else {
+            perror("Error getting file!");
+            return EXIT_FAILURE;
+        }
     case EXIT_SUCCESS:
     default:
         return EXIT_SUCCESS;

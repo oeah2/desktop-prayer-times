@@ -18,6 +18,13 @@
 #include <locale.h>
 #endif // _WIN32
 
+#define WAIT_USER
+#ifdef WAIT_USER
+#ifdef _WIN32
+#include <winuser.h>
+#endif // _WIN32
+#endif // WAIT_USER
+
 #include "cJSON.h"
 
 extern calc_function* calc_functions[];
@@ -33,6 +40,7 @@ int main(int argc, char** argv)
         // Do further initialization to add cities etc.
     }
 
+#ifdef CONSOLE
 #ifdef _WIN32
     //SetConsoleOutputCP(65001);  // Set windows console to UTF8
     SetConsoleCP(65001);
@@ -40,6 +48,7 @@ int main(int argc, char** argv)
     //setlocale(LC_ALL, lang_names[config.lang]); // Set Unix console to locale
     setlocale(LC_ALL, "en_US.UTF-8");
 #endif // _WIN32
+#endif // CONSOLE
 
 //#define ADD_TESTCITIES
 #ifdef ADD_TESTCITIES
@@ -107,6 +116,16 @@ int main(int argc, char** argv)
 
 #endif // TEST_GEOLOCATION
 
+//#define TEST_IMAGE_DOWNLOAD
+#ifdef TEST_IMAGE_DOWNLOAD
+    char* ezanvakti_resp = "http://namazvakti.diyanet.gov.tr/images/r3.gif";
+    char* host = "namazvakti.diyanet.gov.tr";
+    char* file = ezanvakti_resp + strlen(host);
+    char* data = http_get(host, file, NULL);
+    puts(data);
+    return 0;
+#endif // TEST_IMAGE_DOWNLOAD
+
     calc_function* calc_func = 0;
     {
         City* curr_city = 0;
@@ -134,14 +153,27 @@ int main(int argc, char** argv)
 
     }
 
+#ifdef WAIT_USER
+#ifdef _WIN32
+    HCURSOR h_old_cursor = NULL, h_new_cursor = NULL;      // cursor backup
+    puts("Cursor set");
+    h_new_cursor = LoadCursor(NULL, IDC_APPSTARTING);
+    h_old_cursor = SetCursor(h_new_cursor);
+    assert(h_new_cursor);
+#endif // _WIN32
+#endif // WAIT_USER
+
     config_save(config_file, &config);
 
-    char prayer_puffer[prayers_num][6];
+    size_t const buff_len = 15;
+    char prayer_puffer[prayers_num][buff_len];
     for(size_t i = 0; i < prayers_num; i++) {
-        sprintf(prayer_puffer[i], "%2d:%2d", prayer_times[i].time_at.tm_hour, prayer_times[i].time_at.tm_min);
+        sprint_prayer_time(prayer_times[i], buff_len, prayer_puffer[i]);
     }
-    char puffer_date[15];
-    sprintf(puffer_date, "%2d.%2d.%4d", prayer_times->time_at.tm_mday, prayer_times->time_at.tm_mon +1, prayer_times->time_at.tm_year + 1900);
+    char puffer_julian_date[buff_len];
+    char puffer_hijri_date[buff_len];
+    sprint_prayer_date(prayer_times[0], buff_len, puffer_julian_date, false);
+    sprint_prayer_date(prayer_times[0], buff_len, puffer_hijri_date, true);
 
     char* gui_strings[gui_id_num] = {
         [gui_id_fajr_name]      = "Fajr",
@@ -157,16 +189,23 @@ int main(int argc, char** argv)
         [gui_id_maghrib_time]   = prayer_puffer[pr_maghreb],
         [gui_id_isha_time]      = prayer_puffer[pr_ishaa],
         [gui_id_cityname]       = config.cities[0].name,
-        [gui_id_datename]       = puffer_date,
-        [gui_id_hijridate]      = "Heute Hijri",
-        [gui_id_remainingtime]  = "Noch bisschen",
+        [gui_id_datename]       = puffer_julian_date,
+        [gui_id_hijridate]      = puffer_hijri_date,
+        [gui_id_remainingtime]  = "",
         //[gui_id_randomhadith]   = "Hadith",
     };
 
     /* Now GUI Stuff */
     gtk_init(&argc, &argv);
+
     //build_assistant_glade();
     build_glade(&config, gui_id_num, gui_strings);
+
+#ifdef WAIT_USER
+#ifdef _WIN32
+    SetCursor(h_old_cursor);
+#endif // _WIN32
+#endif // WAIT_USER
 
     gtk_main();
 

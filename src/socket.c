@@ -134,8 +134,16 @@ static int socket_receive(int sock_id, char* msg, size_t max_len, int flags)
  */
 static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
 {
-    size_t received = 0, buff_pos = 0;
+    int received = 0, buff_pos = 0;
     while((received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, 0))) {
+        if(received > -1) {
+#ifdef _WIN32
+            int ret = WSAGetLastError();
+#else
+            int ret = errno;
+#endif // _WIN32
+            return ret;
+        }
         buff_pos += received;
     }
     return buff_pos;
@@ -156,7 +164,7 @@ static char* http_create_request(char const*const host, char const*const file, c
     }
 
     size_t const header_max = 2000;
-    char* request = malloc(header_max);
+    char* request = calloc(header_max, sizeof(char));
     if(request) {
         sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
 #ifdef OLD_CODE
@@ -230,11 +238,11 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         if(!socket_sendall(s, http_request, strlen(http_request) + 1)) goto ERR_SEND;
 
         size_t buf_len = 100E3;
-        buffer = malloc(buf_len);
+        buffer = calloc(buf_len, sizeof(char));
         if(!buffer) goto ERR_SEND;
         size_t received_bytes = socket_receiveall(s, buffer, buf_len, 0);
-        assert(received_bytes);
-        if(!http_is_response_ok(buffer)) goto ERR_RECV;
+        //assert(received_bytes);
+        if(!received_bytes || !http_is_response_ok(buffer)) goto ERR_RECV;
         buffer = http_remove_header(buffer);
         assert(buffer);
         ret = buffer;
@@ -253,6 +261,16 @@ ERR_SEND:
 ERR_SOCKET:
     socket_close(s);
     return 0;
+}
+
+bool socket_check_connection()      // Das ist keine schoene Loesung, sollte aber funktionieren.
+{
+    char* ret = http_get("www.google.com", "/", 0);
+    if(ret) {
+        free(ret);
+        return true;
+    }
+    return false;
 }
 
 /** \brief Reports error message from openSSL library
@@ -353,7 +371,7 @@ static BIO* https_connect(const char* hostname, SSL_CTX** ctx_in)
 static char* https_receive(BIO* bio)
 {
     size_t resp_len = 1E6, recv_len = 0;
-    char* response = malloc(resp_len);
+    char* response = calloc(resp_len, sizeof(char));
     /* read HTTP response from server and print to stdout */
     while (1) {
         int n = BIO_read(bio, response + recv_len, resp_len - recv_len);

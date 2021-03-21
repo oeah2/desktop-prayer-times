@@ -22,8 +22,11 @@ struct Config {
     size_t counter_parsed_cities;
     size_t lang;
     size_t displayed_cityID;
+    int last_window_posX;
+    int last_window_posY;
     City* cities;
     bool config_changed;
+    char* cfg_filename;
 };
 
 /** \brief Read config from filename and write into Config* pointer

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -6,11 +7,6 @@
 #include <sys/types.h>
 #include <netdb.h>
 #endif
-
-#ifdef DEPRECATED
-int socket_init(void);
-int socket_deinit(void);
-#endif // DEPRECATED
 
 /** \brief A very simple http request is being made and the result returned. The returned string needs to be freed by the user
  * \details This function initializes the socket interface, connects to @p host, requests @p file and adds @p add_info into the request header.
@@ -24,6 +20,12 @@ int socket_deinit(void);
  */
 char* http_get(char const*const host, char const*const file, char const*const add_info);
 
+/** \brief Checks the internet availability
+ *  \details A HTTP request is sent to google and the reponse is checked for validity.
+ * \return bool true of internet is available, false otherwise
+ *
+ */
+bool socket_check_connection();
 
 /** \brief A very simple http request is being made and the result returned. The returned string needs to be freed by the user
  * \details This function initializes the socket interface, connects to @p host, requests @p file and adds @p add_info into the request header.

@@ -1,5 +1,7 @@
 #include "config.h"
 #include "Salah_times_calc.h"
+#include "cJSON.h"
+#include "socket.h"
 
 char const*const ST_cm_names[ST_cm_num] = {
     [ST_cm_Jafari] = "Jafari",
@@ -99,4 +101,17 @@ int calc_get_preview_prayers(City city, size_t days, prayer prayer_times[days][p
     }
 
     return EXIT_SUCCESS;
+}
+
+struct tm calc_get_hijri_date(struct tm today) {
+    struct tm ret_hijri = {0};
+    char req_file[50];
+    sprintf(req_file, "/v1/gToH?date=%d-%d-%d", today.tm_mday, today.tm_mon + 1, today.tm_year + 1900);
+    char* http_response = http_get("api.aladhan.com", "/v1/gToH?date=7-12-2014", NULL);
+    if(http_response) {
+        puts(http_response);
+    }
+
+    free(http_response);
+    return ret_hijri;
 }
