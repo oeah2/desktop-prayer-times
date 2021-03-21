@@ -21,6 +21,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#ifndef _WIN32
+#define ENOFILE ENOENT
+#endif
 #include <math.h>
 #include "config.h"
 #include "city.h"

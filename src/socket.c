@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#ifdef _WIN32
 #include <openssl/applink.c>
+#endif
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
