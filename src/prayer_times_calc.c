@@ -2,6 +2,7 @@
 #include "Salah_times_calc.h"
 #include "cJSON.h"
 #include "socket.h"
+#include <math.h>
 
 char const*const ST_cm_names[ST_cm_num] = {
     [ST_cm_Jafari] = "Jafari",
@@ -27,7 +28,8 @@ char const*const ST_cm_names[ST_cm_num] = {
  */
 static prayer convert_to_prayer(struct tm date, size_t pr, double prayer_double)
 {
-    intPair time = ST_float_time_decompose(prayer_double);
+    intPair time = {0};
+    if(!isnan(prayer_double)) time = ST_float_time_decompose(prayer_double);
     date.tm_hour = time.val[0];
     date.tm_min = time.val[1];
     prayer ret = (prayer) {
@@ -103,7 +105,8 @@ int calc_get_preview_prayers(City city, size_t days, prayer prayer_times[days][p
     return EXIT_SUCCESS;
 }
 
-struct tm calc_get_hijri_date(struct tm today) {
+struct tm calc_get_hijri_date(struct tm today)
+{
     struct tm ret_hijri = {0};
     char req_file[50];
     sprintf(req_file, "/v1/gToH?date=%d-%d-%d", today.tm_mday, today.tm_mon + 1, today.tm_year + 1900);
