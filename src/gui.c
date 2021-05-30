@@ -15,18 +15,22 @@ extern calc_function* calc_functions[];
 extern preview_function* preview_functions[];
 
 static char* gui_identifiers[gui_id_num] = {
+#ifdef LOCALIZATION_THROUGH_CODE
     [gui_id_fajr_name]      = "label_name_fajr",
     [gui_id_sunrise_name]   = "label_name_sunrise",
     [gui_id_dhuhr_name]     = "label_name_dhuhr",
     [gui_id_asr_name]       = "label_name_asr",
     [gui_id_maghrib_name]   = "label_name_maghrib",
     [gui_id_isha_name]      = "label_name_isha",
+#endif // LOCALIZATION_THROUGH_CODE
     [gui_id_fajr_time]      = "label_time_fajr",
-    [gui_id_sunrise_time]   = "label_time_sunrise",
+    [gui_id_fajrend]        = "label_time_fajrend",
     [gui_id_dhuhr_time]     = "label_time_dhuhr",
     [gui_id_asr_time]       = "label_time_asr",
     [gui_id_maghrib_time]   = "label_time_maghrib",
     [gui_id_isha_time]      = "label_time_isha",
+    [gui_id_sunrise_time]   = "label_time_sunrise",
+    [gui_id_sunset_time]    = "label_time_sunset",
     [gui_id_cityname]       = "label_cityname",
     [gui_id_datename]       = "label_date",
     [gui_id_hijridate]      = "label_hicridate",
@@ -84,7 +88,6 @@ static int gui_calc_prayer_times(City city, size_t dest_len, char dest[prayers_n
     int ret = gui_calc_prayer(city, prayer_times);
 
     for(size_t i = 0, pos = 0; i < prayers_num; i++) {
-        if(i == pr_sunrise || i == pr_sunset) continue;
         sprint_prayer_time(prayer_times[i], dest_len, dest[pos]);
         pos++;
     }
@@ -128,7 +131,6 @@ static int gui_calcpreview_prayer(City city, size_t dest_len, char dest[prayers_
     if(ret != EXIT_SUCCESS) return ret;
 
     for(size_t i = 0, pos = 0; i < prayers_num; i++) {
-        if(i == pr_sunrise || i == pr_sunset) continue;
         sprint_prayer_time(prayer_times[i], dest_len, dest[pos]);
         pos++;
     }
@@ -156,6 +158,12 @@ static int display_preview(City city, int days)
     return ret;
 }
 
+static bool gui_apply_language(size_t lang_id)
+{
+    bool ret = true;
+    return ret;
+}
+
 bool Callback_Minutes(gpointer data)
 {
     bool ret = true;
@@ -166,12 +174,18 @@ bool Callback_Seconds(gpointer data)
 {
     prayer prayer_times[prayers_num];
     gui_calc_prayer(cfg->cities[city_ptr], prayer_times);
+    if(cfg->cities[city_ptr].pr_time_provider == prov_empty) {
+        gtk_label_set_text(GTK_LABEL(labels[gui_id_remainingtime]), "");
+        return true;           // In case the calculation method failed, remaining time will also not be calculated
+    }
 
     int rem_hours = 0, rem_mins = 0, rem_secs = 0, ret_val = 0;
 CALC_REMAINING:
     for(size_t i = 0; i < prayers_num; i++) {
         if(i == pr_sunrise || i == pr_sunset) continue;
-        if((ret_val = prayer_calc_remaining_time(prayer_times[i], &rem_hours, &rem_mins, &rem_secs)) == EXIT_FAILURE) continue;
+        ret_val = prayer_calc_remaining_time(prayer_times[i], &rem_hours, &rem_mins, &rem_secs);
+        if(ret_val == ENETDOWN) cfg->cities[city_ptr].pr_time_provider = prov_empty;
+        else if(ret_val == EXIT_FAILURE) continue;
         size_t buff_len = 50;
         char buffer[buff_len];
         char buffer_prayertime[buff_len];
@@ -182,8 +196,21 @@ CALC_REMAINING:
     }
 
     if(ret_val == EXIT_FAILURE) {
-        gui_calc_preview(cfg->cities[city_ptr], prayer_times, 1);
-        goto CALC_REMAINING;
+        int ret = gui_calc_preview(cfg->cities[city_ptr], prayer_times, 1);
+        if(ret == EXIT_SUCCESS)
+            goto CALC_REMAINING;
+        else {
+            gtk_widget_show(GTK_WIDGET(dlg_calc_error));
+            cfg->cities[city_ptr].pr_time_provider = prov_empty;
+        }
+    }
+
+    static time_t last_calc_day = 0;
+    if(time(0) - last_calc_day > 24 * 60 * 60) {         // new day
+        last_calc_day = time(0);
+        last_calc_day -= last_calc_day % (24 * 60 * 60);    // auf tag abrunden
+        // Update times and days
+        //goto CALC_REMAINING;
     }
 
     size_t buff_len = 15;
@@ -276,6 +303,7 @@ void on_dlg_calc_error_ok_clicked(GtkWidget* widget, gpointer data)
             /*******
             Implement
             ********/
+
             puts("on_dlg_calc_error_ok_clicked: Next city");
         } else {
             /*******
@@ -284,7 +312,7 @@ void on_dlg_calc_error_ok_clicked(GtkWidget* widget, gpointer data)
             puts("on_dlg_calc_error_ok_clicked: Previous city");
         }
         GtkWidget* dialog_window = data;
-        gtk_widget_destroy(GTK_WIDGET(dialog_window));
+        gtk_widget_hide(GTK_WIDGET(dialog_window));
     } else {
         /*******
         Implement error reporting
@@ -304,11 +332,13 @@ void dlg_calc_error_retry_btn_clicked(GtkWidget* widget, gpointer data)
     display_city(*city);
 }
 
-void on_dlg_about_response(GtkWidget* dlg_about, gpointer data) {
+void on_dlg_about_response(GtkWidget* dlg_about, gpointer data)
+{
     gtk_widget_hide(dlg_about);
 }
 
-void on_menuitm_load_activate(GtkWidget* widget, gpointer data) {
+void on_menuitm_load_activate(GtkWidget* widget, gpointer data)
+{
     GtkFileChooser* dlg_filechooser = data;
     char* filename = 0;
 
@@ -337,7 +367,8 @@ void on_menuitm_load_activate(GtkWidget* widget, gpointer data) {
     gtk_widget_hide(GTK_WIDGET(dlg_filechooser));
 }
 
-void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data) {
+void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data)
+{
     GtkFileChooser* dlg_filechooser = data;
     char* filename = 0;
 
@@ -346,6 +377,14 @@ void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data) {
     int dialog_ret = gtk_dialog_run(GTK_DIALOG(dlg_filechooser));
     if(dialog_ret == GTK_RESPONSE_OK) {
         filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dlg_filechooser));
+        char* filename_utf8 = g_filename_to_utf8(filename, -1, NULL, NULL, NULL);
+        free(filename);
+        filename = filename_utf8;
+
+        if(!strstr(filename, ".cfg")) {
+            filename = realloc(filename, strlen(filename) + strlen(".cfg") + 1);
+            strcat(filename, ".cfg");
+        }
         bool old_val = cfg->config_changed;
         cfg->config_changed = true;
         config_save(filename, cfg);
@@ -357,7 +396,8 @@ void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data) {
     gtk_widget_hide(GTK_WIDGET(dlg_filechooser));
 }
 
-void on_menuitm_settings_activate(GtkWidget* widget, gpointer data) {
+void on_menuitm_settings_activate(GtkWidget* widget, gpointer data)
+{
     GtkDialog* dlg_settings = data;
 
     gtk_widget_show(GTK_WIDGET(dlg_settings));
@@ -426,14 +466,20 @@ void statusicon_clicked(GtkWidget* widget, gpointer data)
     gtk_window_present(GTK_WINDOW(widget));
 }
 
-void build_glade(Config* cfg_in, size_t num_strings, char* strings[num_strings])
+void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char* strings[num_strings])
 {
     GtkBuilder      *builder;
     GtkWidget       *window_main;
     cfg = cfg_in;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file (builder, "Prayer_times_GTK.glade", NULL);
+    {
+        int gtk_builder_ret = gtk_builder_add_from_file(builder, glade_filename, NULL);
+        if(!gtk_builder_ret) {
+            perror("Error parsing GUI file!");
+            assert(gtk_builder_ret);
+        }
+    }
 
     window_main = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
     /* Connect Button signals */
