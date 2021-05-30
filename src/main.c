@@ -9,6 +9,7 @@
 #include "socket.h"
 #include "gui.h"
 #include "geolocation.h"
+#include "update.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -31,6 +32,22 @@ extern calc_function* calc_functions[];
 
 int main(int argc, char** argv)
 {
+//#define SKIP_UPDATE
+#ifndef SKIP_UPDATE
+    if(update_check_is_available()) {
+        // Update
+        char* version_this = update_get_current_version();
+        char* version_available = update_get_available_version();
+        if(version_this && version_available) {
+            puts("Update available!");
+            printf("Your version: %s\nAvailable version: %s\n", version_this, version_available);
+            fflush(stdout);
+        }
+        if(version_this) free(version_this);
+        if(version_available) free(version_available);
+    }
+#endif // SKIP_UPDATE
+
     Config config = {0};
     char* config_file = "Config.cfg";
     prayer prayer_times[prayers_num];
@@ -146,7 +163,11 @@ int main(int argc, char** argv)
 #else // CALC_ALL_CITIES
         curr_city = &config.cities[0];
         calc_func = calc_functions[curr_city->pr_time_provider];
-        if(calc_func(config.cities[0], prayer_times) != EXIT_SUCCESS) {
+        int CALC_RESULT = calc_func(config.cities[0], prayer_times);
+        if(CALC_RESULT == ENETDOWN) {
+            config.cities[0].pr_time_provider = prov_empty;
+            calc_functions[curr_city->pr_time_provider](config.cities[0], prayer_times);              // Reset to 00:00
+        } else if(CALC_RESULT != EXIT_SUCCESS) {
             assert(0);
         }
 #endif // CALC_ALL_CITIES
@@ -176,18 +197,22 @@ int main(int argc, char** argv)
     sprint_prayer_date(prayer_times[0], buff_len, puffer_hijri_date, true);
 
     char* gui_strings[gui_id_num] = {
+#ifdef LOCALIZATION_THROUGH_CODE
         [gui_id_fajr_name]      = "Fajr",
         [gui_id_sunrise_name]   = "Sunrise",
         [gui_id_dhuhr_name]     = "Dhuhr",
         [gui_id_asr_name]       = "Asr",
         [gui_id_maghrib_name]   = "Maghrib",
         [gui_id_isha_name]      = "Isha",
+#endif // LOCALIZATION_THROUGH_CODE
         [gui_id_fajr_time]      = prayer_puffer[pr_fajr],
-        [gui_id_sunrise_time]   = prayer_puffer[pr_fajr_end],
+        [gui_id_fajrend]        = prayer_puffer[pr_fajr_end],
         [gui_id_dhuhr_time]     = prayer_puffer[pr_dhuhr],
         [gui_id_asr_time]       = prayer_puffer[pr_asr],
         [gui_id_maghrib_time]   = prayer_puffer[pr_maghreb],
         [gui_id_isha_time]      = prayer_puffer[pr_ishaa],
+        [gui_id_sunrise_time]   = prayer_puffer[pr_sunrise],
+        [gui_id_sunset_time]    = prayer_puffer[pr_sunset],
         [gui_id_cityname]       = config.cities[0].name,
         [gui_id_datename]       = puffer_julian_date,
         [gui_id_hijridate]      = puffer_hijri_date,
@@ -197,9 +222,14 @@ int main(int argc, char** argv)
 
     /* Now GUI Stuff */
     gtk_init(&argc, &argv);
-
-    //build_assistant_glade();
-    build_glade(&config, gui_id_num, gui_strings);
+    char* glade_filename = "Prayer_times_GTK.glade";
+#ifdef RELEASE
+    char* glade_filename = lang_get_filename(LANG_DE);
+#endif // RELEASE
+    build_glade(&config, gui_id_num, glade_filename, gui_strings);
+#ifdef RELEASE
+    free(glade_filename);
+#endif // RELEASE
 
 #ifdef WAIT_USER
 #ifdef _WIN32
