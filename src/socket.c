@@ -140,11 +140,32 @@ static int socket_receive(int sock_id, char* msg, size_t max_len, int flags)
  * \return int
  *
  */
+#if OLDRECVALL
 static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
 {
     int received = 0, buff_pos = 0;
-    while((received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, 0))) {
-        if(received > -1) {
+    while((received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags))) {
+        if(received <= -1) {
+#ifdef _WIN32
+            int ret = WSAGetLastError();
+#else
+            int ret = errno;
+#endif // _WIN32
+            if(!buff_pos)
+                return ret;
+            else
+                break;
+        }
+        buff_pos += received;
+    }
+    return buff_pos;
+}
+#elif NEWRECVALL
+static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
+{
+    int last_val = 0, received = 0;
+    while(received = socket_receive(sock_id, msg, max_len, MSG_PEEK)) {
+        if(received == -1) {
 #ifdef _WIN32
             int ret = WSAGetLastError();
 #else
@@ -152,9 +173,108 @@ static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
 #endif // _WIN32
             return ret;
         }
+        if(received != last_val)
+            last_val = received;
+        else
+            break;
+    }
+    if(last_val > max_len) return -1;
+
+    int ret = socket_receive(sock_id, msg, last_val, flags);
+    http_find_resp_length(msg);
+    http_find_header_length(msg);
+    return ret;
+}
+#elif NEWESTRECVALL
+static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
+{
+    int received = 0;
+    int buff_pos = 0;
+    size_t header_length = 0;
+
+    do {
+        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
+        if(received == -1) goto ERR_RECV;
+        buff_pos += received;
+        if(!http_is_response_ok(msg)) break;                        // error in response
+        if((header_length = http_find_header_length(msg))) break;     // header complete
+    } while(received != -1);
+
+    size_t resp_length = http_find_resp_length(msg);
+
+    while(buff_pos < resp_length + header_length) {
+        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
+        if(received == -1) goto ERR_RECV;
         buff_pos += received;
     }
     return buff_pos;
+
+    int ret = 0;
+ERR_RECV:
+#ifdef _WIN32
+    ret = WSAGetLastError();
+#else
+    ret = errno;
+#endif // _WIN32
+    if(!buff_pos)
+        return ret;
+    return ret;
+}
+#endif // NEWRECVALL
+
+/** \brief Checks http response for validity ("200 OK")
+ *
+ * \param http_response char const*const http response to be checked
+ * \return bool true of OK, false otherwise
+ *
+ */
+static bool http_is_response_ok(char const*const http_response)
+{
+    bool ret = false;
+    if(http_response) {
+        if(strstr(http_response, "HTTP/1.1 200 OK")) {
+            ret = true;
+        }
+    }
+    return ret;
+}
+
+/** \brief Returns the content length of the http response according to the http header
+ *
+ * \param http_response char const*const http response of the server
+ * \return size_t length according to http header
+ *
+ */
+static size_t http_find_resp_length(char const*const http_response)
+{
+    size_t ret = 0;
+    if(http_is_response_ok(http_response)) {            // response valid
+        if(strstr(http_response, "\r\n\r\n")) {         // header complete
+            char* pos_length = strstr(http_response, "Content-Length: ");
+            int scan = sscanf(pos_length, "Content-Length: %zu", &ret);
+            assert(scan);
+        }
+    }
+    return ret;
+}
+
+/** \brief Return the length of the http header
+ *
+ * \param http_response char const*const http response of the server
+ * \return size_t length of header
+ *
+ */
+static size_t http_find_header_length(char const*const http_response)
+{
+    size_t ret = 0;
+    if(http_is_response_ok(http_response)) {
+        char* pos_header_end = strstr(http_response, "\r\n\r\n") + strlen("\r\n\r\n");   // find end of header, -1 necessary?
+        if(pos_header_end) {
+            ptrdiff_t length = pos_header_end - http_response;
+            ret = length;
+        }
+    }
+    return ret;
 }
 
 /** \brief Creates http request. needs to be freed by the user
@@ -174,14 +294,11 @@ static char* http_create_request(char const*const host, char const*const file, c
     size_t const header_max = 2000;
     char* request = calloc(header_max, sizeof(char));
     if(request) {
+#ifdef OLDRECVALL
         sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
-#ifdef OLD_CODE
-        strcpy(request, "GET ");
-        strcat(request, file);
-        strcat(request, " HTTP/1.1\r\nHost: ");
-        strcat(request, host);
-        strcat(request, "\r\nConnection: close\r\nAccept: text/plain\r\n\r\n");
-#endif // OLD_CODE
+#else
+        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
+#endif // OLDRECVALL
         char* new_req = realloc(request, strlen(request + 1));
         if(new_req) {
             request = new_req;
@@ -189,23 +306,6 @@ static char* http_create_request(char const*const host, char const*const file, c
     }
     return request;
 
-}
-
-/** \brief Checks http response for validity ("200 OK")
- *
- * \param http_response char const*const http response to be checked
- * \return bool true of OK, false otherwise
- *
- */
-static bool http_is_response_ok(char const*const http_response)
-{
-    bool ret = false;
-    if(http_response) {
-        if(strstr(http_response, "HTTP/1.1 200 OK")) {
-            ret = true;
-        }
-    }
-    return ret;
 }
 
 /** \brief removes http header from http response
@@ -232,7 +332,59 @@ static char* http_remove_header(char* http_response)
     return http_response;
 }
 
+/** \brief Receive whole message from host
+ *
+ * \param sock_id int id of socket
+ * \param msg char* destination array
+ * \param max_len size_t max length of @p msg
+ * \param flags int additional flags
+ * \return int
+ *
+ */
+static int http_receiveall(int sock_id, char* msg, size_t max_len, int flags)
+{
+    int received = 0;
+    int buff_pos = 0;
+    size_t header_length = 0;
 
+    do {
+        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
+        if(received == -1) goto ERR_RECV;
+        buff_pos += received;
+        if(!http_is_response_ok(msg)) break;                        // error in response
+        if((header_length = http_find_header_length(msg))) break;     // header complete
+    } while(received != -1);
+
+    size_t resp_length = http_find_resp_length(msg);
+
+    while(buff_pos < resp_length + header_length) {
+        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
+        if(received == -1) goto ERR_RECV;
+        buff_pos += received;
+    }
+    return buff_pos;
+
+    int ret = 0;
+ERR_RECV:
+#ifdef _WIN32
+    ret = WSAGetLastError();
+#else
+    ret = errno;
+#endif // _WIN32
+    if(!buff_pos)
+        return ret;
+    return ret;
+}
+
+
+/** \brief Connect to host and request file using HTTP. Add_info will be sent in request
+ *
+ * \param host char const*const address of host
+ * \param file char const*const requested file
+ * \param add_info char const*const additional info to be sent in header
+ * \return char* server response, http header removed. 0 if no valid response
+ *
+ */
 char* http_get(char const*const host, char const*const file, char const*const add_info)
 {
     char* ret = 0;
@@ -248,7 +400,11 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         size_t buf_len = 100E3;
         buffer = calloc(buf_len, sizeof(char));
         if(!buffer) goto ERR_SEND;
+#ifdef SOCKET_RECVALL
         size_t received_bytes = socket_receiveall(s, buffer, buf_len, 0);
+#else
+        size_t received_bytes = http_receiveall(s, buffer, buf_len, 0);
+#endif // HTTP_RECVALL
         //assert(received_bytes);
         if(!received_bytes || !http_is_response_ok(buffer)) goto ERR_RECV;
         buffer = http_remove_header(buffer);
