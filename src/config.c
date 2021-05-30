@@ -104,7 +104,7 @@ static int config_parse_string(char *string_in, Config* cfg)
     return EXIT_SUCCESS;
 }
 
-int config_read(char const*const filename, Config* cfg)
+int config_read(char const* filename, Config* cfg)
 {
     FILE* cfg_file = fopen(filename, "r");
 
@@ -268,18 +268,4 @@ Config* config_clear(Config* cfg)
         free(cfg->cities);
     }
     return config_init(cfg);
-}
-
-bool config_check_update(void)
-{
-    char const*const host = "raw.githubusercontent.com";
-    char* file = "/oeah2/desktop-prayer-times/main/version?token=AL2O77C4ZEI2TPBFSCUO4H3AGDA2W";
-
-    char* current_version = http_get(host, file, 0);
-    float current_version_f = strtod(current_version, 0);
-    float sw_version = (float) VERSION_MAIN_MAJOR + VERSION_MAIN_MINOR / 10;
-    if(current_version_f > sw_version) {
-        return true;
-    }
-    return false;
 }

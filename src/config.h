@@ -9,11 +9,7 @@
 #include "prayer_times.h"
 #include "city.h"
 #include "lang.h"
-
-enum Version {
-    VERSION_MAIN_MAJOR = 0,
-    VERSION_MAIN_MINOR = 1,
-};
+#include "update.h"
 
 typedef struct Config Config;
 
@@ -26,7 +22,7 @@ struct Config {
     int last_window_posY;
     City* cities;
     bool config_changed;
-    char* cfg_filename;
+    char const* cfg_filename;
 };
 
 /** \brief Read config from filename and write into Config* pointer
