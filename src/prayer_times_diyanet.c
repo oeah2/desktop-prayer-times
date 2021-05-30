@@ -1,6 +1,7 @@
 #include "prayer_times.h"
 #include "socket.h"
 #include "lang.h"
+#include "file.h"
 #include "cJSON.h"
 
 static char const*const diyanet_format_keywords[prayers_num] = {
@@ -43,7 +44,8 @@ static struct tm diyanet_mk_prayer_time(char* hr, char* date)
     return tm;
 }
 
-static struct tm diyanet_mk_hijri_date(char* string_in) {
+static struct tm diyanet_mk_hijri_date(char* string_in)
+{
     char* current_pos = string_in;
     do {
         current_pos++;
@@ -173,24 +175,8 @@ GET_PRAYER_TIMES:
     return EXIT_SUCCESS;
 }
 #else
-/** \brief Returns length of file
- *
- * \param file FILE* of which the lengh shall be determined
- * \return size_t file length
- *
- */
-static size_t find_file_length(FILE* file)
-{
-    size_t ret = 0;
-    if(file) {
-        rewind(file);
-        int fseek_result = fseek(file, 0, SEEK_END);
-        assert(!fseek_result);
-        ret = ftell(file);
-        rewind(file);
-    }
-    return ret;
-}
+
+
 
 /** \brief Determines prayer times for given date
  * \details this function is used in prayer time functions of diyanet
@@ -214,11 +200,11 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
         return EFAULT;
     }
 
-    size_t file_length = find_file_length(file_times);
+    size_t file_length = file_find_length(file_times);
     char* file_content = malloc(sizeof(char) * (file_length + 10));
-    if(!fgets(file_content, file_length + 10, file_times)) {
-        ret = EXIT_FAILURE;
-        perror("Error creating cache");
+    if(!file_read_all(file_times, file_length, file_content)) {
+        ret = ENOFILE;
+        perror("Error reading file");
         goto FREE_FILE_CONTENT;
     }
 
@@ -276,18 +262,20 @@ int diyanet_get_todays_prayers(City city, prayer prayer_times[prayers_num])
         return ENOFILE;
     }
     static bool first_event = true;
+    static size_t counter = 0;
     rewind(city.file_times);
     switch(diyanet_get_prayer_times_for_date(city.file_times, prayer_times, 0)) {
     case ENOFILE:
     case EFAULT:    // will be thrown if file is corrupt
     case EOF:
         if(first_event) {
-            first_event = false;
+            if(counter >= 10) first_event = false;
+            counter++;
             diyanet_update_file(&city, false);
             return diyanet_get_todays_prayers(city, prayer_times);
         } else {
             perror("Error getting file!");
-            return EXIT_FAILURE;
+            return ENETDOWN;
         }
     case EXIT_SUCCESS:
     default:
