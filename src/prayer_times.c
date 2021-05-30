@@ -15,6 +15,7 @@ char const*const prayer_names[prayers_num] = {
 char const*const provider_names[prov_num] = {
     [prov_diyanet] = "diyanet",
     [prov_calc] = "calc",
+    [prov_empty] = "",
 };
 
 void prayer_print_times(char const*const city_name, prayer times[prayers_num])
@@ -29,14 +30,34 @@ void prayer_print_times(char const*const city_name, prayer times[prayers_num])
     }
 }
 
+int empty_get_todays_prayers(City city, prayer prayer_times[prayers_num])
+{
+    for(size_t i = 0; i < prayers_num; i++) {
+        prayer_times[i].time_at = (struct tm) {
+            0
+        };
+        prayer_times[i].hicri_date = (struct tm) {
+            0
+        };
+    }
+    return EXIT_SUCCESS;
+}
+
+int empty_get_preview_for_date(City city, prayer prayer_times[prayers_num], struct tm date)
+{
+    return empty_get_todays_prayers(city, prayer_times);
+}
+
 calc_function* calc_functions[] = {
     [prov_diyanet] =  diyanet_get_todays_prayers,
     [prov_calc] = calc_get_todays_prayers,
+    [prov_empty] = empty_get_todays_prayers,
 }; /**< Array of function pointers. During calculation, one of these is being called, depending on the configuration of the city */
 
 preview_function* preview_functions[] = {
     [prov_diyanet] = diyanet_get_preview_for_date,
     [prov_calc] = calc_get_preview_for_date,
+    [prov_empty] = empty_get_preview_for_date,
 };
 
 int sprint_prayer_time(prayer time, size_t buff_len, char dest[buff_len])
@@ -70,13 +91,13 @@ int sprint_prayer_date(prayer time, size_t buff_len, char dest[buff_len], bool h
 #ifdef _C11
         return sprintf_s(dest, buff_len, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
 #else
-    	return sprintf(dest, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+        return sprintf(dest, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
 #endif
     else
 #ifdef _C11
         return sprintf_s(dest, buff_len, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
 #else
-    	return sprintf(dest, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+        return sprintf(dest, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
 #endif
 }
 
@@ -85,6 +106,7 @@ int prayer_calc_remaining_time(prayer next, int* hours, int* minutes, int* secon
     time_t now = 0, remaining = 0;
     int ret = EXIT_FAILURE;
     now = time(0);
+    next.time_at.tm_isdst = -1;             // Determine if daylight saving is active
 
     time_t prayer = mktime(&next.time_at);
     remaining = difftime(prayer, now);

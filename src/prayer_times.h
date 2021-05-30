@@ -49,6 +49,7 @@ enum prayers {    /**< enum for indexing prayers */
 enum pr_time_providers { /**< enum for indexing prayer times providers */
     prov_diyanet,
     prov_calc,
+    prov_empty,
 
     prov_num
 };
