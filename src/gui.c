@@ -7,9 +7,11 @@
 #include "cJSON.h"
 #include "config.h"
 #include "socket.h"
+#include "update.h"
 
 #define USE_STATUSICON
 //#define SHOW_MOON         // not really implemented
+#define JUMP_TO_NEXT_DAY    // At 00:00, the next day will be displayed
 
 extern calc_function* calc_functions[];
 extern preview_function* preview_functions[];
@@ -54,10 +56,16 @@ GtkDialog* dlg_calc_error = 0;
 GtkStatusIcon* statusicon;
 #endif // USE_STATUSICON
 
+void hide_statusicon(GtkStatusIcon* statusicon);
+void label_set_text(enum GUI_IDS id, char* text);
+bool Callback_Minutes(gpointer data);
+bool Callback_Seconds(gpointer data);
+void on_btn_prev_city_clicked(GtkWidget* widget, gpointer data);
+
 #ifdef USE_STATUSICON
-void hide_statusicon(GtkStatusIcon* statusicon)
+void hide_statusicon(GtkStatusIcon* statusiconlcl)
 {
-    gtk_status_icon_set_visible(GTK_STATUS_ICON(statusicon), false);
+    gtk_status_icon_set_visible(GTK_STATUS_ICON(statusiconlcl), false);
 }
 #endif // USE_STATUSICON
 
@@ -91,6 +99,9 @@ static int gui_calc_prayer_times(City city, size_t dest_len, char dest[prayers_n
         sprint_prayer_time(prayer_times[i], dest_len, dest[pos]);
         pos++;
     }
+    if(city.pr_time_provider == prov_calc) {
+        prayer_times[0].hicri_date = calc_get_hijri_date(prayer_times[0].time_at);
+    }
     sprint_dates(prayer_times[0], buff_len, dest_julian_date, dest_hijri_date);
     return ret;
 }
@@ -108,7 +119,7 @@ static void display_city(City city)
     }
     gtk_label_set_text(labels[gui_id_cityname], city.name);
     gtk_label_set_text(labels[gui_id_datename], julian_date);
-    gtk_label_set_text(labels[gui_id_hijridate], (city.pr_time_provider == prov_diyanet) ? hijri_date : "");
+    gtk_label_set_text(labels[gui_id_hijridate], hijri_date);
 }
 
 static int gui_calc_preview(City city, prayer prayer_times[prayers_num], int days)
@@ -154,8 +165,31 @@ static int display_preview(City city, int days)
         gtk_label_set_text(labels[i], times[i - gui_id_fajr_time]);
     }
     gtk_label_set_text(labels[gui_id_datename], julian_date);
-    gtk_label_set_text(labels[gui_id_hijridate], (city.pr_time_provider == prov_diyanet) ? hijri_date : "");
+    gtk_label_set_text(labels[gui_id_hijridate], hijri_date);
     return ret;
+}
+
+static GtkWidget* find_child(GtkWidget* parent, const char* name)
+{
+    if (!strcmp(gtk_widget_get_name(parent), name)) {
+        return parent;
+    }
+
+    if (GTK_IS_BIN(parent)) {
+        GtkWidget* child = gtk_bin_get_child(GTK_BIN(parent));
+        return find_child(child, name);
+    }
+
+    if (GTK_IS_CONTAINER(parent)) {
+        GList *children = gtk_container_get_children(GTK_CONTAINER(parent));
+        do {
+            GtkWidget* widget = find_child(children->data, name);
+            if (widget) {
+                return widget;
+            }
+        } while((children = g_list_next(children)));
+    }
+    return NULL;
 }
 
 static bool gui_apply_language(size_t lang_id)
@@ -168,7 +202,7 @@ bool Callback_Minutes(gpointer data)
 {
     bool ret = true;
     return ret;
-};
+}
 
 bool Callback_Seconds(gpointer data)
 {
@@ -191,7 +225,7 @@ CALC_REMAINING:
         char buffer_prayertime[buff_len];
         sprint_prayer_time(prayer_times[i], buff_len, buffer_prayertime);
         sprintf(buffer, "Next prayer for %s: %s", cfg->cities[city_ptr].name, buffer_prayertime);
-        gtk_status_icon_set_tooltip_text(GTK_STATUS_ICON(statusicon), buffer);
+        gtk_status_icon_set_tooltip_text(statusicon, buffer);
         break;
     }
 
@@ -209,6 +243,14 @@ CALC_REMAINING:
     if(time(0) - last_calc_day > 24 * 60 * 60) {         // new day
         last_calc_day = time(0);
         last_calc_day -= last_calc_day % (24 * 60 * 60);    // auf tag abrunden
+#ifdef JUMP_TO_NEXT_DAY
+        static bool initial_run = true;
+        if(!initial_run) {
+            day_ptr++;
+            display_preview(cfg->cities[city_ptr], day_ptr);
+        }
+        initial_run = false;
+#endif // JUMP_TO_NEXT_DAY
         // Update times and days
         //goto CALC_REMAINING;
     }
@@ -218,8 +260,6 @@ CALC_REMAINING:
     sprint_prayer_remaining(buff_len, remaining_time, rem_hours, rem_mins, rem_secs);
 
     gtk_label_set_text(GTK_LABEL(labels[gui_id_remainingtime]), remaining_time);
-
-    //calc_get_hijri_date(prayer_times[0].time_at);     // not working currently. the website seems to be very slow.
 
     return true;
 }
@@ -236,8 +276,8 @@ void on_btn_prev_city_clicked(GtkWidget* widget, gpointer data)
         gtk_widget_set_sensitive(GTK_WIDGET(btn_next_date), true);
 
         display_city(cfg->cities[city_ptr]);
-        GtkWidget* btn_next_city = data;
-        gtk_widget_set_sensitive(btn_next_city, true);
+        GtkWidget* btn_next_city_lcl = data;
+        gtk_widget_set_sensitive(btn_next_city_lcl, true);
         Callback_Seconds(NULL);
     }
 }
@@ -256,9 +296,12 @@ void on_btn_next_city_clicked(GtkWidget* widget, gpointer data)
         gtk_widget_set_sensitive(GTK_WIDGET(btn_next_date), true);
 
         display_city(cfg->cities[city_ptr]);
-        GtkWidget* btn_prev_city = data;
-        gtk_widget_set_sensitive(btn_prev_city, true);
+        GtkWidget* btn_prev_city_lcl = data;
+        gtk_widget_set_sensitive(btn_prev_city_lcl, true);
         Callback_Seconds(NULL);
+        if(cfg->cities[city_ptr].pr_time_provider == prov_calc) {
+            //calc_get_hijri_date(prayer_times[0].time_at);     // not working currently. the website seems to be very slow.
+        }
     }
 }
 
@@ -354,9 +397,14 @@ void on_menuitm_load_activate(GtkWidget* widget, gpointer data)
         config_read(filename, cfg);
         cfg->config_changed = true;
         cfg->lang = old_lang;
+#ifdef CHECK_RET
+        char* new_mem = realloc(cfg->cfg_filename, strlen(old_filename + 1) * sizeof(char));        // use initial filename, not last filename
+        cfg->cfg_filename = new_mem ? new_mem : cfg->cfg_filename;
+#else
         cfg->cfg_filename = realloc(cfg->cfg_filename, strlen(old_filename + 1) * sizeof(char));        // use initial filename, not last filename
+#endif
         strcpy(cfg->cfg_filename, old_filename);
-        config_save(old_filename, cfg);
+        config_json_save(old_filename, cfg);
         city_ptr = 0;
         display_city(cfg->cities[city_ptr]);
         gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
@@ -365,6 +413,103 @@ void on_menuitm_load_activate(GtkWidget* widget, gpointer data)
         // do nothing
     }
     gtk_widget_hide(GTK_WIDGET(dlg_filechooser));
+}
+
+void on_menuitm_movecities_activate(GtkWidget* widget, gpointer data) {
+
+}
+
+void on_menuitm_removecity_activate(GtkWidget* widget, gpointer data) {
+
+}
+
+void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
+    GtkDialog* dlg_addcity = data;
+
+    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_listbox"));
+    if(!listbox) return;
+
+
+    /* Test, remove later */
+/*    GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
+    if(!list_element) return;
+    GtkRadioButton* radio_button = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label(NULL, "Test"));
+    if(!radio_button) return;
+    GSList* group = gtk_radio_button_get_group(radio_button);
+    if(!group) return;
+
+    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(radio_button));
+    gtk_list_box_insert(listbox, GTK_WIDGET(list_element), -1);
+    /* End test */
+
+
+    gtk_widget_show_all(GTK_WIDGET(dlg_addcity));
+    int dialog_ret = gtk_dialog_run(dlg_addcity);
+    if(dialog_ret == GTK_RESPONSE_APPLY) {
+        gtk_widget_hide(GTK_WIDGET(dlg_addcity));
+    } else if(dialog_ret == GTK_RESPONSE_CANCEL) {
+        gtk_widget_hide(GTK_WIDGET(dlg_addcity));
+    } else {
+        gtk_widget_hide(GTK_WIDGET(dlg_addcity));
+    }
+}
+
+static bool gui_create_and_add_radio_button(GtkListBox* listbox, GSList* list, char const*const label, char const*const name) {
+    bool ret = false;
+    if(!listbox || !label) return ret;
+
+    GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
+    if(!list_element) goto ERR;
+
+
+    GtkRadioButton* radio_button = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label(list, label));
+    if(!radio_button) goto ERR;
+    if(name) gtk_widget_set_name(GTK_WIDGET(radio_button), name);
+
+    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(radio_button));
+    gtk_list_box_insert(listbox, GTK_WIDGET(list_element), -1);
+    ret = true;
+
+    return ret;
+ERR:
+    perror("Error creating radio button");
+    return ret;
+}
+
+void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
+    GtkListBox* listbox = data;
+    char* geolocation_string = 0;
+
+    char const*const input_string = gtk_entry_get_text(GTK_ENTRY(widget));
+    if(!input_string) goto ERR;
+
+    if(strlen(input_string) > 4) {
+        char* geolocation_string = geolocation_get(input_string);
+        if(!geolocation_string) goto ERR;
+        char* split = strtok(geolocation_string, "\n");
+        GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first"));
+        if(!first_radio_button) {
+            if(!gui_create_and_add_radio_button(listbox, NULL, split, "radio_button_first"))
+                goto ERR;
+        }
+        GSList* list = gtk_radio_button_get_group(GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first")));
+        do{
+            puts(split);
+            gui_create_and_add_radio_button(listbox, list, split, NULL);
+        } while(split = strtok(0, "\n"));
+        gtk_widget_show_all(GTK_WIDGET(listbox));
+        free(geolocation_string);
+    }
+    return;
+
+ERR:
+    perror("Error on_dlg_add_city_search_search_changed");
+    free(geolocation_string);
+    return;
+}
+
+void on_dlg_add_city_close(GtkWidget* widget, gpointer data) {
+    gtk_widget_hide(widget);
 }
 
 void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data)
@@ -387,7 +532,7 @@ void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data)
         }
         bool old_val = cfg->config_changed;
         cfg->config_changed = true;
-        config_save(filename, cfg);
+        config_json_save(filename, cfg);
         cfg->config_changed = old_val;
         free(filename);
     } else if(dialog_ret == GTK_RESPONSE_CANCEL) {
@@ -399,32 +544,95 @@ void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data)
 void on_menuitm_settings_activate(GtkWidget* widget, gpointer data)
 {
     GtkDialog* dlg_settings = data;
-
-    gtk_widget_show(GTK_WIDGET(dlg_settings));
     int dialog_ret = 0;
+    bool end = false;
+    bool initial_run = true;
+    GtkWidget* pwidget;
+
+    goto SET_SETTINGS; // set Settings and return here
+
+SHOW_DLG:
+    gtk_widget_show(GTK_WIDGET(dlg_settings));
+
 RUN_DIALOG:
     dialog_ret = gtk_dialog_run(dlg_settings);
-    if(dialog_ret == GTK_RESPONSE_APPLY) {
-        // implement and goto run dialog
-        goto RUN_DIALOG;
-    } else if(dialog_ret == GTK_RESPONSE_OK) {
-        // implement
-    } else if(dialog_ret == GTK_RESPONSE_CANCEL) {
-        // do nothing
-    }
-    gtk_widget_hide(GTK_WIDGET(dlg_settings));
+    const char* lang = 0;
+    switch(dialog_ret) {
+    case GTK_RESPONSE_OK:
+        end = true;
+    case GTK_RESPONSE_APPLY:
+        pwidget = find_child(GTK_WIDGET(dlg_settings), "combobox_lang");
+        if(!pwidget) goto ERR_WIDGET;
+        lang = gtk_combo_box_get_active_id(GTK_COMBO_BOX(pwidget));
+        if(!strcmp(lang, "de")) {
+            cfg->lang = LANG_DE;
+        } else if(!strcmp(lang, "en")) {
+            cfg->lang = LANG_EN;
+        } else if(!strcmp(lang, "tr")) {
+            cfg->lang = LANG_TR;
+        }
 
+        pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_saveposition");
+        if(!pwidget) goto ERR_WIDGET;
+        cfg->save_position = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwidget));
+
+        pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_checkforupdates");
+        if(!pwidget) goto ERR_WIDGET;
+        cfg->check_for_updates = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwidget));
+
+        pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_enable_notification");
+        if(!pwidget) goto ERR_WIDGET;
+        cfg->enable_notification = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwidget));
+        cfg->config_changed = true;
+
+        if(!end) goto RUN_DIALOG;
+        break;
+    case GTK_RESPONSE_CANCEL:
+        goto SET_SETTINGS;
+        break;
+    }
+END_DIALOG:
+    gtk_widget_hide(GTK_WIDGET(dlg_settings));
+    return;
+
+SET_SETTINGS:
+    pwidget = find_child(GTK_WIDGET(dlg_settings), "combobox_lang");
+    if(!pwidget) goto ERR_WIDGET;
+    gtk_combo_box_set_active(GTK_COMBO_BOX(pwidget), cfg->lang);
+
+    pwidget = find_child(GTK_WIDGET(dlg_settings),  "checkbutton_saveposition");
+    if(!pwidget) goto ERR_WIDGET;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->save_position);
+
+    pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_checkforupdates");
+    if(!pwidget) goto ERR_WIDGET;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->check_for_updates);
+
+    pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_enable_notification");
+    if(!pwidget) goto ERR_WIDGET;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->enable_notification);
+    if(initial_run) {
+        initial_run = false;
+        goto SHOW_DLG;
+    }
+    goto END_DIALOG;
+
+ERR_WIDGET:
+    perror("Error finding widget!");
+    gtk_widget_hide(GTK_WIDGET(dlg_settings));
 }
 
 void on_window_close(GtkWidget* window, gpointer data)
 {
-    int posX = 0, posY = 0;
-    gtk_window_get_position(GTK_WINDOW(window), &posX, &posY);
-    if(posX != cfg->last_window_posX || posY != cfg->last_window_posY || cfg->config_changed) {
-        cfg->config_changed = true;
-        cfg->last_window_posX = posX;
-        cfg->last_window_posY = posY;
-        config_save(cfg->cfg_filename, cfg);
+    if(cfg->save_position) {
+        int posX = 0, posY = 0;
+        gtk_window_get_position(GTK_WINDOW(window), &posX, &posY);
+        if(posX != cfg->last_window_posX || posY != cfg->last_window_posY || cfg->config_changed) {
+            cfg->config_changed = true;
+            cfg->last_window_posX = posX;
+            cfg->last_window_posY = posY;
+            config_json_save(cfg->cfg_filename, cfg);
+        }
     }
 
     gtk_widget_destroy(window);
@@ -432,7 +640,7 @@ void on_window_close(GtkWidget* window, gpointer data)
     gtk_main_quit();
 }
 
-void build_assistant_glade()
+void build_assistant_glade(void)
 {
     GtkBuilder          *builder;
     GtkAssistant        *window_assistant;
@@ -452,7 +660,7 @@ void build_assistant_glade()
 }
 
 #ifdef SHOW_MOON
-void show_moodphase(unsigned char* data)
+void show_moonphase(unsigned char* data)
 {
     GdkPixbuf* pixbuf = gdk_pixbuf_new_from_stream(data, NULL, NULL);
     if(pixbuf) {
@@ -466,11 +674,20 @@ void statusicon_clicked(GtkWidget* widget, gpointer data)
     gtk_window_present(GTK_WINDOW(widget));
 }
 
+#define CHECK_OBJ(x)        \
+ do {                       \
+    if(!(x)) {              \
+        err_msg = "" #x "";\
+        goto ERR_OBJ;       \
+    }                       \
+ } while(false)
+
 void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char* strings[num_strings])
 {
     GtkBuilder      *builder;
     GtkWidget       *window_main;
     cfg = cfg_in;
+    char* err_msg = NULL;
 
     builder = gtk_builder_new();
     {
@@ -481,23 +698,25 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
         }
     }
 
-    window_main = GTK_WIDGET(gtk_builder_get_object(builder, "window_main"));
+    window_main = GTK_WIDGET(gtk_builder_get_object(builder, "window_main")); CHECK_OBJ(window_main);
     /* Connect Button signals */
     /* Buttons city */
-    btn_prev_city = GTK_BUTTON(gtk_builder_get_object(builder, "button_prev_city"));
-    btn_next_city = GTK_BUTTON(gtk_builder_get_object(builder, "button_next_city"));
+    btn_prev_city = GTK_BUTTON(gtk_builder_get_object(builder, "button_prev_city")); CHECK_OBJ(btn_prev_city);
+    btn_next_city = GTK_BUTTON(gtk_builder_get_object(builder, "button_next_city")); CHECK_OBJ(btn_next_city);
     g_signal_connect(btn_prev_city, "clicked", G_CALLBACK(on_btn_prev_city_clicked), btn_next_city);
     g_signal_connect(btn_next_city, "clicked", G_CALLBACK(on_btn_next_city_clicked), btn_prev_city);
     /* Buttons date */
-    btn_prev_date = GTK_BUTTON(gtk_builder_get_object(builder, "button_prev_date"));
-    btn_next_date = GTK_BUTTON(gtk_builder_get_object(builder, "button_next_date"));
+    btn_prev_date = GTK_BUTTON(gtk_builder_get_object(builder, "button_prev_date")); CHECK_OBJ(btn_prev_date);
+    btn_next_date = GTK_BUTTON(gtk_builder_get_object(builder, "button_next_date")); CHECK_OBJ(btn_next_date);
     g_signal_connect(btn_prev_date, "clicked", G_CALLBACK(on_btn_prev_date_clicked), btn_next_date);
     g_signal_connect(btn_next_date, "clicked", G_CALLBACK(on_btn_next_date_clicked), btn_prev_date);
 
     /* Get Label IDs */
     if(strings) {
         for(size_t i = 0; i < gui_id_num; i++) {
-            labels[i] = GTK_LABEL(gtk_builder_get_object(builder, gui_identifiers[i]));
+            GtkLabel* label = GTK_LABEL(gtk_builder_get_object(builder, gui_identifiers[i]));
+            CHECK_OBJ(label);
+            labels[i] = label;
             if(strings[i]) gtk_label_set_text(labels[i], strings[i]);
         }
     }
@@ -515,24 +734,41 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
 #ifdef SHOW_MOON
     /* Mondphasen */
     img_mondphase = gtk_builder_get_object(builder, "image-mond");
+    CHECK_OBJ(img_mondphase);
 #endif // SHOW_MOON
 
     gtk_widget_show(window_main);
-    gtk_window_move(GTK_WINDOW(window_main), cfg->last_window_posX, cfg->last_window_posY);
+    if(cfg->save_position)
+        gtk_window_move(GTK_WINDOW(window_main), cfg->last_window_posX, cfg->last_window_posY);
     g_signal_connect(window_main, "delete-event", G_CALLBACK(on_window_close), NULL);
 
     g_timeout_add_seconds(1, G_SOURCE_FUNC(Callback_Seconds), NULL);
     Callback_Seconds(NULL);
 
-
     /* Dialog window for calculation error */
     dlg_calc_error = GTK_DIALOG(gtk_builder_get_object(builder, "dlg_calc_error"));
+    CHECK_OBJ(dlg_calc_error);
+
+    /* Callback functions */
     gtk_builder_add_callback_symbol(builder, "on_dlg_calc_error_ok_clicked", G_CALLBACK(on_dlg_calc_error_ok_clicked));
     gtk_builder_add_callback_symbol(builder, "dlg_calc_error_retry_btn_clicked", G_CALLBACK(dlg_calc_error_retry_btn_clicked));
     gtk_builder_add_callback_symbol(builder, "on_dlg_about_response", G_CALLBACK(on_dlg_about_response));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_load_activate", G_CALLBACK(on_menuitm_load_activate));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_saveas_activate", G_CALLBACK(on_menuitm_saveas_activate));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_settings_activate", G_CALLBACK(on_menuitm_settings_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menuitm_movecities_activate", G_CALLBACK(on_menuitm_movecities_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menuitm_removecity_activate", G_CALLBACK(on_menuitm_removecity_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menuitm_addcity_activate", G_CALLBACK(on_menuitm_addcity_activate));
+    gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_search_search_changed", G_CALLBACK(on_dlg_add_city_search_search_changed));
+    gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_close", G_CALLBACK(on_dlg_add_city_close));
+
+
+    /* About dialog */
+    GtkAboutDialog* dlg_about = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "dlg_about"));
+    CHECK_OBJ(dlg_about);
+    char* current_version = update_get_current_version();
+    gtk_about_dialog_set_version(dlg_about, current_version);
+    free(current_version);
 
     gtk_builder_connect_signals(builder, NULL);
     g_object_unref(builder);
@@ -554,4 +790,10 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     g_signal_connect_swapped(statusicon, "activate", G_CALLBACK(statusicon_clicked), window_main);
     g_signal_connect_swapped(window_main, "destroy", G_CALLBACK(hide_statusicon), statusicon);
 #endif // USE_STATUSICON
+    return;
+
+ERR_OBJ:
+    perror("Error finding object with gtk_builder_get_object");
+    perror(err_msg);
+    return;
 }

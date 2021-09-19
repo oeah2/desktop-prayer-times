@@ -5,6 +5,7 @@
 char const*const lang_names[LANG_NUM] = {
     [LANG_EN] = "en",
     [LANG_DE] = "de",
+    [LANG_TR] = "tr",
 };
 
 

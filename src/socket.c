@@ -17,6 +17,14 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "socket.h"
+#include "update.h"
+
+//#define USE_LIBCURL
+#ifdef USE_LIBCURL
+#include <curl/curl.h>
+#endif // USE_LIBCURL
+
+//#define DEBUG 1
 
 enum {
     SOCK_OK,
@@ -24,7 +32,7 @@ enum {
     SOCK_ERR_ADDRINFO,
 };
 
-int socket_init(void)
+static int socket_init(void)
 {
 #ifdef _WIN32
     WSADATA wsaData;
@@ -37,7 +45,7 @@ int socket_init(void)
     return SOCK_OK;
 }
 
-int socket_deinit(void)
+static int socket_deinit(void)
 {
 #ifdef _WIN32
     return WSACleanup();
@@ -297,9 +305,11 @@ static char* http_create_request(char const*const host, char const*const file, c
 #ifdef OLDRECVALL
         sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
 #else
-        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
+        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
+
+//        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
 #endif // OLDRECVALL
-        char* new_req = realloc(request, strlen(request + 1));
+        char* new_req = realloc(request, strlen(request) + 1);
         if(new_req) {
             request = new_req;
         }
@@ -317,10 +327,11 @@ static char* http_create_request(char const*const host, char const*const file, c
 static char* http_remove_header(char* http_response)
 {
     if(http_response) {
-        size_t length = strlen(http_response);
-        char* header_end = strstr(http_response, "\r\n\r\n") + strlen("\r\n\r\n");
-        if(header_end) {
+        if(strstr(http_response, "\r\n\r\n")) {
+            size_t length = strlen(http_response);
+            char* header_end = strstr(http_response, "\r\n\r\n") + strlen("\r\n\r\n"); // ToDo: header_end kann nie 0 werden, weil strlen immer 4 ist.
             ptrdiff_t header_length = header_end - http_response;
+            assert(header_length > 0);
             char buffer[length - header_length + 1];
             strcpy(buffer, header_end);
             http_response = realloc(http_response, length - header_length + 1);
@@ -357,11 +368,19 @@ static int http_receiveall(int sock_id, char* msg, size_t max_len, int flags)
 
     size_t resp_length = http_find_resp_length(msg);
 
+#ifdef DEBUG
+    printf("HTTP_Recvall resp length: %zu\n", resp_length);
+#endif // DEBUG
+
     while(buff_pos < resp_length + header_length) {
         received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
         if(received == -1) goto ERR_RECV;
         buff_pos += received;
     }
+#ifdef DEBUG
+    printf("HTTP_Recvall received bytes: %d\n", buff_pos);
+    printf("HTTP_Rectall received data: %s\n", msg);
+#endif // DEBUG
     return buff_pos;
 
     int ret = 0;
@@ -376,6 +395,27 @@ ERR_RECV:
     return ret;
 }
 
+/** \brief Generate user agent for http request
+ *
+ * \param void
+ * \return char* string containing user agent, must be freed by user
+ *
+ */
+static char* socket_get_useragent(void)
+{
+    char* ret = malloc(100 * sizeof(char));
+    if(ret) {
+        strcpy(ret, "User-Agent: desktop_prayer_time/");
+        char* current_version = update_get_current_version();
+        assert(current_version);
+        strcat(ret, current_version);
+        free(current_version);
+        char* new_mem = realloc(ret, (strlen(ret) + 1) * sizeof(char));
+        ret = new_mem ? new_mem : ret;
+    }
+    return ret;
+}
+
 
 /** \brief Connect to host and request file using HTTP. Add_info will be sent in request
  *
@@ -385,6 +425,7 @@ ERR_RECV:
  * \return char* server response, http header removed. 0 if no valid response
  *
  */
+#ifndef USE_LIBCURL
 char* http_get(char const*const host, char const*const file, char const*const add_info)
 {
     char* ret = 0;
@@ -396,7 +437,9 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         http_request = http_create_request(host, file, add_info);
         if(!http_request) goto ERR_SOCKET;
         if(!socket_sendall(s, http_request, strlen(http_request) + 1)) goto ERR_SEND;
-
+#ifdef DEBUG
+        printf("HTTP_Get: Sent Request: %s\n", http_request);
+#endif // DEBUG
         size_t buf_len = 100E3;
         buffer = calloc(buf_len, sizeof(char));
         if(!buffer) goto ERR_SEND;
@@ -406,6 +449,10 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         size_t received_bytes = http_receiveall(s, buffer, buf_len, 0);
 #endif // HTTP_RECVALL
         //assert(received_bytes);
+#ifdef DEBUG
+        printf("HTTP_Get Received bytes: %zu\n", received_bytes);
+        printf("HTTP_Get Received data: \n%s\n", buffer);
+#endif // DEBUG
         if(!received_bytes || !http_is_response_ok(buffer)) goto ERR_RECV;
         buffer = http_remove_header(buffer);
         assert(buffer);
@@ -426,6 +473,25 @@ ERR_SOCKET:
     socket_close(s);
     return 0;
 }
+#else
+char* http_get(char const*const host, char const*const file, char const*const add_info)
+{
+    CURL* curl;
+    CURLcode res;
+
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, host);
+        res = curl_easy_perform(curl);
+
+        if(res != CURLE_OK) {
+            perror("Error performing curl operationg!");
+
+        }
+        curl_easy_cleanup(curl);
+    }
+}
+#endif
 
 bool socket_check_connection()      // Das ist keine schoene Loesung, sollte aber funktionieren.
 {
@@ -510,7 +576,7 @@ static BIO* https_connect(const char* hostname, SSL_CTX** ctx_in)
 #define SKIP_VERIFICATION
 #ifndef SKIP_VERIFICATION
     /* verify truststore, check cert */
-    if (!SSL_CTX_load_verify_locations(ctx,
+    if (!SSL_CTX_load_verify_locations(*ctx_in,
                                        "/etc/ssl/certs/ca-certificates.crt", /* truststore */
                                        "/etc/ssl/certs/")) /* more truststore */
         report_and_exit("SSL_CTX_load_verify_locations...");
@@ -549,23 +615,53 @@ static char* https_receive(BIO* bio)
 char* https_get(char const*const host, char const*const file, char const*const add_info)
 {
     https_init();
-    SSL_CTX* ctx = 0;
+    SSL_CTX* ctx = NULL;
     BIO* bio = https_connect(host, &ctx);
     char* http_request = http_create_request(host, file, add_info);
-    BIO_puts(bio, http_request);
+    int sent_bytes = BIO_puts(bio, http_request);
+    if(sent_bytes == -1 || sent_bytes == 0) {
+        perror("Error while sending data over HTTPS socket!");
+        return 0;
+    }
+    assert(strlen(http_request) == sent_bytes);
     free(http_request);
+    http_request = NULL;
 
     char* http_response = https_receive(bio);
-    //#define DEBUG
 #ifdef DEBUG
-    printf("Http response: %s\n", http_response);
+    printf("HTTPS_Get response: %s\n", http_response);
 #endif // DEBUG
     https_cleanup(ctx, bio);
     if(http_is_response_ok(http_response)) {
         http_remove_header(http_response);
     } else {
         free(http_response);
-        http_response = 0;
+        http_response = NULL;
     }
     return http_response;
+}
+
+char* https_get_with_useragent(char const*const host, char const*const file, char const*const add_info)
+{
+    char* ret = 0;
+    size_t buffer_length = 150;
+    char* user_agent = socket_get_useragent();
+    if(user_agent) {
+        assert(strlen(user_agent) < buffer_length - 1);
+        if(add_info) {
+            buffer_length += strlen(add_info);
+        }
+        char buffer[buffer_length];
+        if(add_info) {
+            strcpy(buffer, add_info);
+            strcat(buffer, user_agent);
+        } else {
+            strcpy(buffer, user_agent);
+        }
+        free(user_agent);
+        user_agent = 0;
+
+        ret = https_get(host, file, buffer);
+    }
+    return ret;
 }

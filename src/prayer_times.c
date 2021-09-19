@@ -85,19 +85,31 @@ int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int
 #endif
 }
 
+static char const*const sprint_get_format(struct tm date, bool hijri) {
+    char const* format = 0;
+    if(date.tm_mday < 10 && date.tm_mon + (hijri ? 0 : 1) < 10) format = "0%d.0%d.%d";
+    else if(date.tm_mday >= 10 && date.tm_mon + (hijri ? 0 : 1) < 10) format = "%d.0%d.%d";
+    else if(date.tm_mday < 10 && date.tm_mon + (hijri ? 0 : 1) >= 10) format = "0%d.%d.%d";
+    else format = "%d.%d.%d";
+
+    return format;
+}
+
 int sprint_prayer_date(prayer time, size_t buff_len, char dest[buff_len], bool hijri)
 {
     if(!hijri)
 #ifdef _C11
-        return sprintf_s(dest, buff_len, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+        return sprintf_s(dest, buff_len, sprint_get_format(time.time_at, hijri), time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
 #else
-        return sprintf(dest, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+        //return sprintf(dest, "%d.%d.%d", time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
+        return sprintf(dest, sprint_get_format(time.time_at, hijri), time.time_at.tm_mday, time.time_at.tm_mon + 1, time.time_at.tm_year + 1900);
 #endif
     else
 #ifdef _C11
-        return sprintf_s(dest, buff_len, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+        return sprintf_s(dest, buff_len, sprint_get_format(time.time_at, hijri), time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
 #else
-        return sprintf(dest, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+        //return sprintf(dest, "%d.%d.%d", time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
+        return sprintf(dest, sprint_get_format(time.hicri_date, hijri), time.hicri_date.tm_mday, time.hicri_date.tm_mon, time.hicri_date.tm_year);
 #endif
 }
 
@@ -108,8 +120,8 @@ int prayer_calc_remaining_time(prayer next, int* hours, int* minutes, int* secon
     now = time(0);
     next.time_at.tm_isdst = -1;             // Determine if daylight saving is active
 
-    time_t prayer = mktime(&next.time_at);
-    remaining = difftime(prayer, now);
+    time_t prayer_tm = mktime(&next.time_at);
+    remaining = difftime(prayer_tm, now);
     if(remaining > 0) {
         *hours = remaining / (60*60);
         *minutes = (remaining - *hours * 60 * 60) / 60;

@@ -65,7 +65,7 @@ static doublePair doublePair_init(double a, double b)
         .val = {a, b},
     };
     return ret;
-};
+}
 
 /** Method Config for different calculation methods */
 typedef struct ST_method_config ST_method_config;
@@ -86,63 +86,47 @@ struct ST_method_config {
 **********************************************************/
 
 static ST_method_config ST_method_params[ST_cm_num] = {
-    [ST_cm_Jafari] = (ST_method_config)
-    {
-        .fajr_angle = 16.0,
-        .maghrib_is_minutes = false,
-        .maghrib_value = 4.0,
-        .isha_is_minutes = false,
-        .isha_value = 14.0,
-    },
-    [ST_cm_Karachi] = (ST_method_config)
-    {
-        .fajr_angle = 18.0,
-        .maghrib_is_minutes = true,
-        .maghrib_value = 0.0,
-        .isha_is_minutes = false,
-        .isha_value = 18.0,
-    },
-    [ST_cm_ISNA] = (ST_method_config)
-    {
-        .fajr_angle = 15.0,
-        .maghrib_is_minutes = true,
-        .maghrib_value = 0.0,
-        .isha_is_minutes = false,
-        .isha_value = 15.0,
-    },
-    [ST_cm_MWL] = (ST_method_config)
-    {
-        .fajr_angle = 18.0,
-        .maghrib_is_minutes = true,
-        .maghrib_value = 0.0,
-        .isha_is_minutes = false,
-        .isha_value = 17.0,
-    },
-    [ST_cm_Makkah] = (ST_method_config)
-    {
-        .fajr_angle = 19.0,
-        .maghrib_is_minutes = true,
-        .maghrib_value = 0.0,
-        .isha_is_minutes = true,
-        .isha_value = 90.0,
-    },
-    [ST_cm_Egypt] = (ST_method_config)
-    {
-        .fajr_angle = 19.5,
-        .maghrib_is_minutes = true,
-        .maghrib_value = 0.0,
-        .isha_is_minutes = false,
-        .isha_value = 17.5,
-    },
-    [ST_cm_Custom] = (ST_method_config)
-    {
-        .fajr_angle = 18.0,
-        .maghrib_is_minutes = true,
-        .maghrib_value = 0.0,
-        .isha_is_minutes = false,
-        .isha_value = 17.0,
-    },
+    [ST_cm_Jafari].fajr_angle = 16.0,
+    [ST_cm_Jafari].maghrib_is_minutes = false,
+    [ST_cm_Jafari].maghrib_value = 4.0,
+    [ST_cm_Jafari].isha_is_minutes = false,
+    [ST_cm_Jafari].isha_value = 14.0,
 
+    [ST_cm_Karachi].fajr_angle = 18.0,
+    [ST_cm_Karachi].maghrib_is_minutes = true,
+    [ST_cm_Karachi].maghrib_value = 0.0,
+    [ST_cm_Karachi].isha_is_minutes = false,
+    [ST_cm_Karachi].isha_value = 18.0,
+
+    [ST_cm_ISNA].fajr_angle = 15.0,
+    [ST_cm_ISNA].maghrib_is_minutes = true,
+    [ST_cm_ISNA].maghrib_value = 0.0,
+    [ST_cm_ISNA].isha_is_minutes = false,
+    [ST_cm_ISNA].isha_value = 15.0,
+
+    [ST_cm_MWL].fajr_angle = 18.0,
+    [ST_cm_MWL].maghrib_is_minutes = true,
+    [ST_cm_MWL].maghrib_value = 0.0,
+    [ST_cm_MWL].isha_is_minutes = false,
+    [ST_cm_MWL].isha_value = 17.0,
+
+    [ST_cm_Makkah].fajr_angle = 19.0,
+    [ST_cm_Makkah].maghrib_is_minutes = true,
+    [ST_cm_Makkah].maghrib_value = 0.0,
+    [ST_cm_Makkah].isha_is_minutes = true,
+    [ST_cm_Makkah].isha_value = 90.0,
+
+    [ST_cm_Egypt].fajr_angle = 19.5,
+    [ST_cm_Egypt].maghrib_is_minutes = true,
+    [ST_cm_Egypt].maghrib_value = 0.0,
+    [ST_cm_Egypt].isha_is_minutes = false,
+    [ST_cm_Egypt].isha_value = 17.5,
+
+    [ST_cm_Custom].fajr_angle = 18.0,
+    [ST_cm_Custom].maghrib_is_minutes = true,
+    [ST_cm_Custom].maghrib_value = 0.0,
+    [ST_cm_Custom].isha_is_minutes = false,
+    [ST_cm_Custom].isha_value = 17.0,
 };
 
 ST_method_config ST_method_custom_init(double fajr_angle, bool maghrib_is_minutes, double maghrib_value, bool isha_is_minutes, double isha_value)
@@ -403,6 +387,7 @@ static double night_portion(enum ST_adjusting_method adjust_high_lats, double an
         return 1.0 / 2.0;
     case ST_am_OneSeventh:
         return 1.0 / 7.0;
+    case ST_am_None:
     default:
         // Just to return something!
         // In original library nothing was returned

@@ -218,7 +218,35 @@ int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int
  */
 int sprint_prayer_date(prayer time, size_t buff_len, char dest[buff_len], bool hijri);
 
+/** \brief Calculate remaining time
+ *
+ * \param next prayer
+ * \param hours int*
+ * \param minutes int*
+ * \param seconds int*
+ * \return int
+ *
+ */
 int prayer_calc_remaining_time(prayer next, int* hours, int* minutes, int* seconds);
+
+/** \brief Return empty prayer times, no calculation
+ *
+ * \param city City
+ * \param prayer_times[prayers_num] prayer
+ * \return int
+ *
+ */
+int empty_get_todays_prayers(City city, prayer prayer_times[prayers_num]);
+
+/** \brief Return empty prayer times, no calculation
+ *
+ * \param city City
+ * \param prayer_times[prayers_num] prayer
+ * \param date struct tm
+ * \return int
+ *
+ */
+int empty_get_preview_for_date(City city, prayer prayer_times[prayers_num], struct tm date);
 
 typedef int calc_function(City, prayer[prayers_num]);/**< typedef for the calculation functions. This will be used in the further code to allow the usage of different methods. */
 typedef int preview_function(City, prayer[prayers_num], struct tm date); /**< typedef for preview functions */

@@ -63,6 +63,137 @@ Author: Ahmet Öztürk
       </object>
     </child>
   </object>
+  <object class="GtkDialog" id="dlg_add_city">
+    <property name="width-request">350</property>
+    <property name="height-request">200</property>
+    <property name="can-focus">False</property>
+    <property name="type-hint">dialog</property>
+    <signal name="close" handler="on_dlg_add_city_close" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="margin-bottom">6</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="button6">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button7">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <!-- n-columns=2 n-rows=3 -->
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="row-spacing">4</property>
+            <property name="column-spacing">1</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Stadt:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="valign">start</property>
+                <property name="margin-end">6</property>
+                <property name="label" translatable="yes">Ergebnisse:</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSearchEntry" id="dlg_add_city_search">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="primary-icon-name">edit-find-symbolic</property>
+                <property name="primary-icon-activatable">False</property>
+                <property name="primary-icon-sensitive">False</property>
+                <property name="placeholder-text" translatable="yes">Name der Stadt</property>
+                <signal name="search-changed" handler="on_dlg_add_city_search_search_changed" object="dlg_add_city_listbox" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkListBox" id="dlg_add_city_listbox">
+                <property name="name">dlg_add_city_listbox</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-10">button6</action-widget>
+      <action-widget response="-6">button7</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
     <property name="icon">Graphics\Logo_small.png</property>
@@ -127,26 +258,19 @@ Author: Ahmet Öztürk
           </packing>
         </child>
         <child>
-          <!-- n-columns=2 n-rows=3 -->
-          <object class="GtkGrid">
+          <!-- n-columns=3 n-rows=5 -->
+          <object class="GtkGrid" id="dlg_settings_grid">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">8</property>
+            <property name="row-spacing">3</property>
+            <property name="column-spacing">3</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Cities</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Language</property>
+                <property name="label" translatable="yes">Sprache</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -155,14 +279,15 @@ Author: Ahmet Öztürk
             </child>
             <child>
               <object class="GtkComboBoxText">
+                <property name="name">combobox_lang</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="active">0</property>
+                <property name="tooltip-text" translatable="yes">Wähle die Sprache aus, in der das Programm dargestellt wird.</property>
+                <property name="active">1</property>
                 <items>
-                  <item translatable="yes">Option 1</item>
-                  <item translatable="yes">Option 2</item>
-                  <item translatable="yes">Option 3</item>
-                  <item id="0" translatable="yes">Select option</item>
+                  <item id="en" translatable="yes">English</item>
+                  <item id="de" translatable="yes">Deutsch</item>
+                  <item id="tr" translatable="yes">Türkçe</item>
                 </items>
               </object>
               <packing>
@@ -171,45 +296,91 @@ Author: Ahmet Öztürk
               </packing>
             </child>
             <child>
-              <object class="GtkViewport">
+              <object class="GtkButton">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Neue Sprache hinzufügen</property>
+                <property name="halign">end</property>
+                <property name="always-show-image">True</property>
                 <child>
-                  <object class="GtkTreeView">
+                  <object class="GtkImage">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn">
-                        <property name="title" translatable="yes">City</property>
-                        <child>
-                          <object class="GtkCellRendererText"/>
-                          <attributes>
-                            <attribute name="text">0</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkTreeViewColumn">
-                        <property name="title" translatable="yes">Methode</property>
-                        <child>
-                          <object class="GtkCellRendererText"/>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                          </attributes>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="can-focus">False</property>
+                    <property name="stock">gtk-add</property>
                   </object>
                 </child>
+              </object>
+              <packing>
+                <property name="left-attach">2</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton">
+                <property name="label" translatable="yes">Merke die Position des Fensters</property>
+                <property name="name">checkbutton_saveposition</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">Stellt beim Starten des Programms die Position wieder her, die beim Beenden gespeichert wurde.</property>
+                <property name="draw-indicator">True</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
                 <property name="top-attach">1</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton">
+                <property name="label" translatable="yes">Beim Starten auf Updates überprüfen</property>
+                <property name="name">checkbutton_checkforupdates</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton">
+                <property name="label" translatable="yes">Aktiviere Benachrichtigungen zum Gebet.</property>
+                <property name="name">checkbutton_enable_notification</property>
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">Noch nicht implementiert.</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
@@ -475,6 +646,47 @@ Author: Ahmet Öztürk
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
                         <signal name="activate" handler="on_menuitm_saveas_activate" object="dlg_savefile" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">_Städte</property>
+                <property name="use-underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitm_add_city">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Stadt hinzufügen</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_menuitm_addcity_activate" object="dlg_add_city" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitm_remove_city">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label">Stadt löschen</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_menuitm_removecity_activate" object="dlg_loadfile" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitm_change_city_order">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label">Städte umordnen</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_menuitm_movecities_activate" object="dlg_savefile" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -1010,50 +1222,6 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="test_window">
-    <property name="can-focus">False</property>
-    <child>
-      <object class="GtkFixed">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <child>
-          <object class="GtkViewport">
-            <property name="width-request">400</property>
-            <property name="height-request">300</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="border-width">0</property>
-            <child>
-              <object class="GtkTreeView">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="enable-grid-lines">vertical</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="cv1">
-                    <property name="title" translatable="yes">Column 1</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="cx1"/>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="cv2">
-                    <property name="title" translatable="yes">Column 2</property>
-                    <child>
-                      <object class="GtkCellRendererText" id="cx2"/>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
         </child>
       </object>
     </child>

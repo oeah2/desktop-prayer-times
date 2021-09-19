@@ -19,10 +19,17 @@ bool file_read_all(FILE* file, size_t max_len, char dest[max_len])
     bool ret = false;
     if(file) {
         size_t file_length = file_find_length(file);
-        if(file_length > max_len) return ret;
+        if(file_length > max_len)
+            return ret;
 
         size_t read_bytes = fread(dest, sizeof(char), file_length, file);
-        if(read_bytes < (file_length - 1)) return false;    // depends on library implementation(?)
+        assert(max_len > read_bytes);
+        dest[read_bytes] = '\0';
+        if(read_bytes < (file_length - 1) && !feof(file)) {
+            printf("Error while reading config file. Here is the content: \n");
+            puts(dest);
+            return false;    // depends on library implementation(?)
+        }
         ret = true;
     }
     return ret;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <locale.h>
+#include "geolocation.h"
 #include "cJSON.h"
 #include "socket.h"
 #include "config.h"
@@ -10,10 +11,13 @@ char* geolocation_get(char const*const city_name)
     char const*const host = "nominatim.openstreetmap.org";
     char file[100];
     sprintf(file, "/search?city=%s&format=json", city_name);
+#ifdef OLDCODE
     char user_agent[100];
-    sprintf(user_agent, "%s %d.%d", "User-Agent: desktop_prayer_time /", VERSION_MAIN_MAJOR, VERSION_MAIN_MINOR);
-
+    sprintf(user_agent, "%s %d.%d", "User-Agent: desktop_prayer_time/", VERSION_MAIN_MAJOR, VERSION_MAIN_MINOR);
     char* http_response = https_get(host, file, user_agent);
+#else
+    char* http_response = https_get_with_useragent(host, file, NULL);
+#endif // OLDCODE
     if(!http_response) return 0;
     char* http_resp_json_start = strchr(http_response, '[');
     cJSON* json = cJSON_Parse(http_resp_json_start);

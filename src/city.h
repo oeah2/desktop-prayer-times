@@ -90,6 +90,21 @@ City* city_delete(City* c);
 
 City* city_vnew(size_t num, char const (*name)[num], size_t pr_time_provider[num], char const (*filename)[num], size_t id[num]);
 
+/** \brief Creates a new city for calculation
+ *
+ * \param name char const*const
+ * \param pr_time_provider size_t
+ * \param method size_t
+ * \param id size_t
+ * \param longitude double
+ * \param latitude double
+ * \param asr_juristic size_t
+ * \param adjust_high_lats size_t
+ * \return City*
+ *
+ */
+City* city_new_calc(char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude, size_t asr_juristic, size_t adjust_high_lats);
+
 /** \brief Delete array of cities
  *
  * \param num number of elements in array

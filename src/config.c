@@ -1,5 +1,8 @@
 #include "config.h"
+#include "cJSON.h"
+#include "file.h"
 #include "socket.h"
+#include "prayer_times.h"
 
 enum config_specifiers {
     spec_num_cities,
@@ -9,6 +12,49 @@ enum config_specifiers {
     spec_num
 };
 
+enum config_json_specifiers {
+    json_num_cities,
+    json_cities,
+    json_city,
+    json_name,
+    json_provider,
+    json_id,
+    json_method,
+    json_longitude,
+    json_latitude,
+    json_asrmethod,
+    json_highlats,
+    json_filename,
+    json_savepos,
+    json_posX,
+    json_posY,
+    json_lang,
+    json_check_for_updates,
+    json_notifications,
+    json_NUM,
+};
+
+static char const*const config_format_json_specifiers[json_NUM] = {
+    [json_num_cities] = "Number Cities",
+    [json_cities] = "cities",
+    [json_city] = "city",
+    [json_name] = "name",
+    [json_provider] = "provider",
+    [json_id] = "ID",
+    [json_method] = "method",
+    [json_longitude] = "longitude",
+    [json_latitude] = "latitude",
+    [json_asrmethod] = "asrmethod",
+    [json_highlats] = "highlats",
+    [json_filename] = "filename",
+    [json_savepos] = "Save Position",
+    [json_posX] = "PosX",
+    [json_posY] = "PosY",
+    [json_lang] = "language",
+    [json_check_for_updates] = "Check for updates",
+    [json_notifications] = "Enable notifications",
+};
+
 static char const*const config_format_specifiers[] = {
     [spec_num_cities] = "[num_cities]",
     [spec_city] = "[city]",
@@ -16,6 +62,8 @@ static char const*const config_format_specifiers[] = {
     [spec_pos] = "[pos]",
 };
 
+#define CFG_USE_JSON
+#ifndef CFG_USE_JSON
 /** \brief parses a line of the config string
  * \details This function scans @p string_in for valid specifiers from @p config_format_specifiers. Depending on the specifier different parsings are done. Either cities are added, or other configurations are applied.
  *
@@ -103,7 +151,9 @@ static int config_parse_string(char *string_in, Config* cfg)
     }
     return EXIT_SUCCESS;
 }
+#endif // CFG_USE_JSON
 
+#ifndef CFG_USE_JSON
 int config_read(char const* filename, Config* cfg)
 {
     FILE* cfg_file = fopen(filename, "r");
@@ -133,10 +183,145 @@ int config_read(char const* filename, Config* cfg)
     fclose(cfg_file);
     return EXIT_SUCCESS;
 }
+#else // CFG_USE_JSON
+static bool config_calc_read_city(const cJSON* element, char* name, City* city) {
+    bool ret = false;
+    if(!element || !city || !name)
+        return ret;
+
+    cJSON* id = cJSON_GetObjectItem(element, config_format_json_specifiers[json_id]);
+    cJSON* method = cJSON_GetObjectItem(element, config_format_json_specifiers[json_method]);
+    cJSON* longitude = cJSON_GetObjectItem(element, config_format_json_specifiers[json_longitude]);
+    cJSON* latitude = cJSON_GetObjectItem(element, config_format_json_specifiers[json_latitude]);
+    cJSON* asr = cJSON_GetObjectItem(element, config_format_json_specifiers[json_asrmethod]);
+    cJSON* high_lats = cJSON_GetObjectItem(element, config_format_json_specifiers[json_highlats]);
+    assert(method); assert(longitude); assert(latitude); assert(asr); assert(high_lats);
+    assert(id);
+
+    City* c = city_init_calc(city, name, prov_calc, method->valueint, id->valueint,
+                             longitude->valuedouble, latitude->valuedouble, asr->valueint, high_lats->valueint);
+    if(c) ret = true;
+    return ret;
+}
+
+static bool config_diyanet_read_city(const cJSON* element, char* name, City* city) {
+    bool ret = false;
+    if(!element || !city || !name)
+        return ret;
+
+    cJSON* id = cJSON_GetObjectItem(element, config_format_json_specifiers[json_id]);
+    cJSON* prayer_file = cJSON_GetObjectItem(element, config_format_json_specifiers[json_filename]);
+    assert(prayer_file); assert(id);
+
+    printf("config_diyanet_read_city: id: %d", id->valueint);
+    City* c = city_init_diyanet(city, name, prov_diyanet, prayer_file->valuestring, id->valueint);
+    if(c) ret = true;
+
+    return ret;
+}
+
+int config_read(char const* filename, Config* cfg)
+{
+    int ret = EXIT_FAILURE;
+    FILE* cfg_file = fopen(filename, "r");
+
+    if(!cfg_file) {
+        assert(cfg_file);
+        return EXIT_FAILURE;
+    }
+
+    config_init(cfg);
+
+    size_t file_length = file_find_length(cfg_file);
+    if(!file_length) return EXIT_FAILURE;
+    char* cfg_content = malloc(file_length * sizeof(char));
+    if(!cfg_content) {
+        return EXIT_FAILURE;
+    }
+
+    if(!file_read_all(cfg_file, file_length, cfg_content)) {
+        return EXIT_FAILURE;
+    }
+
+    cJSON* json = cJSON_Parse(cfg_content);
+    if(!json) {
+        perror("Error parsing Config.");
+        return EXIT_FAILURE;
+    }
+
+    cfg->cfg_filename = malloc(strlen(filename) * sizeof(char) + 1);
+    if(!strcpy(cfg->cfg_filename, filename)) goto FREE_JSON;
+
+    cJSON* json_ncities = cJSON_GetObjectItem(json, config_format_json_specifiers[json_num_cities]);
+    if(json_ncities) {
+        cfg->num_cities = json_ncities->valueint;
+    }
+    cfg->cities = malloc(cfg->num_cities * sizeof(City));
+    assert(cfg->cities);
+
+    cJSON* cities = cJSON_GetObjectItem(json, config_format_json_specifiers[json_cities]);
+    if(cJSON_IsArray(cities)) {
+        const cJSON* element = 0;
+        cJSON_ArrayForEach(element, cities) {
+            cJSON* city_name = cJSON_GetObjectItem(element, config_format_json_specifiers[json_name]);
+            cJSON* provider = cJSON_GetObjectItem(element, config_format_json_specifiers[json_provider]);
+
+            assert(city_name && provider);
+            char* provider_name = provider->valuestring;
+            City* current_city = &cfg->cities[cfg->counter_parsed_cities];
+            if(!strcmp(provider_name, provider_names[prov_diyanet])) {
+                if(!config_diyanet_read_city(element, city_name->valuestring, current_city))
+                    goto FREE_CITIES;
+            } else if(!strcmp(provider_name, provider_names[prov_calc])) {
+                if(!config_calc_read_city(element, city_name->valuestring, current_city))
+                    goto FREE_CITIES;
+            }
+            cfg->counter_parsed_cities++;
+        }
+        if(cfg->counter_parsed_cities != cfg->num_cities) {
+        	printf("Something went wrong while parsing cities. Not all cities could be parsed.\n");
+        }
+    }
+
+    cJSON* savePos = cJSON_GetObjectItem(json, config_format_json_specifiers[json_savepos]);
+    if(savePos && savePos->valueint) {
+        cfg->save_position = true;
+        cJSON* posX = cJSON_GetObjectItem(json, config_format_json_specifiers[json_posX]);
+        cJSON* posY = cJSON_GetObjectItem(json, config_format_json_specifiers[json_posY]);
+        if(posX && posY) {
+            cfg->last_window_posX = posX->valueint;
+            cfg->last_window_posY = posY->valueint;
+        }
+    }
+
+    cJSON* checkForUpdates = cJSON_GetObjectItem(json, config_format_json_specifiers[json_check_for_updates]);
+    if(checkForUpdates && checkForUpdates->valueint)
+        cfg->check_for_updates = true;
+
+    cJSON* enableNotifications = cJSON_GetObjectItem(json, config_format_json_specifiers[json_notifications]);
+    if(enableNotifications && enableNotifications->valueint)
+        cfg->enable_notification = true;
+
+    cJSON* language = cJSON_GetObjectItem(json, config_format_json_specifiers[json_lang]);
+    if(language)
+        cfg->lang = language->valueint;
+
+    ret = EXIT_SUCCESS;
+    goto FREE_JSON;
+
+FREE_CITIES:
+    free(cfg->cities);
+FREE_JSON:
+    cJSON_Delete(json);
+    fclose(cfg_file);
+
+    return ret;
+}
+#endif
 
 int config_save(char const*const filename, Config const*const cfg)
 {
-    if(!cfg->config_changed) return EXIT_FAILURE;
+    if(!cfg || ! filename || !cfg->config_changed) return EXIT_FAILURE;
 
     FILE* cfg_file = fopen(filename, "w");
 
@@ -172,14 +357,77 @@ int config_save(char const*const filename, Config const*const cfg)
     return EXIT_SUCCESS;
 }
 
+int config_json_save(char const*const filename, Config*const cfg) {
+    int ret = EXIT_FAILURE;
+    if(!cfg || !cfg->config_changed || !filename) return ret;
+
+    FILE* cfg_file = fopen(filename, "w");
+
+    if(!cfg_file) {
+        assert(cfg_file);
+        return EXIT_FAILURE;
+    }
+
+    cJSON* json = cJSON_CreateObject();
+    if(!json) goto ERR;
+
+    if(!cJSON_AddNumberToObject(json, config_format_json_specifiers[json_num_cities], cfg->num_cities)) goto ERR;
+    if(!cJSON_AddNumberToObject(json, config_format_json_specifiers[json_posX], cfg->last_window_posX)) goto ERR;
+    if(!cJSON_AddNumberToObject(json, config_format_json_specifiers[json_posY], cfg->last_window_posY)) goto ERR;
+    if(!cJSON_AddNumberToObject(json, config_format_json_specifiers[json_lang], cfg->lang)) goto ERR;
+    if(!cJSON_AddBoolToObject(json, config_format_json_specifiers[json_savepos], cfg->save_position)) goto ERR;
+    if(!cJSON_AddBoolToObject(json, config_format_json_specifiers[json_check_for_updates], cfg->check_for_updates)) goto ERR;
+    if(!cJSON_AddBoolToObject(json, config_format_json_specifiers[json_notifications], cfg->enable_notification)) goto ERR;
+
+    cJSON* cities = cJSON_CreateArray();
+    if(!cities) goto ERR;
+    cJSON_AddItemToObject(json, config_format_json_specifiers[json_cities], cities);
+
+    for(size_t i = 0; i < cfg->num_cities; i++) {
+        cJSON* city = cJSON_CreateObject();
+        if(!cJSON_AddStringToObject(city, config_format_json_specifiers[json_name], cfg->cities[i].name)) goto ERR;
+        if(!cJSON_AddStringToObject(city, config_format_json_specifiers[json_provider], provider_names[cfg->cities[i].pr_time_provider])) goto ERR;
+        if(!cJSON_AddNumberToObject(city, config_format_json_specifiers[json_id], cfg->cities[i].id)) goto ERR;
+        char const*const calc_str = cfg->cities[i].pr_time_provider == prov_calc ? ST_cm_names[cfg->cities[i].method] : " ";
+        if(!cJSON_AddStringToObject(city, config_format_json_specifiers[json_method], calc_str)) goto ERR;
+        if(!cJSON_AddNumberToObject(city, config_format_json_specifiers[json_longitude], cfg->cities[i].longitude)) goto ERR;
+        if(!cJSON_AddNumberToObject(city, config_format_json_specifiers[json_latitude], cfg->cities[i].latitude)) goto ERR;
+        if(!cJSON_AddNumberToObject(city, config_format_json_specifiers[json_asrmethod], cfg->cities[i].asr_juristic)) goto ERR;
+        if(!cJSON_AddNumberToObject(city, config_format_json_specifiers[json_highlats], cfg->cities[i].adjust_high_lats)) goto ERR;
+        char const*const filename_prayers = cfg->cities[i].pr_time_provider == prov_diyanet ? cfg->cities[i].filename : " ";
+        if(!cJSON_AddStringToObject(city, config_format_json_specifiers[json_filename], filename_prayers)) goto ERR;
+        cJSON_AddItemToArray(cities, city);
+    }
+
+    char* string = cJSON_Print(json);
+    if(!string) {
+        perror("Error printing json");
+        goto ERR;
+    }
+    puts(string);
+    fprintf(cfg_file, "%s\n", string);
+    free(string);
+    string = 0;
+
+    cfg->config_changed = false;
+    goto END;
+ERR:
+    perror("Error while printing config json");
+END:
+    cJSON_Delete(json);
+    fclose(cfg_file);
+    return ret;
+}
+
 Config* config_init(Config* cfg)
 {
     if(cfg) {
-        cfg->cities = 0;
-        cfg->counter_parsed_cities = 0;
-        cfg->lang = LANG_EN;
-        cfg->num_cities = 0;
-        cfg->config_changed = false;
+        *cfg = (Config) {
+            .lang = LANG_EN,
+            .config_changed = false,
+        };
+        //cfg->lang = LANG_EN;
+        //cfg->config_changed = false;
     }
     return cfg;
 }

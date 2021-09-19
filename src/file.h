@@ -7,7 +7,7 @@
 /** \brief Returns length of file
  *
  * \param file FILE* of which the lengh shall be determined
- * \return size_t file length
+ * \return size_t file length, including terminating zero
  *
  */
 size_t file_find_length(FILE* file);

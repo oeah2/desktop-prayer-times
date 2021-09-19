@@ -495,9 +495,13 @@ char* diyanet_get_country_codes(enum Languages lang)
     case LANG_TR:
         json_identifier_country = "UlkeAdi";
         break;
+    case LANG_DE:
+    case LANG_EN:
     default:
         json_identifier_country = "UlkeAdiEn";
         break;
+    case LANG_NUM:
+        assert(0);
     }
 
     char const*const host = "ezanvakti.herokuapp.com";
@@ -539,7 +543,7 @@ char* diyanet_get_provinces(size_t country_code, enum Languages lang)
         sprintf(file, "/sehirler/%zu", country_code);
         char* http_response = http_get(host, file, 0);
 
-        cJSON* json = cJSON_Parse(http_response);
+cJSON* json = cJSON_Parse(http_response);
         if(!json) {
             perror("Error parsing JSON.");
             return ret;
@@ -547,12 +551,16 @@ char* diyanet_get_provinces(size_t country_code, enum Languages lang)
 
         char* json_identifier_province = 0;
         switch (lang) {
+        case LANG_DE:
         case LANG_EN:
-            json_identifier_province = "SehirAdiEn";
-            break;
         default:
             json_identifier_province = "SehirAdi";
             break;
+        case LANG_TR:
+            json_identifier_province = "SehirAdiEn";
+            break;
+        case LANG_NUM:
+            assert(0);
         }
 
         ret = calloc(1E5, sizeof(char));
@@ -595,9 +603,13 @@ char* diyanet_get_cities(size_t province_code, enum Languages lang)
         case LANG_EN:
             json_identifier_cities = "IlceAdiEn";
             break;
+        case LANG_DE:
+        case LANG_TR:
         default:
             json_identifier_cities = "IlceAdi";
             break;
+        case LANG_NUM:
+            assert(0);
         }
 
         ret = calloc(1E6, sizeof(char));

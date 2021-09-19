@@ -84,6 +84,7 @@ int calc_get_preview_for_date(City city, prayer prayer_times[prayers_num], struc
     time_t time_date = mktime(&date);
     ST_get_prayer_times_t(time_date, city.latitude, city.longitude, city.method, city.asr_juristic, city.adjust_high_lats, times_double);
     convert_double_to_prayer(date, prayer_times, times_double);
+    prayer_times[0].hicri_date = calc_get_hijri_date(date);
 
     return EXIT_SUCCESS;
 }
@@ -110,11 +111,42 @@ struct tm calc_get_hijri_date(struct tm today)
     struct tm ret_hijri = {0};
     char req_file[50];
     sprintf(req_file, "/v1/gToH?date=%d-%d-%d", today.tm_mday, today.tm_mon + 1, today.tm_year + 1900);
-    char* http_response = http_get("api.aladhan.com", "/v1/gToH?date=7-12-2014", NULL);
+    char* http_response = http_get("api.aladhan.com", req_file, NULL);
     if(http_response) {
-        puts(http_response);
-    }
+        cJSON* json = cJSON_Parse(http_response);
+        if(!json) {
+            perror("Error parsing JSON.");
+            return (struct tm) {
+                0
+            };
+        }
+        cJSON* data = cJSON_GetObjectItem(json, "data");
+        cJSON* hijri = cJSON_GetObjectItem(data, "hijri");
+        cJSON* day = cJSON_GetObjectItem(hijri, "day");
+        cJSON* month = cJSON_GetObjectItem(hijri, "month");
+        cJSON* month_num = cJSON_GetObjectItem(month, "number");
+        cJSON* year = cJSON_GetObjectItem(hijri, "year");
+        if(day->valuestring && year->valuestring && !month_num->valuestring) {
+            int day_val = atoi(day->valuestring);
+            int month_val = month_num->valueint;
+            int year_val = atoi(year->valuestring);
 
+            assert(day_val);
+            assert(month_val);
+            assert(year_val);
+
+            ret_hijri.tm_mday = day_val;
+            ret_hijri.tm_mon = month_val;
+            ret_hijri.tm_year = year_val;
+        }
+        free(year);
+        free(month_num);
+        free(month);
+        free(day);
+        free(hijri);
+        free(data);
+        free(json);
+    }
     free(http_response);
     return ret_hijri;
 }

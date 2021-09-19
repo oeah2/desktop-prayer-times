@@ -22,7 +22,10 @@ struct Config {
     int last_window_posY;
     City* cities;
     bool config_changed;
-    char const* cfg_filename;
+    bool save_position;
+    bool check_for_updates;
+    bool enable_notification;
+    char /*const*/* cfg_filename;
 };
 
 /** \brief Read config from filename and write into Config* pointer
@@ -44,6 +47,15 @@ int config_read(char const*const filename, Config* cfg);
  */
 
 int config_save(char const*const filename, Config const*const cfg);
+
+/** \brief Save config into filename using JSON format
+ *
+ * \param filename char const*const
+ * \param cfg Config*const pointer to config of application
+ * \return int EXIT_SUCCESS on success, EXIT_FAILURE otherwise
+ *
+ */
+int config_json_save(char const*const filename, Config*const cfg);
 
 /** \brief Initialize config, if no config shall be read from file
  *

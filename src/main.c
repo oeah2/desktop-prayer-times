@@ -30,23 +30,31 @@
 
 extern calc_function* calc_functions[];
 
+#ifdef TEST_TIME
+time_t time(time_t* time_in) {
+    static time_t val = 1623542394;
+    return val++;
+}
+#endif
+
 int main(int argc, char** argv)
 {
-//#define SKIP_UPDATE
-#ifndef SKIP_UPDATE
-    if(update_check_is_available()) {
-        // Update
-        char* version_this = update_get_current_version();
-        char* version_available = update_get_available_version();
-        if(version_this && version_available) {
-            puts("Update available!");
-            printf("Your version: %s\nAvailable version: %s\n", version_this, version_available);
-            fflush(stdout);
-        }
-        if(version_this) free(version_this);
-        if(version_available) free(version_available);
+//#define ENABLE_LOG
+#ifdef ENABLE_LOG
+    char const*const log_filename = "errors.log";
+    //FILE* logfile = fopen(log_filename, "a+");
+    //if(!logfile) assert(logfile);
+    if(!freopen(log_filename, "a+", stderr)) {
+        perror("Error opening log file");
     }
-#endif // SKIP_UPDATE
+    {
+        time_t t = time(0);
+        struct tm tm = *localtime(&t);
+        char buffer[50];
+        sprintf(buffer, "\n\nToday: %02d.%02d.%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+        perror(buffer);
+    };
+#endif // ENABLE_LOG
 
     Config config = {0};
     char* config_file = "Config.cfg";
@@ -54,8 +62,31 @@ int main(int argc, char** argv)
 
     if(config_read(config_file, &config) == EXIT_FAILURE) {
         config = *config_init(&config);
-        // Do further initialization to add cities etc.
+        // Create Makkah as reference city
+        City c;
+        city_init_calc(&c, "Makkah", prov_calc, ST_cm_Makkah, 0, 39.814838, 21.427378, ST_jm_Shafii, ST_am_None);
+        config_add_city(c, &config);
     }
+
+#define SKIP_UPDATE
+#ifndef SKIP_UPDATE
+    if(config.check_for_updates) {
+        if(update_check_is_available()) {
+            // Update
+            char* version_this = update_get_current_version();
+            char* version_available = update_get_available_version();
+            if(version_this && version_available) {
+                puts("Update available!");
+                printf("Your version: %s\nAvailable version: %s\n", version_this, version_available);
+                fflush(stdout);
+            }
+            if(version_this) free(version_this);
+            if(version_available) free(version_available);
+        } else {
+            puts("No updates available");
+        }
+    }
+#endif // SKIP_UPDATE
 
 #ifdef CONSOLE
 #ifdef _WIN32
@@ -114,7 +145,7 @@ int main(int argc, char** argv)
     diyanet_city_codes = 0;
 #endif // DIYANET_GET_CITIES
 
-//#define TEST_GEOLOCATION
+#define TEST_GEOLOCATION
 #ifdef TEST_GEOLOCATION
 
     while(1) {
@@ -184,7 +215,8 @@ int main(int argc, char** argv)
 #endif // _WIN32
 #endif // WAIT_USER
 
-    config_save(config_file, &config);
+    //config_save(config_file, &config);
+    config_json_save(config_file, &config);
 
     size_t const buff_len = 15;
     char prayer_puffer[prayers_num][buff_len];
@@ -223,6 +255,7 @@ int main(int argc, char** argv)
     /* Now GUI Stuff */
     gtk_init(&argc, &argv);
     char* glade_filename = "Prayer_times_GTK.glade";
+    //char* glade_filename = lang_get_filename(config.lang);
 #ifdef RELEASE
     char* glade_filename = lang_get_filename(LANG_DE);
 #endif // RELEASE
@@ -238,6 +271,8 @@ int main(int argc, char** argv)
 #endif // WAIT_USER
 
     gtk_main();
+    if(config.config_changed)
+        config_json_save(config.cfg_filename, &config);
 
     return 0;
 }

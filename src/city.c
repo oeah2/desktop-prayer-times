@@ -85,7 +85,20 @@ City* city_new(char const*const name, size_t pr_time_provider, char const*const 
 {
     City* c = malloc(sizeof(City));
     if(c) {
-        if(!city_init_diyanet(c, name, pr_time_provider, filename, id)) goto FREE_CITY;
+        if(pr_time_provider == prov_diyanet && !city_init_diyanet(c, name, pr_time_provider, filename, id)) goto FREE_CITY;
+    }
+    return c;
+
+FREE_CITY:
+    free(c);
+    c = 0;
+    return c;
+}
+
+City* city_new_calc(char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude, size_t asr_juristic, size_t adjust_high_lats) {
+    City* c = malloc(sizeof(City));
+    if(c) {
+        if(pr_time_provider == prov_calc && !city_init_calc(c, name, pr_time_provider, method, id, longitude, latitude, asr_juristic, adjust_high_lats)) goto FREE_CITY;
     }
     return c;
 
@@ -138,6 +151,9 @@ City* city_vdelete(size_t num, City* c)
     return c;
 }
 
+#define EPS             (1.0E-6)
+#define CMP_DBL(x,y)     (fabs((x)-(y)) < EPS)
+
 bool city_is_equal(City a, City b)
 {
     return  a.adjust_high_lats == b.adjust_high_lats &&
@@ -147,8 +163,8 @@ bool city_is_equal(City a, City b)
             a.file_times == b.file_times &&
             a.id == b.id &&
 #endif // ARE_THESE_TESTS_OF_ANY_BENEFIT
-            a.latitude == b.latitude &&
-            a.longitude == b.longitude &&
+            CMP_DBL(a.latitude, b.latitude) &&    //a.latitude == b.latitude &&
+            CMP_DBL(a.longitude, b.longitude) &&
             a.method == b.method &&
             a.pr_time_provider == b.pr_time_provider;
 }
