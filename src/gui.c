@@ -2,6 +2,7 @@
 #include <stdbool.h>
 //#define NDEBUG 1
 #include <assert.h>
+#include <pthread.h>
 #include "gui.h"
 #include "geolocation.h"
 #include "cJSON.h"
@@ -40,18 +41,18 @@ static char* gui_identifiers[gui_id_num] = {
     [gui_id_randomhadith]   = "label_randomhadith",
 };
 
-GtkLabel* labels[gui_id_num];
 static Config* cfg;
 static size_t city_ptr = 0;
 static int day_ptr = 0;
+GtkLabel* labels[gui_id_num];
 GtkButton* btn_prev_date = 0;
 GtkButton* btn_next_date = 0;
 GtkButton* btn_prev_city = 0;
 GtkButton* btn_next_city = 0;
+GtkDialog* dlg_calc_error = 0;
 #ifdef SHOW_MOON
 GtkImage* img_mondphase = 0;
 #endif // SHOW_MOON
-GtkDialog* dlg_calc_error = 0;
 #ifdef USE_STATUSICON
 GtkStatusIcon* statusicon;
 #endif // USE_STATUSICON
@@ -169,8 +170,9 @@ static int display_preview(City city, int days)
     return ret;
 }
 
-static GtkWidget* find_child(GtkWidget* parent, const char* name)
+static GtkWidget* find_child(GtkWidget* parent, const char*const name)
 {
+    if(!parent || !name) return NULL;
     if (!strcmp(gtk_widget_get_name(parent), name)) {
         return parent;
     }
@@ -182,6 +184,7 @@ static GtkWidget* find_child(GtkWidget* parent, const char* name)
 
     if (GTK_IS_CONTAINER(parent)) {
         GList *children = gtk_container_get_children(GTK_CONTAINER(parent));
+        if(!children) return NULL;
         do {
             GtkWidget* widget = find_child(children->data, name);
             if (widget) {
@@ -190,6 +193,26 @@ static GtkWidget* find_child(GtkWidget* parent, const char* name)
         } while((children = g_list_next(children)));
     }
     return NULL;
+}
+
+static void destroy_all_children(GtkWidget* widget) {
+    if(!widget) return;
+
+    if (GTK_IS_BIN(widget)) {
+        GtkWidget* child = gtk_bin_get_child(GTK_BIN(widget));
+        destroy_all_children(child);
+        return;
+    }
+    else if (GTK_IS_CONTAINER(widget)) {
+        GList* children = gtk_container_get_children(GTK_CONTAINER(widget));
+        for(GList* iter = children; iter; iter = g_list_next(iter)) {
+            destroy_all_children(GTK_WIDGET(iter->data));
+        }
+        g_list_free(children);
+    }
+    else {
+        gtk_widget_destroy(widget);
+    }
 }
 
 static bool gui_apply_language(size_t lang_id)
@@ -484,19 +507,22 @@ void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
     if(!input_string) goto ERR;
 
     if(strlen(input_string) > 4) {
-        char* geolocation_string = geolocation_get(input_string);
+        geolocation_string = geolocation_get(input_string);
         if(!geolocation_string) goto ERR;
+        puts(geolocation_string);
         char* split = strtok(geolocation_string, "\n");
         GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first"));
-        if(!first_radio_button) {
-            if(!gui_create_and_add_radio_button(listbox, NULL, split, "radio_button_first"))
+        if(first_radio_button) // Destroy remaining radio buttons
+            destroy_all_children(GTK_WIDGET(first_radio_button));
+
+        if(!gui_create_and_add_radio_button(listbox, NULL, split, "radio_button_first")) // create new radio buttons
                 goto ERR;
-        }
         GSList* list = gtk_radio_button_get_group(GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first")));
-        do{
+        puts("Split strings: ");
+        while(split = strtok(0, "\n")) {
             puts(split);
             gui_create_and_add_radio_button(listbox, list, split, NULL);
-        } while(split = strtok(0, "\n"));
+        }
         gtk_widget_show_all(GTK_WIDGET(listbox));
         free(geolocation_string);
     }
@@ -541,17 +567,44 @@ void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data)
     gtk_widget_hide(GTK_WIDGET(dlg_filechooser));
 }
 
+static bool dlg_settings_apply_config(GtkDialog* dlg_settings) {
+    char buffer[200];
+    char* widget_name = "combobox_lang";
+    GtkWidget* pwidget = find_child(GTK_WIDGET(dlg_settings), widget_name);
+    if(!pwidget) goto ERR;
+    gtk_combo_box_set_active(GTK_COMBO_BOX(pwidget), cfg->lang);
+
+    widget_name = "checkbutton_saveposition";
+    pwidget = find_child(GTK_WIDGET(dlg_settings), widget_name);
+    if(!pwidget) goto ERR;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->save_position);
+
+    widget_name = "checkbutton_checkforupdates";
+    pwidget = find_child(GTK_WIDGET(dlg_settings), widget_name);
+    if(!pwidget) goto ERR;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->check_for_updates);
+
+    widget_name = "checkbutton_enable_notification";
+    pwidget = find_child(GTK_WIDGET(dlg_settings), widget_name);
+    if(!pwidget) goto ERR;
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->enable_notification);
+
+    return true;
+
+ERR:
+    sprintf(buffer, "Error in function %s looking for widget %s", __func__, widget_name);
+    perror(buffer);
+    return false;
+}
+
 void on_menuitm_settings_activate(GtkWidget* widget, gpointer data)
 {
     GtkDialog* dlg_settings = data;
     int dialog_ret = 0;
     bool end = false;
-    bool initial_run = true;
     GtkWidget* pwidget;
 
-    goto SET_SETTINGS; // set Settings and return here
-
-SHOW_DLG:
+    if(!dlg_settings_apply_config(dlg_settings)) return;
     gtk_widget_show(GTK_WIDGET(dlg_settings));
 
 RUN_DIALOG:
@@ -588,34 +641,11 @@ RUN_DIALOG:
         if(!end) goto RUN_DIALOG;
         break;
     case GTK_RESPONSE_CANCEL:
-        goto SET_SETTINGS;
+        dlg_settings_apply_config(dlg_settings);
         break;
     }
-END_DIALOG:
     gtk_widget_hide(GTK_WIDGET(dlg_settings));
     return;
-
-SET_SETTINGS:
-    pwidget = find_child(GTK_WIDGET(dlg_settings), "combobox_lang");
-    if(!pwidget) goto ERR_WIDGET;
-    gtk_combo_box_set_active(GTK_COMBO_BOX(pwidget), cfg->lang);
-
-    pwidget = find_child(GTK_WIDGET(dlg_settings),  "checkbutton_saveposition");
-    if(!pwidget) goto ERR_WIDGET;
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->save_position);
-
-    pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_checkforupdates");
-    if(!pwidget) goto ERR_WIDGET;
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->check_for_updates);
-
-    pwidget = find_child(GTK_WIDGET(dlg_settings), "checkbutton_enable_notification");
-    if(!pwidget) goto ERR_WIDGET;
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwidget), cfg->enable_notification);
-    if(initial_run) {
-        initial_run = false;
-        goto SHOW_DLG;
-    }
-    goto END_DIALOG;
 
 ERR_WIDGET:
     perror("Error finding widget!");
@@ -636,7 +666,6 @@ void on_window_close(GtkWidget* window, gpointer data)
     }
 
     gtk_widget_destroy(window);
-
     gtk_main_quit();
 }
 
