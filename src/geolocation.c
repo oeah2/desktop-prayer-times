@@ -35,7 +35,9 @@ char* geolocation_get(char const*const city_name)
         cJSON const* element = 0;
 
         cJSON_ArrayForEach(element, json) {
+            const size_t length_same = 50;
             char puffer[400];
+            char puffer2[length_same];
             cJSON* name = cJSON_GetObjectItem(element, "display_name");
             cJSON* lat_str = cJSON_GetObjectItem(element, "lat");
             cJSON* long_str = cJSON_GetObjectItem(element, "lon");
@@ -47,7 +49,10 @@ char* geolocation_get(char const*const city_name)
             setlocale(LC_ALL, prev_locale);
 
             sprintf(puffer, "%s: %f\t%f\n", name->valuestring, latitude, longitude);
-            strcat(ret, puffer);
+            memcpy(puffer2, puffer, length_same - 1);
+            puffer2[length_same - 1] = '\0';
+            if(!strstr(ret, puffer2))
+                strcat(ret, puffer);
         }
         ret = realloc(ret, strlen(ret) + 1);
     }
