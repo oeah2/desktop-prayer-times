@@ -226,7 +226,6 @@ int config_read(char const* filename, Config* cfg)
     FILE* cfg_file = fopen(filename, "r");
 
     if(!cfg_file) {
-        assert(cfg_file);
         return EXIT_FAILURE;
     }
 
