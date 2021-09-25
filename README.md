@@ -11,3 +11,4 @@ Todo:
 - Rework update checking
 - Create distribution files
 - Create language files
+- Improve makefile
