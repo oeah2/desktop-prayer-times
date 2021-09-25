@@ -1,8 +1,7 @@
 # desktop-prayer-times
 
 Known Issues:
-- Socket implementation is buggy
-- Socket implementation is blocking
+- Socket implementation is buggy and blocking
 - Adding, renaming, moving and removing cities not working.
 
 
