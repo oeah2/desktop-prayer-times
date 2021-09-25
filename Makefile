@@ -8,7 +8,9 @@ CLAGS_RELEASE = -Wall -std=c11 -O3
 
 release: Release
 
-debug: Debug
+$(OUT_RELEASE): Release
+
+$(OUT_DEBUG): Debug
 
 Release: $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o ./Graphics/icon.res
 	gcc $(CLAGS_RELEASE) -o $(OUT_RELEASE) $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o ./Graphics/icon.res `pkg-config gtk+-3.0 --libs` -lws2_32 -lssl -lcrypto
@@ -104,16 +106,16 @@ $(OBJ_RELEASE_PATH)/main.o:
 	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/main.c -o $(OBJ_RELEASE_PATH)/main.o	
 	
 cleanDebug:
-	rm $(OBJ_DEBUG_PATH)/city.o $(OBJ_DEBUG_PATH)/cJSON.o $(OBJ_DEBUG_PATH)/config.o $(OBJ_DEBUG_PATH)/file.o $(OBJ_DEBUG_PATH)/geolocation.o $(OBJ_DEBUG_PATH)/gui.o $(OBJ_DEBUG_PATH)/lang.o $(OBJ_DEBUG_PATH)/main.o $(OBJ_DEBUG_PATH)/prayer_times.o $(OBJ_DEBUG_PATH)/prayer_times_calc.o $(OBJ_DEBUG_PATH)/prayer_times_diyanet.o $(OBJ_DEBUG_PATH)/Salah_times_calc.o $(OBJ_DEBUG_PATH)/socket.o $(OBJ_DEBUG_PATH)/update.o
+	rm $(OUT_DEBUG) $(OBJ_DEBUG_PATH)/city.o $(OBJ_DEBUG_PATH)/cJSON.o $(OBJ_DEBUG_PATH)/config.o $(OBJ_DEBUG_PATH)/file.o $(OBJ_DEBUG_PATH)/geolocation.o $(OBJ_DEBUG_PATH)/gui.o $(OBJ_DEBUG_PATH)/lang.o $(OBJ_DEBUG_PATH)/main.o $(OBJ_DEBUG_PATH)/prayer_times.o $(OBJ_DEBUG_PATH)/prayer_times_calc.o $(OBJ_DEBUG_PATH)/prayer_times_diyanet.o $(OBJ_DEBUG_PATH)/Salah_times_calc.o $(OBJ_DEBUG_PATH)/socket.o $(OBJ_DEBUG_PATH)/update.o
 	
 cleanRelease:
-	rm $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o
+	rm $(OUT_RELEASE) $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o
 
 run: $(OUT_RELEASE)
 	$(OUT_RELEASE)
 
 debug: $(OUT_DEBUG)
-	$(OUT_DEBUG)
+	gdb $(OUT_DEBUG)
 
 valgrind: $(OUT_DEBUG)
 	valgrind $(OUT_DEBUG)
