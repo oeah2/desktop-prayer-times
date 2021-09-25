@@ -117,7 +117,7 @@ Author: Ahmet Öztürk
         </child>
         <child>
           <!-- n-columns=2 n-rows=3 -->
-          <object class="GtkGrid">
+          <object class="GtkGrid" id="dlg_addcity_grid">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="hexpand">True</property>
@@ -149,6 +149,7 @@ Author: Ahmet Öztürk
             </child>
             <child>
               <object class="GtkSearchEntry" id="dlg_add_city_search">
+                <property name="name">dlg_add_city_search</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="hexpand">True</property>
@@ -156,7 +157,7 @@ Author: Ahmet Öztürk
                 <property name="primary-icon-activatable">False</property>
                 <property name="primary-icon-sensitive">False</property>
                 <property name="placeholder-text" translatable="yes">Name der Stadt</property>
-                <signal name="search-changed" handler="on_dlg_add_city_search_search_changed" object="dlg_add_city_listbox" swapped="no"/>
+                <signal name="search-changed" handler="on_dlg_add_city_search_search_changed" object="dlg_addcity_grid" swapped="no"/>
               </object>
               <packing>
                 <property name="left-attach">1</property>

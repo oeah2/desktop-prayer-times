@@ -195,24 +195,24 @@ static GtkWidget* find_child(GtkWidget* parent, const char*const name)
     return NULL;
 }
 
-static void destroy_all_children(GtkWidget* widget) {
-    if(!widget) return;
+static GtkListBox* gtk_listbox_clear(GtkListBox* listbox) {
+    GtkListBox* box_return = listbox;
+    if(!listbox) return box_return;
 
-    if (GTK_IS_BIN(widget)) {
-        GtkWidget* child = gtk_bin_get_child(GTK_BIN(widget));
-        destroy_all_children(child);
-        return;
-    }
-    else if (GTK_IS_CONTAINER(widget)) {
-        GList* children = gtk_container_get_children(GTK_CONTAINER(widget));
-        for(GList* iter = children; iter; iter = g_list_next(iter)) {
-            destroy_all_children(GTK_WIDGET(iter->data));
-        }
-        g_list_free(children);
-    }
-    else {
-        gtk_widget_destroy(widget);
-    }
+    GtkWidget* parent = gtk_widget_get_parent(GTK_WIDGET(listbox));
+    if(!parent || !GTK_IS_CONTAINER(parent)) return box_return;
+
+    GtkListBox* new_listbox = GTK_LIST_BOX(gtk_list_box_new());
+    if(!new_listbox) return box_return;
+    gtk_widget_set_name(GTK_WIDGET(new_listbox), "dlg_add_city_listbox");
+
+    gtk_widget_destroy(GTK_WIDGET(listbox));
+    assert(GTK_IS_GRID(parent));
+    GtkGrid* grid = GTK_GRID(parent);
+    gtk_grid_attach(grid, GTK_WIDGET(new_listbox), 1, 1, 1, 1);
+    //gtk_container_add(GTK_CONTAINER(parent), GTK_WIDGET(new_listbox));
+    box_return = new_listbox;
+    return box_return;
 }
 
 static bool gui_apply_language(size_t lang_id)
@@ -452,20 +452,6 @@ void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
     GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_listbox"));
     if(!listbox) return;
 
-
-    /* Test, remove later */
-/*    GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
-    if(!list_element) return;
-    GtkRadioButton* radio_button = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label(NULL, "Test"));
-    if(!radio_button) return;
-    GSList* group = gtk_radio_button_get_group(radio_button);
-    if(!group) return;
-
-    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(radio_button));
-    gtk_list_box_insert(listbox, GTK_WIDGET(list_element), -1);
-    /* End test */
-
-
     gtk_widget_show_all(GTK_WIDGET(dlg_addcity));
     int dialog_ret = gtk_dialog_run(dlg_addcity);
     if(dialog_ret == GTK_RESPONSE_APPLY) {
@@ -475,23 +461,33 @@ void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
     } else {
         gtk_widget_hide(GTK_WIDGET(dlg_addcity));
     }
+
+    // Clear Search
+    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_search"));
+    if(entry) {
+        gtk_entry_set_text(GTK_ENTRY(entry), "");
+    }
+    GtkListBox* list = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_listbox"));
+    if(list) {
+       list =  gtk_listbox_clear(list);
+    }
+    gtk_window_resize(GTK_WINDOW(dlg_addcity), 350, 200);
 }
 
-static bool gui_create_and_add_radio_button(GtkListBox* listbox, GSList* list, char const*const label, char const*const name) {
-    bool ret = false;
+static GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkRadioButton* group, char const*const label, char const*const name) {
+    GtkRadioButton* ret = 0;
     if(!listbox || !label) return ret;
 
     GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
     if(!list_element) goto ERR;
 
+    ret = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label_from_widget(group, label));
+    //ret = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label(list, label));
+    if(!ret) goto ERR;
+    if(name) gtk_widget_set_name(GTK_WIDGET(ret), name);
 
-    GtkRadioButton* radio_button = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label(list, label));
-    if(!radio_button) goto ERR;
-    if(name) gtk_widget_set_name(GTK_WIDGET(radio_button), name);
-
-    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(radio_button));
+    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(ret));
     gtk_list_box_insert(listbox, GTK_WIDGET(list_element), -1);
-    ret = true;
 
     return ret;
 ERR:
@@ -500,28 +496,36 @@ ERR:
 }
 
 void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
-    GtkListBox* listbox = data;
+    GtkGrid* grid = data;
+    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(grid), "dlg_add_city_listbox")); // Todo statt listbox die grid übertragen; dann kann ich die listbox löschen. Denn wenn ich die listbox lösche, kann der gpointer nicht mehr ordnungsgemäß arbeitne.
+    if(!listbox)
+        return;
     char* geolocation_string = 0;
 
     char const*const input_string = gtk_entry_get_text(GTK_ENTRY(widget));
     if(!input_string) goto ERR;
 
-    if(strlen(input_string) > 4) {
+    if(strlen(input_string) > 3) {
         geolocation_string = geolocation_get(input_string);
         if(!geolocation_string) goto ERR;
         puts(geolocation_string);
         char* split = strtok(geolocation_string, "\n");
         GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first"));
-        if(first_radio_button) // Destroy remaining radio buttons
-            destroy_all_children(GTK_WIDGET(first_radio_button));
+        if(first_radio_button) { // Destroy remaining radio buttons
+            assert(listbox);
+            GtkListBox* newList = gtk_listbox_clear(listbox);
+            if(newList) listbox = newList;
+            //gtk_listbox_remove_all_children(listbox);
+            //destroy_all_children(GTK_WIDGET(listbox));
+            //gtk_widget_show_all(GTK_WIDGET(listbox));
+        }
 
-        if(!gui_create_and_add_radio_button(listbox, NULL, split, "radio_button_first")) // create new radio buttons
+
+        if(!(first_radio_button = gui_create_and_add_radio_button(listbox, NULL, split, "radio_button_first"))) // create new radio buttons
                 goto ERR;
-        GSList* list = gtk_radio_button_get_group(GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first")));
-        puts("Split strings: ");
-        while(split = strtok(0, "\n")) {
-            puts(split);
-            gui_create_and_add_radio_button(listbox, list, split, NULL);
+        while((split = strtok(0, "\n"))) {
+            GtkRadioButton* radio_button = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label_from_widget(first_radio_button, split));
+            gtk_container_add(GTK_CONTAINER(listbox), GTK_WIDGET(radio_button));
         }
         gtk_widget_show_all(GTK_WIDGET(listbox));
         free(geolocation_string);
@@ -535,6 +539,14 @@ ERR:
 }
 
 void on_dlg_add_city_close(GtkWidget* widget, gpointer data) {
+    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(widget, "dlg_add_city_search"));
+    if(entry) {
+        gtk_entry_set_text(GTK_ENTRY(entry), "");
+    }
+    GtkListBox* list = GTK_LIST_BOX(find_child(widget, "dlg_add_city_listbox"));
+    if(list) {
+       list =  gtk_listbox_clear(list);
+    }
     gtk_widget_hide(widget);
 }
 
