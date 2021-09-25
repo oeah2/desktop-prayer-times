@@ -10,4 +10,3 @@ Todo:
 - Rework update checking
 - Create distribution files
 - Create language files
-- 
