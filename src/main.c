@@ -145,7 +145,7 @@ int main(int argc, char** argv)
     diyanet_city_codes = 0;
 #endif // DIYANET_GET_CITIES
 
-#define TEST_GEOLOCATION
+//#define TEST_GEOLOCATION
 #ifdef TEST_GEOLOCATION
 
     while(1) {
