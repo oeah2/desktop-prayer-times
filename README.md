@@ -12,3 +12,4 @@ Todo:
 - Create distribution files
 - Create language files
 - Improve makefile
+- Run valgrind
