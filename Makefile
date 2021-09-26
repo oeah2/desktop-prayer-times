@@ -135,11 +135,11 @@ debugLinux: $(OUT_DEBUG_LINUX)
 	gdb $(OUT_DEBUG_LINUX)
 	
 
-valgrind: $(OUT_DEBUG)
-	valgrind $(OUT_DEBUG)
+valgrind: $(OUT_DEBUG_LINUX)
+	valgrind $(OUT_DEBUG_LINUX)
 
-valgrind_leakcheck: $(OUT_DEBUG)
-	valgrind --leak-check=full $(OUT_DEBUG)
+valgrind_leakcheck: $(OUT_DEBUG_LINUX)
+	valgrind --leak-check=full $(OUT_DEBUG_LINUX)
 
-valgrind_extreme: $(OUT_DEBUG)
-	valgrind --leak-check=full --show-leak-kinds=all --leak-resolution=high --track-origins=yes --vgdb=yes $(OUT_DEBUG)
+valgrind_extreme: $(OUT_DEBUG_LINUX)
+	valgrind --leak-check=full --show-leak-kinds=all --leak-resolution=high --track-origins=yes --vgdb=yes $(OUT_DEBUG_LINUX)
