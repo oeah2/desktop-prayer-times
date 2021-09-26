@@ -196,7 +196,7 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
 
     time_t day_start = time(0);
     day_start -= day_start % secs_per_day;
-    if(difftime(date, day_start) < - secs_per_day / 2) {        // Könnte sein, dass hier ein Problem bei anderen Timezones entsteht....
+    if(difftime(date, day_start) < - secs_per_day / 2) {        // Kï¿½nnte sein, dass hier ein Problem bei anderen Timezones entsteht....
         return EFAULT;
     }
 
@@ -539,7 +539,7 @@ char* diyanet_get_provinces(size_t country_code, enum Languages lang)
     char* ret = 0;
     if(country_code) {
         char const*const host = "ezanvakti.herokuapp.com";
-        char file[20];
+        char file[32];
         sprintf(file, "/sehirler/%zu", country_code);
         char* http_response = http_get(host, file, 0);
 
@@ -588,7 +588,7 @@ char* diyanet_get_cities(size_t province_code, enum Languages lang)
     char* ret = 0;
     if(province_code) {
         char const*const host = "ezanvakti.herokuapp.com";
-        char file[20];
+        char file[31];
         sprintf(file, "/ilceler/%zu", province_code);
         char* http_response = http_get(host, file, 0);
 
