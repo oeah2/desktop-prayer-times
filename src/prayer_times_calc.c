@@ -30,6 +30,7 @@ static prayer convert_to_prayer(struct tm date, size_t pr, double prayer_double)
 {
     intPair time = {0};
     if(!isnan(prayer_double)) time = ST_float_time_decompose(prayer_double);
+    date.tm_sec = 0;
     date.tm_hour = time.val[0];
     date.tm_min = time.val[1];
     prayer ret = (prayer) {
