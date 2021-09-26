@@ -20,7 +20,7 @@ struct City {
     FILE* file_times;
     char* name;
     char* filename;
-    size_t id, pr_time_provider;
+    size_t id, pr_time_provider;						// id is depreciated now
     size_t method;                                      // must be element of enum ST_calculation_method
     size_t asr_juristic;                                // must be element of enum ST_juristic_method
     size_t adjust_high_lats;                            // must be element of enum ST_adjusting_method
@@ -32,7 +32,7 @@ struct City {
  * \param c city to be initialized
  * \param name of city
  * \param filename name of prayer times file
- * \param id id of city
+ * \param id id of city, depreciated
  * \return pointer to initialized city
  *
  */
@@ -43,7 +43,7 @@ City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider,
  * \param c city to be initialized
  * \param name of city
  * \param method of calculation
- * \param id id of city
+ * \param id id of city, depreciated
  * \return pointer to initialized city
  *
  */
@@ -62,7 +62,7 @@ City* city_destroy(City* c);
  *
  * \param name of city
  * \param filename name of prayer times file
- * \param id id of city
+ * \param id id of city, depreciated
  * \return pointer to new and initialized city
  *
  */
@@ -83,7 +83,7 @@ City* city_delete(City* c);
  * \param num number of new cities to be created
  * \param name array to names of cities
  * \param filename array of filenames for prayer times files
- * \param id array of pointers
+ * \param id array of pointers, depreciated
  * \return pointer to newly created array of cities
  *
  */
@@ -95,7 +95,7 @@ City* city_vnew(size_t num, char const (*name)[num], size_t pr_time_provider[num
  * \param name char const*const
  * \param pr_time_provider size_t
  * \param method size_t
- * \param id size_t
+ * \param id size_t, depreciated
  * \param longitude double
  * \param latitude double
  * \param asr_juristic size_t
