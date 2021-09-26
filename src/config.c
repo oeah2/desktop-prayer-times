@@ -249,7 +249,7 @@ int config_read(char const* filename, Config* cfg)
     }
 
     cfg->cfg_filename = malloc(strlen(filename) * sizeof(char) + 1);
-    if(!strcpy(cfg->cfg_filename, filename)) goto FREE_JSON;
+    if(!strcpy(cfg->cfg_filename, filename)) goto FREE_FILENAME;
 
     cJSON* json_ncities = cJSON_GetObjectItem(json, config_format_json_specifiers[json_num_cities]);
     if(json_ncities) {
@@ -310,6 +310,8 @@ int config_read(char const* filename, Config* cfg)
 
 FREE_CITIES:
     free(cfg->cities);
+FREE_FILENAME:
+	free(cfg->cfg_filename);
 FREE_JSON:
     cJSON_Delete(json);
     fclose(cfg_file);
