@@ -510,7 +510,6 @@ void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
     if(strlen(input_string) > 3) {
         geolocation_string = geolocation_get(input_string);
         if(!geolocation_string) goto ERR;
-        puts(geolocation_string);
         char* split = strtok(geolocation_string, "\n");
         GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first"));
         if(first_radio_button) { // Destroy remaining radio buttons
