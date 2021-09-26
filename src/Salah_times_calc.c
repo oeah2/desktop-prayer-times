@@ -418,7 +418,7 @@ static void compute_times(double julian_date, double latitude, enum ST_calculati
     times[ST_prayer_dhuhr]   = compute_mid_day(julian_date, times[ST_prayer_dhuhr]);
     times[ST_prayer_asr]     = compute_asr(julian_date, latitude, 1 + asr_juristic, times[ST_prayer_asr]);
     times[ST_prayer_sunset]  = compute_time(julian_date, latitude, 0.833, times[ST_prayer_sunset]);
-    times[ST_prayer_maghrib] = compute_time(julian_date, latitude, ST_method_params[calc_method].maghrib_value, times[ST_prayer_maghrib]);
+    times[ST_prayer_maghrib] = compute_time(julian_date, latitude, ST_method_params[calc_method].maghrib_value, times[ST_prayer_maghrib]); // Todo Check if this is fine. how is maghrib angle adjusted.
     times[ST_prayer_isha]    = compute_time(julian_date, latitude, ST_method_params[calc_method].isha_value, times[ST_prayer_isha]);
 }
 
