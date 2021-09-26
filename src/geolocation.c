@@ -4,6 +4,7 @@
 #include "cJSON.h"
 #include "socket.h"
 #include "config.h"
+#include "error.h"
 
 char* geolocation_get(char const*const city_name)
 {
@@ -25,8 +26,8 @@ char* geolocation_get(char const*const city_name)
     http_response = 0;
 
     if(!json) {
-        perror("Error parsing JSON!");
-        perror(cJSON_GetErrorPtr());
+    	myperror("Error parsing JSON!");
+    	myperror(cJSON_GetErrorPtr());
         return ret;
     }
 

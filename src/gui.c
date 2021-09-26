@@ -9,6 +9,7 @@
 #include "config.h"
 #include "socket.h"
 #include "update.h"
+#include "error.h"
 
 #define USE_STATUSICON
 //#define SHOW_MOON         // not really implemented
@@ -493,7 +494,7 @@ static GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkR
 
     return ret;
 ERR:
-    perror("Error creating radio button");
+	myperror("Error creating radio button");
     return ret;
 }
 
@@ -534,7 +535,7 @@ void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
     return;
 
 ERR:
-    perror("Error on_dlg_add_city_search_search_changed");
+	myperror("Error on_dlg_add_city_search_search_changed");
     free(geolocation_string);
     return;
 }
@@ -606,7 +607,7 @@ static bool dlg_settings_apply_config(GtkDialog* dlg_settings) {
 
 ERR:
     sprintf(buffer, "Error in function %s looking for widget %s", __func__, widget_name);
-    perror(buffer);
+	myperror(buffer);
     return false;
 }
 
@@ -661,7 +662,7 @@ RUN_DIALOG:
     return;
 
 ERR_WIDGET:
-    perror("Error finding widget!");
+	myperror("Error finding widget!");
     gtk_widget_hide(GTK_WIDGET(dlg_settings));
 }
 
@@ -735,7 +736,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     {
         int gtk_builder_ret = gtk_builder_add_from_file(builder, glade_filename, NULL);
         if(!gtk_builder_ret) {
-            perror("Error parsing GUI file!");
+        	myperror("Error parsing GUI file!");
             assert(gtk_builder_ret);
         }
     }
@@ -835,7 +836,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     return;
 
 ERR_OBJ:
-    perror("Error finding object with gtk_builder_get_object");
-    perror(err_msg);
+	myperror("Error finding object with gtk_builder_get_object");
+	myperror(err_msg);
     return;
 }

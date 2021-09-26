@@ -2,6 +2,7 @@
 #include "Salah_times_calc.h"
 #include "cJSON.h"
 #include "socket.h"
+#include "error.h"
 #include <math.h>
 
 char const*const ST_cm_names[ST_cm_num] = {
@@ -117,7 +118,7 @@ struct tm calc_get_hijri_date(struct tm today)
         cJSON* json = cJSON_Parse(http_response);
         if(!json) {
         	free(http_response);
-            perror("Error parsing JSON.");
+        	myperror("Error parsing JSON.");
             return (struct tm) {
                 0
             };

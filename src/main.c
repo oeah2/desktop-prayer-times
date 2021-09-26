@@ -10,6 +10,7 @@
 #include "gui.h"
 #include "geolocation.h"
 #include "update.h"
+#include "error.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -30,30 +31,14 @@
 
 extern calc_function* calc_functions[];
 
-#ifdef TEST_TIME
-time_t time(time_t* time_in) {
-    static time_t val = 1623542394;
-    return val++;
-}
-#endif
-
 int main(int argc, char** argv)
 {
 //#define ENABLE_LOG
 #ifdef ENABLE_LOG
     char const*const log_filename = "errors.log";
-    //FILE* logfile = fopen(log_filename, "a+");
-    //if(!logfile) assert(logfile);
     if(!freopen(log_filename, "a+", stderr)) {
-        perror("Error opening log file");
+    	myperror("Error opening log file");
     }
-    {
-        time_t t = time(0);
-        struct tm tm = *localtime(&t);
-        char buffer[50];
-        sprintf(buffer, "\n\nToday: %02d.%02d.%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
-        perror(buffer);
-    };
 #endif // ENABLE_LOG
 
     Config config = {0};
@@ -228,14 +213,6 @@ int main(int argc, char** argv)
     sprint_prayer_date(prayer_times[0], buff_len, puffer_hijri_date, true);
 
     char* gui_strings[gui_id_num] = {
-#ifdef LOCALIZATION_THROUGH_CODE
-        [gui_id_fajr_name]      = "Fajr",
-        [gui_id_sunrise_name]   = "Sunrise",
-        [gui_id_dhuhr_name]     = "Dhuhr",
-        [gui_id_asr_name]       = "Asr",
-        [gui_id_maghrib_name]   = "Maghrib",
-        [gui_id_isha_name]      = "Isha",
-#endif // LOCALIZATION_THROUGH_CODE
         [gui_id_fajr_time]      = prayer_puffer[pr_fajr],
         [gui_id_fajrend]        = prayer_puffer[pr_fajr_end],
         [gui_id_dhuhr_time]     = prayer_puffer[pr_dhuhr],

@@ -18,6 +18,7 @@
 #include <openssl/ssl.h>
 #include "socket.h"
 #include "update.h"
+#include "error.h"
 
 //#define USE_LIBCURL
 #ifdef USE_LIBCURL
@@ -38,7 +39,7 @@ static int socket_init(void)
     WSADATA wsaData;
 
     if(WSAStartup(MAKEWORD(1,1), &wsaData)) {
-        perror("Error during Socket initialization.");
+    	myperror("Error during Socket initialization.");
         return SOCK_ERR_INIT;
     }
 #endif
@@ -82,7 +83,7 @@ static int socket_connect(char const*const addr)
     hints.ai_socktype = SOCK_STREAM;
 
     if(getaddrinfo(addr, "http", &hints, &res)) {
-        perror("Error getting addrinfo.");
+    	myperror("Error getting addrinfo.");
         return SOCK_ERR_ADDRINFO;
     }
 
@@ -465,7 +466,7 @@ char* http_get(char const*const host, char const*const file, char const*const ad
     return ret;
 
 ERR_RECV:
-    perror("Error during receive");
+	myperror("Error during receive");
     free(buffer);
 ERR_SEND:
     free(http_request);
@@ -485,7 +486,7 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         res = curl_easy_perform(curl);
 
         if(res != CURLE_OK) {
-            perror("Error performing curl operationg!");
+        	myperror("Error performing curl operationg!");
 
         }
         curl_easy_cleanup(curl);
@@ -508,7 +509,7 @@ bool socket_check_connection()      // Das ist keine schoene Loesung, sollte abe
  */
 static void report_and_exit(const char* msg)
 {
-    perror(msg);
+	myperror(msg);
     ERR_print_errors_fp(stderr);
     exit(-1);
 }
@@ -620,7 +621,7 @@ char* https_get(char const*const host, char const*const file, char const*const a
     char* http_request = http_create_request(host, file, add_info);
     int sent_bytes = BIO_puts(bio, http_request);
     if(sent_bytes == -1 || sent_bytes == 0) {
-        perror("Error while sending data over HTTPS socket!");
+    	myperror("Error while sending data over HTTPS socket!");
         return 0;
     }
     assert(strlen(http_request) == sent_bytes);

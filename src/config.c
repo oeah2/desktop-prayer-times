@@ -1,4 +1,5 @@
 #include "config.h"
+#include "error.h"
 #include "cJSON.h"
 #include "file.h"
 #include "socket.h"
@@ -257,7 +258,7 @@ int config_read(char const* filename, Config* cfg)
 
     cJSON* json = cJSON_Parse(cfg_content);
     if(!json) {
-        perror("Error parsing Config.");
+    	myperror("Error parsing Config.");
         return EXIT_FAILURE;
     }
 
@@ -415,7 +416,7 @@ int config_json_save(char const*const filename, Config*const cfg) {
 
     char* string = cJSON_Print(json);
     if(!string) {
-        perror("Error printing json");
+    	myperror("Error printing json");
         goto ERR;
     }
     puts(string);
@@ -426,7 +427,7 @@ int config_json_save(char const*const filename, Config*const cfg) {
     cfg->config_changed = false;
     goto END;
 ERR:
-    perror("Error while printing config json");
+	myperror("Error while printing config json");
 END:
     cJSON_Delete(json);
     fclose(cfg_file);
