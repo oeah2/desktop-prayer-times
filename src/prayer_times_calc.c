@@ -115,6 +115,7 @@ struct tm calc_get_hijri_date(struct tm today)
     if(http_response) {
         cJSON* json = cJSON_Parse(http_response);
         if(!json) {
+        	free(http_response);
             perror("Error parsing JSON.");
             return (struct tm) {
                 0
@@ -146,7 +147,7 @@ struct tm calc_get_hijri_date(struct tm today)
         free(hijri);
         free(data);
         free(json);
+        free(http_response);
     }
-    free(http_response);
     return ret_hijri;
 }
