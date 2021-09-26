@@ -215,7 +215,6 @@ int main(int argc, char** argv)
 #endif // _WIN32
 #endif // WAIT_USER
 
-    //config_save(config_file, &config);
     config_json_save(config_file, &config);
 
     size_t const buff_len = 15;
