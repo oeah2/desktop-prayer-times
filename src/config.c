@@ -2,6 +2,7 @@
 #include "cJSON.h"
 #include "file.h"
 #include "socket.h"
+#include "Salah_times_calc.h"
 #include "prayer_times.h"
 
 enum config_specifiers {
@@ -184,6 +185,18 @@ int config_read(char const* filename, Config* cfg)
     return EXIT_SUCCESS;
 }
 #else // CFG_USE_JSON
+enum ST_calculation_method config_get_calc_method(const cJSON* element) {
+	enum ST_calculation_method ret = ST_cm_Jafari;
+	if(!element) return ret;
+	for(size_t i = 0; i < ST_cm_num; i++) {
+		if(!strcmp(element->valuestring, ST_cm_names[i])) {
+			ret = i;
+			break;
+		}
+	}
+	return ret;
+}
+
 static bool config_calc_read_city(const cJSON* element, char* name, City* city) {
     bool ret = false;
     if(!element || !city || !name)
@@ -198,7 +211,7 @@ static bool config_calc_read_city(const cJSON* element, char* name, City* city) 
     assert(method); assert(longitude); assert(latitude); assert(asr); assert(high_lats);
     assert(id);
 
-    City* c = city_init_calc(city, name, prov_calc, method->valueint, id->valueint,
+    City* c = city_init_calc(city, name, prov_calc, config_get_calc_method(method), id->valueint,
                              longitude->valuedouble, latitude->valuedouble, asr->valueint, high_lats->valueint);
     if(c) ret = true;
     return ret;
