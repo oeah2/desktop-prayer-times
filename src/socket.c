@@ -633,7 +633,7 @@ char* https_get(char const*const host, char const*const file, char const*const a
 #endif // DEBUG
     https_cleanup(ctx, bio);
     if(http_is_response_ok(http_response)) {
-        http_remove_header(http_response);
+    	http_response = http_remove_header(http_response);
     } else {
         free(http_response);
         http_response = NULL;
