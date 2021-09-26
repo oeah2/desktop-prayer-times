@@ -254,7 +254,7 @@ int main(int argc, char** argv)
 
     /* Now GUI Stuff */
     gtk_init(&argc, &argv);
-    char* glade_filename = "Prayer_times_GTK.glade";
+    char* glade_filename = "./bin/Prayer_times_GTK.glade";
     //char* glade_filename = lang_get_filename(config.lang);
 #ifdef RELEASE
     char* glade_filename = lang_get_filename(LANG_DE);

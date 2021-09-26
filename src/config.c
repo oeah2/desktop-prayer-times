@@ -231,7 +231,7 @@ int config_read(char const* filename, Config* cfg)
 
     config_init(cfg);
 
-    size_t file_length = file_find_length(cfg_file);
+    size_t file_length = file_find_length(cfg_file) + 1;
     if(!file_length) return EXIT_FAILURE;
     char* cfg_content = malloc(file_length * sizeof(char));
     if(!cfg_content) {
