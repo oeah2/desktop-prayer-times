@@ -191,6 +191,8 @@ static GtkWidget* find_child(GtkWidget* parent, const char*const name)
                 return widget;
             }
         } while((children = g_list_next(children)));
+        //g_list_free_full(children);
+        g_list_free(children);
     }
     return NULL;
 }
@@ -497,7 +499,7 @@ ERR:
 
 void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
     GtkGrid* grid = data;
-    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(grid), "dlg_add_city_listbox")); // Todo statt listbox die grid übertragen; dann kann ich die listbox löschen. Denn wenn ich die listbox lösche, kann der gpointer nicht mehr ordnungsgemäß arbeitne.
+    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(grid), "dlg_add_city_listbox")); // Todo statt listbox die grid ï¿½bertragen; dann kann ich die listbox lï¿½schen. Denn wenn ich die listbox lï¿½sche, kann der gpointer nicht mehr ordnungsgemï¿½ï¿½ arbeitne.
     if(!listbox)
         return;
     char* geolocation_string = 0;
