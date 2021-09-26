@@ -446,6 +446,10 @@ static bool is_id_valid(size_t city_id, Config const*const cfg)
     return false;
 }
 
+static size_t config_get_first_free_id(Config const*const cfg) {
+	return cfg->num_cities;
+}
+
 size_t config_find_idpos(size_t city_id, Config const*const cfg)
 {
     size_t ret = -1;
@@ -472,10 +476,11 @@ size_t config_find_next_id(Config const*const cfg)
 int config_add_city(City c, Config* cfg)
 {
     int ret = EXIT_FAILURE;
-    if(cfg && !is_id_valid(c.id, cfg)) {
+    if(cfg) {
         City* new_pointer = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
         if(!new_pointer) return EXIT_FAILURE;
         cfg->cities = new_pointer;
+        c.id = config_get_first_free_id(cfg);
         cfg->cities[cfg->num_cities] = c;
         cfg->num_cities++;
         cfg->counter_parsed_cities++;
@@ -488,11 +493,12 @@ int config_add_city(City c, Config* cfg)
 int config_remove_city(size_t city_id, Config* cfg)
 {
     int ret = EXIT_FAILURE;
-    if(cfg && is_id_valid(city_id, cfg)) {
+    if(cfg) {
         City buffer[cfg->num_cities - 1];
         for(size_t i = 0, counter = 0; i < cfg->num_cities; i++) {       // Copy cities to array
             if(cfg->cities[i].id == city_id) continue;
             buffer[counter] = cfg->cities[i];
+            buffer[counter].id = counter; // Adjust IDs
             counter++;
         }
         cfg->num_cities--;
@@ -507,6 +513,74 @@ int config_remove_city(size_t city_id, Config* cfg)
         ret = EXIT_SUCCESS;
     }
     return ret;
+}
+
+int config_swap_cities(size_t const city1, size_t const city2, Config*const cfg) {
+	int ret = EXIT_FAILURE;
+	if(cfg) {
+		if(city1 < cfg->num_cities && city2 < cfg->num_cities) {
+			City city_buffer = cfg->cities[city1];
+			cfg->cities[city1] = cfg->cities[city2];
+			cfg->cities[city2] = city_buffer;
+			cfg->cities[city1].id = city1; // Adjust ID of previously city 2
+			cfg->cities[city2].id = city2; // Adjist ID of previously city 1
+			cfg->config_changed = true;
+			ret = EXIT_SUCCESS;
+		}
+	}
+	return ret;
+}
+
+static int config_copy_cities(size_t num, City dest[num], City src[num]) {
+	int ret = EXIT_FAILURE;
+	if(num) {
+		for(size_t i = 0; i < num; i++) {
+			dest[i] = src[i];
+		}
+		ret = EXIT_SUCCESS;
+	}
+	return ret;
+}
+
+static size_t min(size_t const pos1, size_t const pos2) {
+	assert(pos1 != pos2);
+	if(pos1 < pos2) return pos1;
+	return pos2;
+}
+
+static size_t max(size_t const pos1, size_t const pos2) {
+	assert(pos1 != pos2);
+	if(pos1 > pos2) return pos1;
+	return pos2;
+}
+
+int config_move_city(size_t const id_initial, size_t const id_after, Config*const cfg) { // Todo verify function
+	int ret = EXIT_FAILURE;
+	if(cfg) {
+		if(id_initial < cfg->num_cities && id_after < cfg->num_cities && id_initial != id_after) {
+			int len = abs(id_initial - id_after);
+			size_t start = min(id_initial, id_after);
+			size_t end = max(id_initial, id_after);
+			City buffer[len];
+
+			size_t copy_start = start == id_initial ? start + 1 : start; // Copy from cfg to buffer. If city is to be moved backwards, copy from buffer to cfg startign at position start + 1.
+			size_t fill_start = start == id_initial ? start : start + 1; // Copy from buffer to cfg. If city is to be moved backwards, copy from buffer to cfg startign at position start.
+			City buffer2 = cfg->cities[id_initial];
+			config_copy_cities(len, buffer, &(cfg->cities[copy_start]));
+			config_copy_cities(len, &(cfg->cities[fill_start]), buffer);
+			cfg->cities[id_after] = buffer2;
+
+			for(size_t i = start; i <= end; i++) {
+				cfg->cities[i].id = i;
+			}/*
+			for(size_t i = 0; i < cfg->num_cities; i++) {
+				cfg->cities[i].id = i;
+			}*/
+			cfg->config_changed = true;
+			ret = EXIT_SUCCESS;
+		}
+	}
+	return ret;
 }
 
 Config* config_clear(Config* cfg)

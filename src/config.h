@@ -84,7 +84,7 @@ size_t config_find_idpos(size_t city_id, Config const*const cfg);
 
 size_t config_find_next_id(Config const*const cfg);
 
-/** \brief Add city to config. User shall verify id of city is not already assigned to other city. Use find_next_id if possible
+/** \brief Add city to config. ID of city is ignored (depreciated).
  *
  * \param city to be added to config
  * \param cfg pointer to struct Config, containing configuration of application
@@ -112,5 +112,26 @@ int config_remove_city(size_t city_id, Config* cfg);
  */
 
 Config* config_clear(Config* cfg);
+
+/** \brief Swap two cities in config.
+ *
+ * \param cfg pointer to struct Config
+ * \param city1 first city
+ * \param city2 second city
+ * \return EXIT_SUCCESS on success, EXIT_FAILURE otherwise
+ *
+ */
+int config_swap_cities(size_t const city1, size_t const city2, Config*const cfg);
+
+/** \brief Move a City position in config.
+ *
+ * \param cfg pointer to struct Config
+ * \param id_initial Initial position of city
+ * \param id_after Position of City after this function
+ * \return EXIT_SUCCESS on success, EXIT_FAILURE otherwise
+ *
+ */
+int config_move_city(size_t const id_initial, size_t const id_after, Config*const cfg);
+
 
 #endif // CONFIG_H_INCLUDED

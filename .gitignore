@@ -1,3 +1,5 @@
 
 *.o
 *.res
+/.cproject
+/.project

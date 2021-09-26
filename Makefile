@@ -8,6 +8,8 @@ SRC_PATH = ./src
 CFLAGS_DEBUG = -Wall -std=c11 -g -O0
 CLAGS_RELEASE = -Wall -std=c11 -O3
 
+all: DebugLinux
+
 release: Release
 
 $(OUT_RELEASE): Release
