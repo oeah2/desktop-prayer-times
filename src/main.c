@@ -274,5 +274,8 @@ int main(int argc, char** argv)
     if(config.config_changed)
         config_json_save(config.cfg_filename, &config);
 
+    free(config.cities);
+    free(config.cfg_filename);
+
     return 0;
 }
