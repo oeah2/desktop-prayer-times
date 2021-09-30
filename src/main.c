@@ -209,8 +209,15 @@ int main(int argc, char** argv)
     }
     char puffer_julian_date[buff_len];
     char puffer_hijri_date[buff_len];
+    prayer pr_hijri_date = {0}, pr_julian_date = {0};
+    if(config.cities[0].pr_time_provider == prov_calc) {
+        time_t now = time(0);
+        struct tm tm = *localtime(&now);
+        pr_hijri_date.hicri_date = calc_get_hijri_date(tm); // Todo, das muss auch für Diyanet erfolgen
+	}
+
     sprint_prayer_date(prayer_times[0], buff_len, puffer_julian_date, false);
-    sprint_prayer_date(prayer_times[0], buff_len, puffer_hijri_date, true);
+    sprint_prayer_date(pr_hijri_date, buff_len, puffer_hijri_date, true);
 
     char* gui_strings[gui_id_num] = {
         [gui_id_fajr_time]      = prayer_puffer[pr_fajr],
