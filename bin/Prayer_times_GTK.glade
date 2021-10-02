@@ -975,197 +975,6 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
       </object>
     </child>
   </object>
-  <object class="GtkAssistant" id="assistant_addcity">
-    <property name="name">assistant_addcity</property>
-    <property name="can-focus">False</property>
-    <property name="transient-for">window_main</property>
-    <signal name="cancel" handler="on_assistant_addcity_cancel" swapped="no"/>
-    <signal name="prepare" handler="on_assistant_addcity_prepare" swapped="no"/>
-    <child>
-      <object class="GtkBox" id="assistant_addcity_page0_box">
-        <property name="name">assistant_addcity_page0_box</property>
-        <property name="can-focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="homogeneous">True</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Wähle die Method zur Bestimmung der Gebetszeiten aus.</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkListBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkListBoxRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkRadioButton" id="assistant_addcity_radiobutton_calc">
-                    <property name="label" translatable="yes">Berechnung</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkListBoxRow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <child>
-                  <object class="GtkRadioButton">
-                    <property name="label" translatable="yes">Diyanet</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw-indicator">True</property>
-                    <property name="group">assistant_addcity_radiobutton_calc</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="page-type">intro</property>
-        <property name="has-padding">False</property>
-      </packing>
-    </child>
-    <child>
-      <!-- n-columns=2 n-rows=3 -->
-      <object class="GtkGrid" id="assistant_addcity_page1_grid">
-        <property name="name">assistant_addcity_page1_grid</property>
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="hexpand">True</property>
-        <property name="row-spacing">4</property>
-        <property name="column-spacing">1</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Stadt:</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="valign">start</property>
-            <property name="margin-end">6</property>
-            <property name="label" translatable="yes">Ergebnisse:</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSearchEntry" id="assistant_add_city_page1_search">
-            <property name="name">assistant_add_city_page1_search</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="hexpand">True</property>
-            <property name="primary-icon-name">edit-find-symbolic</property>
-            <property name="primary-icon-activatable">False</property>
-            <property name="primary-icon-sensitive">False</property>
-            <property name="placeholder-text" translatable="yes">Name der Stadt</property>
-            <signal name="search-changed" handler="on_assistant_add_city_page1_search_search_changed" object="assistant_addcity_page1_grid" swapped="no"/>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkListBox" id="assistant_add_city_page1_listbox">
-            <property name="name">assistant_add_city_page1_listbox</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">1</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="has-padding">False</property>
-      </packing>
-    </child>
-    <child>
-      <!-- n-columns=3 n-rows=3 -->
-      <object class="GtkGrid">
-        <property name="can-focus">False</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="has-padding">False</property>
-      </packing>
-    </child>
-    <child internal-child="action_area">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-      </object>
-      <packing>
-        <property name="has-padding">False</property>
-      </packing>
-    </child>
-  </object>
   <object class="GtkAboutDialog" id="dlg_about">
     <property name="can-focus">False</property>
     <property name="resizable">False</property>
@@ -1299,6 +1108,347 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           </packing>
         </child>
       </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="img_logo_diyanet">
+    <property name="name">img_logo_diyanet</property>
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="pixbuf">../Graphics/Diyanet_Logo.png</property>
+  </object>
+  <object class="GtkAssistant" id="assistant_addcity">
+    <property name="name">assistant_addcity</property>
+    <property name="can-focus">False</property>
+    <property name="transient-for">window_main</property>
+    <signal name="cancel" handler="on_assistant_addcity_cancel" swapped="no"/>
+    <signal name="prepare" handler="on_assistant_addcity_prepare" swapped="no"/>
+    <child>
+      <object class="GtkBox" id="assistant_addcity_page0_box">
+        <property name="name">assistant_addcity_page0_box</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="homogeneous">True</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Wähle die Method zur Bestimmung der Gebetszeiten aus.</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkListBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkRadioButton" id="assistant_addcity_radiobutton_calc">
+                    <property name="label" translatable="yes">Berechnung</property>
+                    <property name="name">assistant_addcity_radiobutton_calc</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkRadioButton">
+                    <property name="label" translatable="yes">Diyanet</property>
+                    <property name="name">assistant_addcity_radiobutton_diyanet</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="image">img_logo_diyanet</property>
+                    <property name="always-show-image">True</property>
+                    <property name="active">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">assistant_addcity_radiobutton_calc</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="page-type">intro</property>
+        <property name="has-padding">False</property>
+      </packing>
+    </child>
+    <child>
+      <!-- n-columns=2 n-rows=3 -->
+      <object class="GtkGrid" id="assistant_addcity_page1_grid">
+        <property name="name">assistant_addcity_page1_grid</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="row-spacing">4</property>
+        <property name="column-spacing">1</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Stadt:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="valign">start</property>
+            <property name="margin-end">6</property>
+            <property name="label" translatable="yes">Ergebnisse:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSearchEntry" id="assistant_add_city_page1_search">
+            <property name="name">assistant_add_city_page1_search</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="primary-icon-name">edit-find-symbolic</property>
+            <property name="primary-icon-activatable">False</property>
+            <property name="primary-icon-sensitive">False</property>
+            <property name="placeholder-text" translatable="yes">Name der Stadt</property>
+            <signal name="search-changed" handler="on_assistant_add_city_page1_search_search_changed" object="assistant_addcity" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkListBox" id="assistant_add_city_page1_listbox">
+            <property name="name">assistant_add_city_page1_listbox</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="page-type">progress</property>
+        <property name="has-padding">False</property>
+      </packing>
+    </child>
+    <child>
+      <!-- n-columns=2 n-rows=3 -->
+      <object class="GtkGrid">
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Berechnungsmethod:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Nachmittagsgebet:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Anpassung für hohe Breitengrade:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="name">assistant_addcity_calc_combobox_method</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="active">3</property>
+            <items>
+              <item id="jafari" translatable="yes">Ithna Ashari</item>
+              <item id="karachi" translatable="yes">University of Islamic Sciences, Karachi</item>
+              <item id="isna" translatable="yes">Islamic Society of North America (ISNA)</item>
+              <item id="mwl" translatable="yes">Muslim World League (MWL)</item>
+              <item id="makkah" translatable="yes">Umm al-Qura, Makkah</item>
+              <item id="egypt" translatable="yes">Egyptian General Authority of Survey</item>
+              <item id="custom" translatable="yes">Eigene Parameter</item>
+            </items>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="name">assistant_addcity_calc_combobox_asr</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="active">0</property>
+            <items>
+              <item id="shafi" translatable="yes">Shafii</item>
+              <item id="hanafi" translatable="yes">Hanafi</item>
+            </items>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="name">assistant_addcity_calc_combobox_highlats</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <items>
+              <item id="none" translatable="yes">Keine Anpassung</item>
+              <item id="midnight" translatable="yes">Mitternacht</item>
+              <item id="one_seventh" translatable="yes">Ein Siebtel Regel</item>
+              <item id="angle" translatable="yes">Winkelbasiert</item>
+            </items>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="page-type">summary</property>
+        <property name="has-padding">False</property>
+      </packing>
+    </child>
+    <child>
+      <!-- n-columns=2 n-rows=3 -->
+      <object class="GtkGrid">
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Land:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Provinz:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Stadt:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="name">assistant_addcity_diyanet_combobox_country</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="name">assistant_addcity_diyanet_combobox_citz</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkComboBoxText">
+            <property name="name">assistant_addcity_diyanet_combobox_province</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="page-type">summary</property>
+        <property name="has-padding">False</property>
+      </packing>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+      </object>
+      <packing>
+        <property name="has-padding">False</property>
+      </packing>
     </child>
   </object>
   <object class="GtkTreeStore" id="treestore1"/>

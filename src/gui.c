@@ -42,6 +42,14 @@ static char* gui_identifiers[gui_id_num] = {
     [gui_id_randomhadith]   = "label_randomhadith",
 };
 
+typedef enum AssistantAddcityPages {
+	AssistantPages_Intro,
+	AssistantPages_Calc_Cityname,
+	AssistantPages_Calc_Method,
+	AssistantPages_Diyanet,
+	AssistantPages_Apply,
+} AssistantAddcityPages;
+
 static Config* cfg;
 static size_t city_ptr = 0;
 static int day_ptr = 0;
@@ -510,15 +518,78 @@ ERR:
     return ret;
 }
 
+int assistant_addcity_nextpage_func(int current_page, gpointer data) {
+	AssistantAddcityPages next_page = 0;
+	AssistantAddcityPages curr_page = current_page;
+	GtkAssistant* assistant = GTK_ASSISTANT(data);
+
+	switch(curr_page) {
+	case AssistantPages_Intro:
+		(void) current_page;
+		GtkRadioButton* button_calc = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(assistant), "assistant_addcity_radiobutton_calc"));
+		GtkRadioButton* button_diyanet = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(assistant), "assistant_addcity_radiobutton_diyanet"));
+		assert(button_calc && button_diyanet);
+		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_calc))) {
+			next_page = AssistantPages_Calc_Cityname;
+		} else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_diyanet))) {
+			next_page = AssistantPages_Diyanet;
+		}
+		break;
+	case AssistantPages_Calc_Cityname:
+		next_page = AssistantPages_Calc_Method;
+		break;
+
+	case AssistantPages_Calc_Method:
+		next_page = AssistantPages_Apply;
+		break;
+	case AssistantPages_Diyanet:
+		break;
+	case AssistantPages_Apply:
+		break;
+	default:
+		break;
+
+	}
+	printf("assistant_addcity_nextpage_func %d\n", next_page);
+	return next_page;
+}
+
+void assistant_set_current_page_complete(GtkAssistant* assistant) {
+	if(assistant) {
+		int current_page = gtk_assistant_get_current_page(assistant);
+
+		GtkWidget* assistant_current_page = gtk_assistant_get_nth_page(assistant, current_page);
+		gtk_assistant_set_page_complete(assistant, assistant_current_page, true);
+	}
+}
+
+void assistant_addcity_destroy(gpointer data) {
+
+}
+
 void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
 
+//	gtk_assistant_set_forward_page_func(assistant, assistant_addcity_nextpage_func, assistant, assistant_addcity_destroy);
+
 	int current_page = gtk_assistant_get_current_page(assistant);
-	if(current_page == 0) {
-		GtkWidget* page0 = gtk_assistant_get_nth_page(assistant, current_page);
-		gtk_assistant_set_page_complete(assistant, page0, true);
+	switch(current_page) {
+	case 0:
+		(void) current_page;
+		assistant_set_current_page_complete(assistant);
+		break;
+	case 1:
+		break;
+
+	case 2:
+		break;
+
+	default:
+		break;
+
 	}
-	puts("drin");
+	//assistant_addcity_radiobutton_calc
+	printf("on_assistant_addcity_prepare: page %d\n", current_page);
 }
 
 void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
@@ -528,7 +599,8 @@ void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
 }
 
 void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpointer data) {
-    GtkGrid* grid = data;
+	GtkAssistant* assistant = GTK_ASSISTANT(data);
+    GtkGrid* grid = GTK_GRID(find_child(GTK_WIDGET(assistant), "assistant_addcity_page1_grid"));
     GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(grid), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
     if(!listbox)
         return;
@@ -541,16 +613,12 @@ void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpoint
         geolocation_string = geolocation_get(input_string);
         if(!geolocation_string) goto ERR;
         char* split = strtok(geolocation_string, "\n");
-        GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(data), "radio_button_first"));
+        GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(grid), "radio_button_first"));
         if(first_radio_button) { // Destroy remaining radio buttons
             assert(listbox);
             GtkListBox* newList = gtk_listbox_clear(listbox);
             if(newList) listbox = newList;
-            //gtk_listbox_remove_all_children(listbox);
-            //destroy_all_children(GTK_WIDGET(listbox));
-            //gtk_widget_show_all(GTK_WIDGET(listbox));
         }
-
 
         if(!(first_radio_button = gui_create_and_add_radio_button(listbox, NULL, split, "radio_button_first"))) // create new radio buttons
                 goto ERR;
@@ -558,6 +626,7 @@ void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpoint
             GtkRadioButton* radio_button = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label_from_widget(first_radio_button, split));
             gtk_container_add(GTK_CONTAINER(listbox), GTK_WIDGET(radio_button));
         }
+        assistant_set_current_page_complete(assistant);
         gtk_widget_show_all(GTK_WIDGET(listbox));
         free(geolocation_string);
     }
@@ -836,6 +905,10 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_prepare", G_CALLBACK(on_assistant_addcity_prepare));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_cancel", G_CALLBACK(on_assistant_addcity_cancel));
     gtk_builder_add_callback_symbol(builder, "on_dlg_about_delete_event", G_CALLBACK(on_dlg_about_delete_event));
+
+    // Todo check
+    GtkAssistant* assistant_addcity = GTK_ASSISTANT(gtk_builder_get_object(builder, "assistant_addcity")); CHECK_OBJ(assistant_addcity);
+	gtk_assistant_set_forward_page_func(assistant_addcity, assistant_addcity_nextpage_func, assistant_addcity, assistant_addcity_destroy);
 
 
     /* About dialog */
