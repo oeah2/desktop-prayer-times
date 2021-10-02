@@ -49,6 +49,8 @@ City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider,
  */
 City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude, size_t asr_juristic, size_t adjust_high_lats);
 
+City* city_init_empty(City* c);
+
 /** \brief Destroys city element, without freeing c
  *
  * \param c city element to be destroyed

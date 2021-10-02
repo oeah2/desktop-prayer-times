@@ -71,6 +71,15 @@ ERR_NAME:
     return c;
 }
 
+City* city_init_empty(City* c) {
+	if(c) {
+		*c = (City) {
+			.pr_time_provider = prov_empty,
+		};
+	}
+	return c;
+}
+
 City* city_destroy(City* c)
 {
     if(c) {
