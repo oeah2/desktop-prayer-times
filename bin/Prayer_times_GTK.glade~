@@ -1118,6 +1118,8 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
   </object>
   <object class="GtkAssistant" id="assistant_addcity">
     <property name="name">assistant_addcity</property>
+    <property name="width-request">500</property>
+    <property name="height-request">200</property>
     <property name="can-focus">False</property>
     <property name="transient-for">window_main</property>
     <signal name="cancel" handler="on_assistant_addcity_cancel" swapped="no"/>
@@ -1263,7 +1265,6 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
         </child>
       </object>
       <packing>
-        <property name="page-type">progress</property>
         <property name="has-padding">False</property>
       </packing>
     </child>
@@ -1346,6 +1347,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
             <property name="name">assistant_addcity_calc_combobox_highlats</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="active">0</property>
             <items>
               <item id="none" translatable="yes">Keine Anpassung</item>
               <item id="midnight" translatable="yes">Mitternacht</item>
@@ -1360,7 +1362,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
         </child>
       </object>
       <packing>
-        <property name="page-type">summary</property>
+        <property name="page-type">confirm</property>
         <property name="has-padding">False</property>
       </packing>
     </child>
@@ -1438,44 +1440,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
         </child>
       </object>
       <packing>
-        <property name="page-type">summary</property>
-        <property name="has-padding">False</property>
-      </packing>
-    </child>
-    <child>
-      <!-- n-columns=3 n-rows=3 -->
-      <object class="GtkGrid">
-        <property name="can-focus">False</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="page-type">summary</property>
+        <property name="page-type">confirm</property>
         <property name="has-padding">False</property>
       </packing>
     </child>

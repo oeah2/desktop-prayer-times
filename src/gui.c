@@ -47,7 +47,6 @@ typedef enum AssistantAddcityPages {
 	AssistantPages_Calc_Cityname,
 	AssistantPages_Calc_Method,
 	AssistantPages_Diyanet,
-	AssistantPages_Apply,
 } AssistantAddcityPages;
 
 static Config* cfg;
@@ -65,6 +64,8 @@ GtkImage* img_mondphase = 0;
 #ifdef USE_STATUSICON
 GtkStatusIcon* statusicon;
 #endif // USE_STATUSICON
+
+City city_buffer;
 
 void hide_statusicon(GtkStatusIcon* statusicon);
 void label_set_text(enum GUI_IDS id, char* text);
@@ -525,32 +526,39 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 
 	switch(curr_page) {
 	case AssistantPages_Intro:
-		(void) current_page;
+		city_buffer = *city_init_empty(&city_buffer);
 		GtkRadioButton* button_calc = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(assistant), "assistant_addcity_radiobutton_calc"));
 		GtkRadioButton* button_diyanet = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(assistant), "assistant_addcity_radiobutton_diyanet"));
 		assert(button_calc && button_diyanet);
 		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_calc))) {
 			next_page = AssistantPages_Calc_Cityname;
+			city_buffer.pr_time_provider = prov_calc;
 		} else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button_diyanet))) {
 			next_page = AssistantPages_Diyanet;
+			city_buffer.pr_time_provider = prov_diyanet;
 		}
+
 		break;
 	case AssistantPages_Calc_Cityname:
+		// Todo aktive stadt erkennung und namen übernehmen
 		next_page = AssistantPages_Calc_Method;
+
 		break;
 
 	case AssistantPages_Calc_Method:
-		next_page = AssistantPages_Apply;
+		// todo aktive einstellungen übernehmen
+		gtk_widget_hide(GTK_WIDGET(assistant));
+		//next_page = AssistantPages_Apply;
 		break;
 	case AssistantPages_Diyanet:
-		break;
-	case AssistantPages_Apply:
+		puts("AssistantPages_Diyanet no next page");
 		break;
 	default:
 		break;
 
 	}
-	printf("assistant_addcity_nextpage_func %d\n", next_page);
+
+	printf("assistant_addcity_nextpage_func, current_page: %d, next page: %d\n", current_page, next_page);
 	return next_page;
 }
 
@@ -563,28 +571,55 @@ void assistant_set_current_page_complete(GtkAssistant* assistant) {
 	}
 }
 
+void assistant_set_page_incomplete(GtkAssistant* assistant, int page) {
+	if(assistant) {
+		GtkWidget* assistant_page = gtk_assistant_get_nth_page(assistant, page);
+		gtk_assistant_set_page_complete(assistant, assistant_page, false);
+	}
+}
+
 void assistant_addcity_destroy(gpointer data) {
 
 }
 
 void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
-
+	GtkListBox* listbox = NULL;
+	GtkSearchEntry* search_entry = NULL;
 //	gtk_assistant_set_forward_page_func(assistant, assistant_addcity_nextpage_func, assistant, assistant_addcity_destroy);
 
 	int current_page = gtk_assistant_get_current_page(assistant);
 	switch(current_page) {
-	case 0:
+	case AssistantPages_Intro:
 		(void) current_page;
 		assistant_set_current_page_complete(assistant);
+		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
 		break;
-	case 1:
+	case AssistantPages_Calc_Cityname:
 		break;
 
-	case 2:
+	case AssistantPages_Calc_Method:
+		listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
+		search_entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_search"));
+		assert(listbox && search_entry);
+		gtk_entry_set_text(GTK_ENTRY(search_entry), "");
+		gtk_listbox_clear(listbox);
+		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
+		assistant_set_current_page_complete(assistant);
+		gtk_window_resize(GTK_WINDOW(assistant), 400, 200);
+		break;
+
+	case AssistantPages_Diyanet:
+
 		break;
 
 	default:
+		listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
+		search_entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_search"));
+		assert(listbox && search_entry);
+		gtk_entry_set_text(GTK_ENTRY(search_entry), "");
+		gtk_listbox_clear(listbox);
+		gtk_window_resize(GTK_WINDOW(assistant), 400, 200);
 		break;
 
 	}
