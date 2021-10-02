@@ -1128,6 +1128,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
       <object class="GtkBox" id="assistant_addcity_page0_box">
         <property name="name">assistant_addcity_page0_box</property>
         <property name="can-focus">False</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
         <property name="orientation">vertical</property>
         <property name="homogeneous">True</property>
         <child>
@@ -1202,6 +1206,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
         <property name="name">assistant_addcity_page1_grid</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
         <property name="hexpand">True</property>
         <property name="row-spacing">4</property>
         <property name="column-spacing">1</property>
@@ -1272,6 +1280,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
       <!-- n-columns=2 n-rows=3 -->
       <object class="GtkGrid">
         <property name="can-focus">False</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
@@ -1312,13 +1324,13 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
             <property name="can-focus">False</property>
             <property name="active">3</property>
             <items>
-              <item id="jafari" translatable="yes">Ithna Ashari</item>
-              <item id="karachi" translatable="yes">University of Islamic Sciences, Karachi</item>
-              <item id="isna" translatable="yes">Islamic Society of North America (ISNA)</item>
-              <item id="mwl" translatable="yes">Muslim World League (MWL)</item>
-              <item id="makkah" translatable="yes">Umm al-Qura, Makkah</item>
-              <item id="egypt" translatable="yes">Egyptian General Authority of Survey</item>
-              <item id="custom" translatable="yes">Eigene Parameter</item>
+              <item id="Jafari" translatable="yes">Ithna Ashari</item>
+              <item id="Karachi" translatable="yes">University of Islamic Sciences, Karachi</item>
+              <item id="ISNA" translatable="yes">Islamic Society of North America (ISNA)</item>
+              <item id="Muslim World League" translatable="yes">Muslim World League (MWL)</item>
+              <item id="Makkah" translatable="yes">Umm al-Qura, Makkah</item>
+              <item id="Egypt" translatable="yes">Egyptian General Authority of Survey</item>
+              <item id="Custom" translatable="yes">Eigene Parameter</item>
             </items>
           </object>
           <packing>
@@ -1370,6 +1382,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
       <!-- n-columns=2 n-rows=3 -->
       <object class="GtkGrid">
         <property name="can-focus">False</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>

@@ -519,6 +519,87 @@ ERR:
     return ret;
 }
 
+void assistant_clearCityname_page(GtkAssistant* assistant) {
+	if(assistant) {
+		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
+		GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
+		GtkSearchEntry* search_entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_search"));
+		if(listbox)
+			gtk_listbox_clear(listbox);
+		if(search_entry)
+			gtk_entry_set_text(GTK_ENTRY(search_entry), "");
+	}
+}
+
+City assistant_read_city_name(GtkAssistant* assistant, City c) {
+	City ret = c;
+	if(assistant) {
+		GtkRadioButton* radio = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(assistant), "radio_button_first"));
+		GtkRadioButton* active = NULL;
+		if(radio) {
+			GSList* list = gtk_radio_button_get_group(radio);
+			if(list) {
+				for(GSList* child = list; child; child = g_list_next(child)) {
+					active = GTK_RADIO_BUTTON(child->data);
+					if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(active)))
+						break;
+				}
+				char* string = gtk_button_get_label(GTK_BUTTON(active));
+				if(string) {
+					char* name = strtok(string, ",");
+					strtok(0, ":");
+					char* lattitude_str = strtok(0, ";");
+					char* longitude_str = strtok(0, "\n");
+
+					double lattitude = strtod(lattitude_str, 0);
+					double longitude = strtod(longitude_str, 0);
+					ret = *city_set_name(&ret, name);
+					ret.latitude = lattitude;
+					ret.longitude = longitude;
+				}
+			}
+		}
+	}
+	return ret;
+}
+
+City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* method, GtkComboBox* asr, GtkComboBox* highlats) {
+	City* ret = 0;
+	if(c && assistant && method && asr && highlats) {
+		char* method_id = gtk_combo_box_get_active_id(method);
+		if(method_id) {
+			for(enum ST_calculation_method cm = ST_cm_Karachi; cm < ST_cm_num; cm++) {
+				if(!strcmp(method_id, ST_cm_names[cm])) {
+					c->method = cm;
+					break;
+				}
+			}
+		}
+		char* asr_id = gtk_combo_box_get_active_id(asr);
+		if(asr_id) {
+			if(!strcmp(asr_id, "shafi")) {
+				c->asr_juristic = ST_jm_Shafii;
+			} else if(!strcmp(asr_id, "hanafi")) {
+				c->asr_juristic = ST_jm_Hanafi;
+			}
+		}
+		char* adjust_id = gtk_combo_box_get_active_id(highlats);
+		if(adjust_id) {
+			if(!strcmp(adjust_id, "none")) {
+				c->adjust_high_lats = ST_am_None;
+			} else if(!strcmp(adjust_id, "midnight")) {
+				c->adjust_high_lats = ST_am_MidNight;
+			} else if(!strcmp(adjust_id, "one_seventh")) {
+				c->adjust_high_lats = ST_am_OneSeventh;
+			} else if(!strcmp(adjust_id, "angle")) {
+				c->adjust_high_lats = ST_am_AngleBased;
+			}
+		}
+		ret = c;
+	}
+	return ret;
+}
+
 int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 	AssistantAddcityPages next_page = 0;
 	AssistantAddcityPages curr_page = current_page;
@@ -542,13 +623,24 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 	case AssistantPages_Calc_Cityname:
 		// Todo aktive stadt erkennung und namen übernehmen
 		next_page = AssistantPages_Calc_Method;
-
 		break;
 
 	case AssistantPages_Calc_Method:
 		// todo aktive einstellungen übernehmen
-		gtk_widget_hide(GTK_WIDGET(assistant));
-		//next_page = AssistantPages_Apply;
+		(void)next_page;
+		GtkComboBox* method = 0, *asr = 0, *highlats = 0;
+		method = GTK_COMBO_BOX(find_child(GTK_WIDGET(assistant), "assistant_addcity_calc_combobox_method"));
+		asr = GTK_COMBO_BOX(find_child(GTK_WIDGET(assistant), "assistant_addcity_calc_combobox_asr"));
+		highlats = GTK_COMBO_BOX(find_child(GTK_WIDGET(assistant), "assistant_addcity_calc_combobox_highlats"));
+		if(method && asr && highlats) {
+			city_buffer = *assistant_read_calc_params(&city_buffer, assistant, method, asr, highlats);
+			if(config_add_city(city_buffer, cfg) == EXIT_FAILURE) {
+				assert(false);
+			}
+			gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
+			gtk_widget_hide(GTK_WIDGET(assistant));
+			//next_page = AssistantPages_Apply;
+		}
 		break;
 	case AssistantPages_Diyanet:
 		puts("AssistantPages_Diyanet no next page");
@@ -586,7 +678,6 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
 	GtkListBox* listbox = NULL;
 	GtkSearchEntry* search_entry = NULL;
-//	gtk_assistant_set_forward_page_func(assistant, assistant_addcity_nextpage_func, assistant, assistant_addcity_destroy);
 
 	int current_page = gtk_assistant_get_current_page(assistant);
 	switch(current_page) {
@@ -594,19 +685,18 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 		(void) current_page;
 		assistant_set_current_page_complete(assistant);
 		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
+		assistant_clearCityname_page(assistant);
+		gtk_window_resize(GTK_WINDOW(assistant), 500, 130);
 		break;
 	case AssistantPages_Calc_Cityname:
 		break;
 
 	case AssistantPages_Calc_Method:
-		listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
-		search_entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_search"));
-		assert(listbox && search_entry);
-		gtk_entry_set_text(GTK_ENTRY(search_entry), "");
-		gtk_listbox_clear(listbox);
+		city_buffer = assistant_read_city_name(assistant, city_buffer);
+		assistant_clearCityname_page(assistant);
 		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
 		assistant_set_current_page_complete(assistant);
-		gtk_window_resize(GTK_WINDOW(assistant), 400, 200);
+		gtk_window_resize(GTK_WINDOW(assistant), 500, 130);
 		break;
 
 	case AssistantPages_Diyanet:
@@ -614,12 +704,8 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 		break;
 
 	default:
-		listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
-		search_entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_search"));
-		assert(listbox && search_entry);
-		gtk_entry_set_text(GTK_ENTRY(search_entry), "");
-		gtk_listbox_clear(listbox);
-		gtk_window_resize(GTK_WINDOW(assistant), 400, 200);
+		assistant_clearCityname_page(assistant);
+		gtk_window_resize(GTK_WINDOW(assistant), 500, 130);
 		break;
 
 	}
