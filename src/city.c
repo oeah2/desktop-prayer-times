@@ -71,6 +71,18 @@ ERR_NAME:
     return c;
 }
 
+City* city_set_name(City* c, char const*const name) {
+	City* ret = 0;
+	if(c && name) {
+		c->name = malloc(strlen(name) + 1);
+		if(c->name) {
+			strcpy(c->name, name);
+			ret = c;
+		}
+	}
+	return ret;
+}
+
 City* city_init_empty(City* c) {
 	if(c) {
 		*c = (City) {

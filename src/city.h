@@ -51,6 +51,8 @@ City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, si
 
 City* city_init_empty(City* c);
 
+City* city_set_name(City* c, char const*const name);
+
 /** \brief Destroys city element, without freeing c
  *
  * \param c city element to be destroyed
