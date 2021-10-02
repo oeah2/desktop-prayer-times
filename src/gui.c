@@ -406,6 +406,12 @@ void on_dlg_about_response(GtkWidget* dlg_about, gpointer data)
     gtk_widget_hide(dlg_about);
 }
 
+bool on_dlg_about_delete_event(GtkWidget* dlg_about, gpointer data) {
+	puts("on_dlg_about_delete_event");
+	gtk_widget_hide(dlg_about);
+	return true;
+}
+
 void on_menuitm_load_activate(GtkWidget* widget, gpointer data)
 {
     GtkFileChooser* dlg_filechooser = data;
@@ -450,7 +456,12 @@ void on_menuitm_removecity_activate(GtkWidget* widget, gpointer data) {
 }
 
 void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
-    GtkDialog* dlg_addcity = data;
+#define ASSISTANT_ADDCITY
+#ifdef ASSISTANT_ADDCITY
+	GtkAssistant* assistant_addcity = data;
+	gtk_widget_show_all(GTK_WIDGET(assistant_addcity));
+#else
+	GtkDialog* dlg_addcity = data;
 
     GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_listbox"));
     if(!listbox) return;
@@ -475,6 +486,7 @@ void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
        list =  gtk_listbox_clear(list);
     }
     gtk_window_resize(GTK_WINDOW(dlg_addcity), 350, 200);
+#endif
 }
 
 static GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkRadioButton* group, char const*const label, char const*const name) {
@@ -496,6 +508,17 @@ static GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkR
 ERR:
 	myperror("Error creating radio button");
     return ret;
+}
+
+void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
+	GtkAssistant* assistant = GTK_ASSISTANT(widget);
+	puts("drin");
+}
+
+void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
+	GtkAssistant* assistant = GTK_ASSISTANT(widget);
+	puts("on_assistant_addcity_cancel");
+	gtk_widget_hide(GTK_WIDGET(assistant));
 }
 
 void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
@@ -804,6 +827,9 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_menuitm_addcity_activate", G_CALLBACK(on_menuitm_addcity_activate));
     gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_search_search_changed", G_CALLBACK(on_dlg_add_city_search_search_changed));
     gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_close", G_CALLBACK(on_dlg_add_city_close));
+    gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_prepare", G_CALLBACK(on_assistant_addcity_prepare));
+    gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_cancel", G_CALLBACK(on_assistant_addcity_cancel));
+    gtk_builder_add_callback_symbol(builder, "on_dlg_about_delete_event", G_CALLBACK(on_dlg_about_delete_event));
 
 
     /* About dialog */
