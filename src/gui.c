@@ -207,7 +207,7 @@ static GtkListBox* gtk_listbox_clear(GtkListBox* listbox) {
 
     GtkListBox* new_listbox = GTK_LIST_BOX(gtk_list_box_new());
     if(!new_listbox) return box_return;
-    gtk_widget_set_name(GTK_WIDGET(new_listbox), "dlg_add_city_listbox");
+    gtk_widget_set_name(GTK_WIDGET(new_listbox), "assistant_add_city_page1_listbox");
 
     gtk_widget_destroy(GTK_WIDGET(listbox));
     assert(GTK_IS_GRID(parent));
@@ -463,7 +463,7 @@ void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
 #else
 	GtkDialog* dlg_addcity = data;
 
-    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_listbox"));
+    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "assistant_add_city_page1_listbox"));
     if(!listbox) return;
 
     gtk_widget_show_all(GTK_WIDGET(dlg_addcity));
@@ -477,11 +477,11 @@ void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
     }
 
     // Clear Search
-    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_search"));
+    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(dlg_addcity), "assistant_add_city_page1_search"));
     if(entry) {
         gtk_entry_set_text(GTK_ENTRY(entry), "");
     }
-    GtkListBox* list = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "dlg_add_city_listbox"));
+    GtkListBox* list = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "assistant_add_city_page1_listbox"));
     if(list) {
        list =  gtk_listbox_clear(list);
     }
@@ -512,6 +512,12 @@ ERR:
 
 void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
+
+	int current_page = gtk_assistant_get_current_page(assistant);
+	if(current_page == 0) {
+		GtkWidget* page0 = gtk_assistant_get_nth_page(assistant, current_page);
+		gtk_assistant_set_page_complete(assistant, page0, true);
+	}
 	puts("drin");
 }
 
@@ -521,9 +527,9 @@ void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
 	gtk_widget_hide(GTK_WIDGET(assistant));
 }
 
-void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
+void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpointer data) {
     GtkGrid* grid = data;
-    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(grid), "dlg_add_city_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
+    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(grid), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
     if(!listbox)
         return;
     char* geolocation_string = 0;
@@ -558,17 +564,17 @@ void on_dlg_add_city_search_search_changed(GtkWidget* widget, gpointer data) {
     return;
 
 ERR:
-	myperror("Error on_dlg_add_city_search_search_changed");
+	myperror("Error on_assistant_add_city_page1_search_search_changed");
     free(geolocation_string);
     return;
 }
 
 void on_dlg_add_city_close(GtkWidget* widget, gpointer data) {
-    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(widget, "dlg_add_city_search"));
+    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(widget, "assistant_add_city_page1_search"));
     if(entry) {
         gtk_entry_set_text(GTK_ENTRY(entry), "");
     }
-    GtkListBox* list = GTK_LIST_BOX(find_child(widget, "dlg_add_city_listbox"));
+    GtkListBox* list = GTK_LIST_BOX(find_child(widget, "assistant_add_city_page1_listbox"));
     if(list) {
        list =  gtk_listbox_clear(list);
     }
@@ -825,7 +831,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_menuitm_movecities_activate", G_CALLBACK(on_menuitm_movecities_activate));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_removecity_activate", G_CALLBACK(on_menuitm_removecity_activate));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_addcity_activate", G_CALLBACK(on_menuitm_addcity_activate));
-    gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_search_search_changed", G_CALLBACK(on_dlg_add_city_search_search_changed));
+    gtk_builder_add_callback_symbol(builder, "on_assistant_add_city_page1_search_search_changed", G_CALLBACK(on_assistant_add_city_page1_search_search_changed));
     gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_close", G_CALLBACK(on_dlg_add_city_close));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_prepare", G_CALLBACK(on_assistant_addcity_prepare));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_cancel", G_CALLBACK(on_assistant_addcity_cancel));

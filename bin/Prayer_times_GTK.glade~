@@ -27,138 +27,6 @@ Author: Ahmet Öztürk
   <!-- interface-name Desktop Prayer Times -->
   <!-- interface-description A desktop tool to display islamic prayer times -->
   <!-- interface-authors Ahmet \303\226zt\303\274rk -->
-  <object class="GtkDialog" id="dlg_add_city">
-    <property name="width-request">350</property>
-    <property name="height-request">200</property>
-    <property name="can-focus">False</property>
-    <property name="type-hint">dialog</property>
-    <signal name="close" handler="on_dlg_add_city_close" swapped="no"/>
-    <child internal-child="vbox">
-      <object class="GtkBox">
-        <property name="can-focus">False</property>
-        <property name="hexpand">True</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">6</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox">
-            <property name="can-focus">False</property>
-            <property name="margin-bottom">6</property>
-            <property name="layout-style">end</property>
-            <child>
-              <object class="GtkButton" id="button6">
-                <property name="label">gtk-apply</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button7">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="receives-default">True</property>
-                <property name="use-stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <!-- n-columns=2 n-rows=3 -->
-          <object class="GtkGrid" id="dlg_addcity_grid">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="hexpand">True</property>
-            <property name="row-spacing">4</property>
-            <property name="column-spacing">1</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Stadt:</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="valign">start</property>
-                <property name="margin-end">6</property>
-                <property name="label" translatable="yes">Ergebnisse:</property>
-              </object>
-              <packing>
-                <property name="left-attach">0</property>
-                <property name="top-attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSearchEntry" id="dlg_add_city_search">
-                <property name="name">dlg_add_city_search</property>
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="hexpand">True</property>
-                <property name="primary-icon-name">edit-find-symbolic</property>
-                <property name="primary-icon-activatable">False</property>
-                <property name="primary-icon-sensitive">False</property>
-                <property name="placeholder-text" translatable="yes">Name der Stadt</property>
-                <signal name="search-changed" handler="on_dlg_add_city_search_search_changed" object="dlg_addcity_grid" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkListBox" id="dlg_add_city_listbox">
-                <property name="name">dlg_add_city_listbox</property>
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="-10">button6</action-widget>
-      <action-widget response="-6">button7</action-widget>
-    </action-widgets>
-  </object>
   <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
     <property name="icon">Graphics\Logo_small.png</property>
@@ -1114,46 +982,184 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <signal name="cancel" handler="on_assistant_addcity_cancel" swapped="no"/>
     <signal name="prepare" handler="on_assistant_addcity_prepare" swapped="no"/>
     <child>
-      <placeholder/>
+      <object class="GtkBox" id="assistant_addcity_page0_box">
+        <property name="name">assistant_addcity_page0_box</property>
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="homogeneous">True</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Wähle die Method zur Bestimmung der Gebetszeiten aus.</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkListBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkRadioButton" id="assistant_addcity_radiobutton_calc">
+                    <property name="label" translatable="yes">Berechnung</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw-indicator">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkListBoxRow">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <child>
+                  <object class="GtkRadioButton">
+                    <property name="label" translatable="yes">Diyanet</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw-indicator">True</property>
+                    <property name="group">assistant_addcity_radiobutton_calc</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="page-type">intro</property>
+        <property name="has-padding">False</property>
+      </packing>
     </child>
     <child>
-      <object class="GtkLabel">
+      <!-- n-columns=2 n-rows=3 -->
+      <object class="GtkGrid" id="assistant_addcity_page1_grid">
+        <property name="name">assistant_addcity_page1_grid</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Inhaltsseite</property>
+        <property name="hexpand">True</property>
+        <property name="row-spacing">4</property>
+        <property name="column-spacing">1</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Stadt:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="valign">start</property>
+            <property name="margin-end">6</property>
+            <property name="label" translatable="yes">Ergebnisse:</property>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSearchEntry" id="assistant_add_city_page1_search">
+            <property name="name">assistant_add_city_page1_search</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="primary-icon-name">edit-find-symbolic</property>
+            <property name="primary-icon-activatable">False</property>
+            <property name="primary-icon-sensitive">False</property>
+            <property name="placeholder-text" translatable="yes">Name der Stadt</property>
+            <signal name="search-changed" handler="on_assistant_add_city_page1_search_search_changed" object="assistant_addcity_page1_grid" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkListBox" id="assistant_add_city_page1_listbox">
+            <property name="name">assistant_add_city_page1_listbox</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
       </object>
       <packing>
         <property name="has-padding">False</property>
       </packing>
     </child>
     <child>
-      <object class="GtkLabel">
-        <property name="visible">True</property>
+      <!-- n-columns=3 n-rows=3 -->
+      <object class="GtkGrid">
         <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Bestätigungsseite</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
       </object>
       <packing>
-        <property name="page-type">confirm</property>
         <property name="has-padding">False</property>
       </packing>
-    </child>
-    <child>
-      <placeholder/>
-    </child>
-    <child>
-      <placeholder/>
     </child>
     <child internal-child="action_area">
       <object class="GtkBox">
         <property name="can-focus">False</property>
-        <property name="halign">end</property>
-        <property name="margin-left">6</property>
-        <property name="margin-right">6</property>
-        <property name="margin-start">6</property>
-        <property name="margin-end">6</property>
-        <property name="margin-top">6</property>
-        <property name="margin-bottom">6</property>
-        <property name="spacing">6</property>
       </object>
       <packing>
         <property name="has-padding">False</property>
