@@ -49,7 +49,7 @@ char* geolocation_get(char const*const city_name)
             double longitude = strtof(cJSON_GetStringValue(long_str), NULL);
             setlocale(LC_ALL, prev_locale);
 
-            sprintf(puffer, "%s: %f\t%f\n", name->valuestring, latitude, longitude);
+            sprintf(puffer, "%s: %f;%f\n", name->valuestring, latitude, longitude);
             memcpy(puffer2, puffer, length_same - 1);
             puffer2[length_same - 1] = '\0';
             if(!strstr(ret, puffer2))
