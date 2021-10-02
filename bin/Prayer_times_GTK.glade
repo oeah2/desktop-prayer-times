@@ -1358,6 +1358,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           <object class="GtkComboBoxText">
             <property name="name">assistant_addcity_calc_combobox_highlats</property>
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">False</property>
             <property name="active">0</property>
             <items>
@@ -1420,10 +1421,11 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText">
+          <object class="GtkComboBoxText" id="assistant_addcity_diyanet_combobox_country">
             <property name="name">assistant_addcity_diyanet_combobox_country</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <signal name="changed" handler="on_assistant_addcity_diyanet_combobox_country_changed" swapped="no"/>
           </object>
           <packing>
             <property name="left-attach">1</property>

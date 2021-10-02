@@ -519,6 +519,23 @@ ERR:
     return ret;
 }
 
+void assistant_set_current_page_complete(GtkAssistant* assistant) {
+	if(assistant) {
+		int current_page = gtk_assistant_get_current_page(assistant);
+
+		GtkWidget* assistant_current_page = gtk_assistant_get_nth_page(assistant, current_page);
+		gtk_assistant_set_page_complete(assistant, assistant_current_page, true);
+	}
+}
+
+void assistant_set_page_incomplete(GtkAssistant* assistant, int page) {
+	if(assistant) {
+		GtkWidget* assistant_page = gtk_assistant_get_nth_page(assistant, page);
+		gtk_assistant_set_page_complete(assistant, assistant_page, false);
+	}
+}
+
+
 void assistant_clearCityname_page(GtkAssistant* assistant) {
 	if(assistant) {
 		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
@@ -539,14 +556,16 @@ City assistant_read_city_name(GtkAssistant* assistant, City c) {
 		if(radio) {
 			GSList* list = gtk_radio_button_get_group(radio);
 			if(list) {
-				for(GSList* child = list; child; child = g_list_next(child)) {
-					active = GTK_RADIO_BUTTON(child->data);
+				for(size_t i = 0, len = g_slist_length(list); i < len; i++) {
+					active = GTK_RADIO_BUTTON(g_slist_nth_data(list, i));
 					if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(active)))
 						break;
 				}
-				char* string = gtk_button_get_label(GTK_BUTTON(active));
+				char const*const string = gtk_button_get_label(GTK_BUTTON(active));
+				char buffer[strlen(string) + 5];
+				strcpy(buffer, string);
 				if(string) {
-					char* name = strtok(string, ",");
+					char* name = strtok(buffer, ",");
 					strtok(0, ":");
 					char* lattitude_str = strtok(0, ";");
 					char* longitude_str = strtok(0, "\n");
@@ -566,7 +585,7 @@ City assistant_read_city_name(GtkAssistant* assistant, City c) {
 City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* method, GtkComboBox* asr, GtkComboBox* highlats) {
 	City* ret = 0;
 	if(c && assistant && method && asr && highlats) {
-		char* method_id = gtk_combo_box_get_active_id(method);
+		char const*const method_id = gtk_combo_box_get_active_id(method);
 		if(method_id) {
 			for(enum ST_calculation_method cm = ST_cm_Karachi; cm < ST_cm_num; cm++) {
 				if(!strcmp(method_id, ST_cm_names[cm])) {
@@ -575,7 +594,7 @@ City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* 
 				}
 			}
 		}
-		char* asr_id = gtk_combo_box_get_active_id(asr);
+		char const*const asr_id = gtk_combo_box_get_active_id(asr);
 		if(asr_id) {
 			if(!strcmp(asr_id, "shafi")) {
 				c->asr_juristic = ST_jm_Shafii;
@@ -583,7 +602,7 @@ City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* 
 				c->asr_juristic = ST_jm_Hanafi;
 			}
 		}
-		char* adjust_id = gtk_combo_box_get_active_id(highlats);
+		char const*const adjust_id = gtk_combo_box_get_active_id(highlats);
 		if(adjust_id) {
 			if(!strcmp(adjust_id, "none")) {
 				c->adjust_high_lats = ST_am_None;
@@ -598,6 +617,24 @@ City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* 
 		ret = c;
 	}
 	return ret;
+}
+
+void assistant_diyanet_display_countries(GtkAssistant* assistant) {
+	if(assistant) {
+		char* countries = diyanet_get_country_codes(cfg->lang);
+		if(countries) {
+			GtkComboBoxText* combobox_country = GTK_COMBO_BOX_TEXT(find_child(GTK_WIDGET(assistant), "assistant_addcity_diyanet_combobox_country"));
+			if(combobox_country) {
+				char *name = 0;
+				name = strtok(countries, ";");
+				gtk_combo_box_text_append_text(combobox_country, name);
+				while((name = strtok(0, ";"))) {
+					gtk_combo_box_text_append_text(combobox_country, name);
+				}
+				gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_country), -1);
+			}
+		}
+	}
 }
 
 int assistant_addcity_nextpage_func(int current_page, gpointer data) {
@@ -654,30 +691,12 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 	return next_page;
 }
 
-void assistant_set_current_page_complete(GtkAssistant* assistant) {
-	if(assistant) {
-		int current_page = gtk_assistant_get_current_page(assistant);
-
-		GtkWidget* assistant_current_page = gtk_assistant_get_nth_page(assistant, current_page);
-		gtk_assistant_set_page_complete(assistant, assistant_current_page, true);
-	}
-}
-
-void assistant_set_page_incomplete(GtkAssistant* assistant, int page) {
-	if(assistant) {
-		GtkWidget* assistant_page = gtk_assistant_get_nth_page(assistant, page);
-		gtk_assistant_set_page_complete(assistant, assistant_page, false);
-	}
-}
-
 void assistant_addcity_destroy(gpointer data) {
 
 }
 
 void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
-	GtkListBox* listbox = NULL;
-	GtkSearchEntry* search_entry = NULL;
 
 	int current_page = gtk_assistant_get_current_page(assistant);
 	switch(current_page) {
@@ -700,7 +719,7 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 		break;
 
 	case AssistantPages_Diyanet:
-
+		assistant_diyanet_display_countries(assistant);
 		break;
 
 	default:
