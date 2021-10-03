@@ -632,7 +632,7 @@ static size_t assistant_get_diyanet_code(char const*const str) {
 		char buffer[strlen(str) + 5];
 		strcpy(buffer, str);
 
-		char* name = strtok(buffer, ",");
+		strtok(buffer, ",");
 		char* id = strtok(0, "\0");
 		ret = strtol(id, 0, 10);
 	}
@@ -668,7 +668,7 @@ void assistant_diyanet_display_countries(GtkAssistant* assistant) {
 static void assistant_diyanet_reset_combobox(GtkComboBoxText* combobox, bool set_sensitive) {
 	if(combobox) {
 		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), -1);
-		if(gtk_combo_box_get_has_entry(combobox))
+		if(gtk_combo_box_get_has_entry(GTK_COMBO_BOX(combobox)))
 			gtk_combo_box_text_remove_all(combobox);
 		gtk_widget_set_sensitive(GTK_WIDGET(combobox), set_sensitive);
 	}
@@ -695,7 +695,7 @@ void on_assistant_addcity_diyanet_combobox_changed_func(GtkComboBoxText* combobo
 			free(result_str);
 		} else {
 			// Reset
-			if(gtk_combo_box_get_has_entry(combobox_src))
+			if(gtk_combo_box_get_has_entry(GTK_COMBO_BOX(combobox_src)))
 				gtk_combo_box_text_remove_all(combobox_src);
 			assistant_diyanet_reset_combobox(combobox_dest, false);
 		}
