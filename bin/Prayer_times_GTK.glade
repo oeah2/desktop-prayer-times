@@ -492,20 +492,21 @@ Author: Ahmet Öztürk
                         <signal name="activate" handler="on_menuitm_saveas_activate" object="dlg_savefile" swapped="no"/>
                       </object>
                     </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Städte</property>
-                <property name="use-underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menuitm_reset">
+                        <property name="label">gtk-revert-to-saved</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="use-stock">True</property>
+                        <signal name="activate" handler="on_menuitm_reset_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                      </object>
+                    </child>
                     <child>
                       <object class="GtkMenuItem" id="menuitm_add_city">
                         <property name="visible">True</property>
@@ -519,7 +520,7 @@ Author: Ahmet Öztürk
                       <object class="GtkMenuItem" id="menuitm_remove_city">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label">Stadt löschen</property>
+                        <property name="label">Städte löschen</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_removecity_activate" object="dlg_loadfile" swapped="no"/>
                       </object>
@@ -555,6 +556,25 @@ Author: Ahmet Öztürk
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
                         <signal name="activate" handler="gtk_widget_show" object="dlg_about" swapped="yes"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menutim_report_error">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Fehler melden</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_menutim_report_error_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitm_participate">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Unterstütze uns bei der Entwicklung dieses Programms</property>
+                        <property name="label" translatable="yes">Mitmachen</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_menuitm_participate_activate" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -1425,7 +1445,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
             <property name="name">assistant_addcity_diyanet_combobox_country</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <signal name="changed" handler="on_assistant_addcity_diyanet_combobox_country_changed" swapped="no"/>
+            <signal name="changed" handler="on_assistant_addcity_diyanet_combobox_country_changed" object="assistant_addcity_diyanet_combobox_province" swapped="no"/>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -1433,11 +1453,12 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText">
-            <property name="name">assistant_addcity_diyanet_combobox_citz</property>
+          <object class="GtkComboBoxText" id="assistant_addcity_diyanet_combobox_city">
+            <property name="name">assistant_addcity_diyanet_combobox_city</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="can-focus">False</property>
+            <signal name="changed" handler="on_assistant_addcity_diyanet_combobox_city_changed" object="assistant_addcity" swapped="no"/>
           </object>
           <packing>
             <property name="left-attach">1</property>
@@ -1445,11 +1466,12 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           </packing>
         </child>
         <child>
-          <object class="GtkComboBoxText">
+          <object class="GtkComboBoxText" id="assistant_addcity_diyanet_combobox_province">
             <property name="name">assistant_addcity_diyanet_combobox_province</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
             <property name="can-focus">False</property>
+            <signal name="changed" handler="on_assistant_addcity_diyanet_combobox_province_changed" object="assistant_addcity_diyanet_combobox_city" swapped="no"/>
           </object>
           <packing>
             <property name="left-attach">1</property>
