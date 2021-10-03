@@ -62,6 +62,7 @@ enum pr_time_providers { /**< enum for indexing prayer times providers */
 extern char const*const prayer_names[prayers_num]; /**< Referenced to prayer names */
 extern char const*const provider_names[prov_num]; /**< Referencing to prayer times providers names */
 extern char const*const ST_cm_names[ST_cm_num];
+extern char const*const diyanet_prayer_times_file_destination;
 
 typedef struct prayer prayer;
 

@@ -535,6 +535,13 @@ void assistant_set_page_incomplete(GtkAssistant* assistant, int page) {
 	}
 }
 
+void assistant_set_current_page_incomplete(GtkAssistant* assistant) {
+	if(assistant) {
+		int current_page = gtk_assistant_get_current_page(assistant);
+		assistant_set_page_incomplete(assistant, current_page);
+	}
+}
+
 
 void assistant_clearCityname_page(GtkAssistant* assistant) {
 	if(assistant) {
@@ -619,21 +626,123 @@ City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* 
 	return ret;
 }
 
+static size_t assistant_get_diyanet_code(char const*const str) {
+	size_t ret = 0;
+	if(str) {
+		char buffer[strlen(str) + 5];
+		strcpy(buffer, str);
+
+		char* name = strtok(buffer, ",");
+		char* id = strtok(0, "\0");
+		ret = strtol(id, 0, 10);
+	}
+	return ret;
+}
+
+void assistant_apply_diyanet_to_combobox(GtkComboBoxText* combobox_dest, char* str) {
+	if(combobox_dest && str) {
+		gtk_combo_box_text_remove_all(combobox_dest);
+		char* name = 0;
+		name = strtok(str, ";");
+		gtk_combo_box_text_append_text(combobox_dest, name);
+		while((name = strtok(0, ";"))) {
+			gtk_combo_box_text_append_text(combobox_dest, name);
+		}
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_dest), -1);
+	}
+}
+
 void assistant_diyanet_display_countries(GtkAssistant* assistant) {
 	if(assistant) {
 		char* countries = diyanet_get_country_codes(cfg->lang);
 		if(countries) {
 			GtkComboBoxText* combobox_country = GTK_COMBO_BOX_TEXT(find_child(GTK_WIDGET(assistant), "assistant_addcity_diyanet_combobox_country"));
 			if(combobox_country) {
-				char *name = 0;
-				name = strtok(countries, ";");
-				gtk_combo_box_text_append_text(combobox_country, name);
-				while((name = strtok(0, ";"))) {
-					gtk_combo_box_text_append_text(combobox_country, name);
-				}
-				gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_country), -1);
+				assistant_apply_diyanet_to_combobox(combobox_country, countries);
 			}
 		}
+		free(countries);
+	}
+}
+
+static void assistant_diyanet_reset_combobox(GtkComboBoxText* combobox, bool set_sensitive) {
+	if(combobox) {
+		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), -1);
+		if(gtk_combo_box_get_has_entry(combobox))
+			gtk_combo_box_text_remove_all(combobox);
+		gtk_widget_set_sensitive(GTK_WIDGET(combobox), set_sensitive);
+	}
+}
+
+static void assistant_diyanet_reset_comboboxes(GtkComboBoxText* combobox_country, GtkComboBoxText* combobox_provinces, GtkComboBoxText* combobox_cities) {
+	if(combobox_country)
+		assistant_diyanet_reset_combobox(combobox_country, true);
+	if(combobox_provinces)
+		assistant_diyanet_reset_combobox(combobox_provinces, false);
+	if(combobox_cities)
+		assistant_diyanet_reset_combobox(combobox_cities, false);
+}
+
+void on_assistant_addcity_diyanet_combobox_changed_func(GtkComboBoxText* combobox_src, GtkComboBoxText* combobox_dest, bool set_dest_sensitive, char* (*f)(size_t, enum Languages)) {
+	if(combobox_src && combobox_dest && f) {
+		char const*const chosen_element = gtk_combo_box_text_get_active_text(combobox_src);
+		if(chosen_element) {
+			size_t chosen_id = assistant_get_diyanet_code(chosen_element);
+			char* result_str = f(chosen_id, cfg->lang);
+			assistant_apply_diyanet_to_combobox(combobox_dest, result_str);
+			if(set_dest_sensitive)
+				gtk_widget_set_sensitive(GTK_WIDGET(combobox_dest), true);
+			free(result_str);
+		} else {
+			// Reset
+			if(gtk_combo_box_get_has_entry(combobox_src))
+				gtk_combo_box_text_remove_all(combobox_src);
+			assistant_diyanet_reset_combobox(combobox_dest, false);
+		}
+	}
+}
+
+void on_assistant_addcity_diyanet_combobox_country_changed(GtkWidget* widget, gpointer data) {
+	GtkComboBoxText* combobox_country = GTK_COMBO_BOX_TEXT(widget);
+	GtkComboBoxText* combobox_provinces = GTK_COMBO_BOX_TEXT(data);
+	if(combobox_country && combobox_provinces) {
+		on_assistant_addcity_diyanet_combobox_changed_func(combobox_country, combobox_provinces, true, diyanet_get_provinces);
+	}
+}
+
+void on_assistant_addcity_diyanet_combobox_province_changed(GtkWidget* widget, gpointer data) {
+	GtkComboBoxText* combobox_provinces = GTK_COMBO_BOX_TEXT(widget);
+	GtkComboBoxText* combobox_cities = GTK_COMBO_BOX_TEXT(data);
+	if(combobox_provinces && combobox_cities) {
+		on_assistant_addcity_diyanet_combobox_changed_func(combobox_provinces, combobox_cities, true, diyanet_get_cities);
+	}
+}
+
+void on_assistant_addcity_diyanet_combobox_city_changed(GtkWidget* widget, gpointer data) {
+	GtkComboBoxText* combobox_city = GTK_COMBO_BOX_TEXT(widget);
+	GtkAssistant* assistant = GTK_ASSISTANT(data);
+	if(combobox_city && assistant) {
+		char const*const chosen_id = gtk_combo_box_text_get_active_text(combobox_city);
+		if(chosen_id && strcmp(chosen_id, ""))
+			assistant_set_current_page_complete(assistant);
+		else
+			assistant_set_current_page_incomplete(assistant);
+	}
+}
+
+void assistant_addcity_diyanet_parse_city(char const*const combobox_city_str) {
+	if(combobox_city_str) {
+		char buffer[strlen(combobox_city_str) + 5];
+		strcpy(buffer, combobox_city_str);
+		char* name = strtok(buffer, ",");
+		char* id_str = strtok(0, "\0");
+		char filename[strlen(id_str) + 30];
+		strcpy(filename, diyanet_prayer_times_file_destination);
+		strcat(filename, id_str);
+		strcat(filename, ".json");
+
+		city_init_diyanet(&city_buffer, name, prov_diyanet, filename, 0);
+		config_add_city(city_buffer, cfg);
 	}
 }
 
@@ -658,12 +767,10 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 
 		break;
 	case AssistantPages_Calc_Cityname:
-		// Todo aktive stadt erkennung und namen übernehmen
 		next_page = AssistantPages_Calc_Method;
 		break;
 
 	case AssistantPages_Calc_Method:
-		// todo aktive einstellungen übernehmen
 		(void)next_page;
 		GtkComboBox* method = 0, *asr = 0, *highlats = 0;
 		method = GTK_COMBO_BOX(find_child(GTK_WIDGET(assistant), "assistant_addcity_calc_combobox_method"));
@@ -680,14 +787,24 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 		}
 		break;
 	case AssistantPages_Diyanet:
-		puts("AssistantPages_Diyanet no next page");
+		(void) next_page;
+		GtkComboBoxText* combobox_diyanet_city = GTK_COMBO_BOX_TEXT(find_child(GTK_WIDGET(assistant), "assistant_addcity_diyanet_combobox_city"));
+		if(combobox_diyanet_city) {
+			char const*const chosen_element = gtk_combo_box_text_get_active_text(combobox_diyanet_city);
+			if(chosen_element) {
+				assistant_addcity_diyanet_parse_city(chosen_element);
+				gtk_widget_hide(GTK_WIDGET(assistant));
+				//diyanet_update_file(&city_buffer, false);
+			} else {
+				next_page = current_page;
+			}
+		}
 		break;
 	default:
+		perror("assistant_addcity_nextpage_func, default. Should not occur");
 		break;
 
 	}
-
-	printf("assistant_addcity_nextpage_func, current_page: %d, next page: %d\n", current_page, next_page);
 	return next_page;
 }
 
@@ -719,6 +836,14 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 		break;
 
 	case AssistantPages_Diyanet:
+		(void) current_page;
+		GtkComboBoxText *combobox_country, *combobox_provinces, *combobox_cities;
+		combobox_country = GTK_COMBO_BOX_TEXT(find_child(GTK_WIDGET(assistant), "assistant_addcity_diyanet_combobox_country"));
+		combobox_provinces = GTK_COMBO_BOX_TEXT(find_child(GTK_WIDGET(assistant), "assistant_addcity_diyanet_combobox_province"));
+		combobox_cities = GTK_COMBO_BOX_TEXT(find_child(GTK_WIDGET(assistant), "assistant_addcity_diyanet_combobox_city"));
+		if(combobox_country && combobox_provinces && combobox_cities) {
+			assistant_diyanet_reset_comboboxes(combobox_country, combobox_provinces, combobox_cities);
+		}
 		assistant_diyanet_display_countries(assistant);
 		break;
 
@@ -1045,6 +1170,11 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_prepare", G_CALLBACK(on_assistant_addcity_prepare));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_cancel", G_CALLBACK(on_assistant_addcity_cancel));
     gtk_builder_add_callback_symbol(builder, "on_dlg_about_delete_event", G_CALLBACK(on_dlg_about_delete_event));
+    gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_diyanet_combobox_country_changed", G_CALLBACK(on_assistant_addcity_diyanet_combobox_country_changed));
+    gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_diyanet_combobox_province_changed", G_CALLBACK(on_assistant_addcity_diyanet_combobox_province_changed));
+    gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_diyanet_combobox_city_changed", G_CALLBACK(on_assistant_addcity_diyanet_combobox_city_changed));
+
+
 
     // Todo check
     GtkAssistant* assistant_addcity = GTK_ASSISTANT(gtk_builder_get_object(builder, "assistant_addcity")); CHECK_OBJ(assistant_addcity);

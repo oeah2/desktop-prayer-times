@@ -16,6 +16,8 @@ static char const*const diyanet_format_keywords[prayers_num] = {
     [pr_ishaa] = "Yatsi"
 };
 
+char const*const diyanet_prayer_times_file_destination = "./bin/";
+
 //#define OLD_CODE
 #ifdef OLD_CODE
 static struct tm diyanet_mk_prayer_time(char* hr, char* date)
@@ -201,8 +203,8 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
         return EFAULT;
     }
 
-    size_t file_length = file_find_length(file_times);
-    char* file_content = malloc(sizeof(char) * (file_length + 10));
+    size_t file_length = file_find_length(file_times) + 10;
+    char* file_content = malloc(sizeof(char) * (file_length));
     if(!file_read_all(file_times, file_length, file_content)) {
         ret = ENOFILE;
     	myperror("Error reading file");
@@ -329,26 +331,32 @@ int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days
 
 int diyanet_update_file(City* city, bool preserve_old_data)
 {
-    char const*const host = "ezanvakti.herokuapp.com";
-    char filename[strlen(city->filename)];
-    strcpy(filename, city->filename);
-    char* filename_without_type = strtok(filename, ".");
-    size_t buff_len = strlen("/vakitler/") + strlen(filename_without_type) + 1;
-    assert(buff_len);
-    char buffer[buff_len];
-    strcpy(buffer, "/vakitler/");
-    strcat(buffer, filename_without_type);
+	if(city) {
+		char const*const host = "ezanvakti.herokuapp.com";
+		char filename[strlen(city->filename)];
+		strcpy(filename, city->filename);
+		char* filename_without_type = 0;
+		if(!strstr(filename, diyanet_prayer_times_file_destination))
+			filename_without_type = strtok(filename, ".");
+		else
+			filename_without_type = strtok(filename + strlen(diyanet_prayer_times_file_destination), ".");
+		size_t buff_len = strlen("/vakitler/") + strlen(filename_without_type) + 1;
+		assert(buff_len);
+		char buffer[buff_len];
+		strcpy(buffer, "/vakitler/");
+		strcat(buffer, filename_without_type);
 
-    char* ret = http_get(host, buffer, 0);
-    char* mode = preserve_old_data ? "a" : "w";     // Append file or not
-    if(city->file_times)
-        city->file_times = freopen(city->filename, mode, city->file_times);
-    else
-        city->file_times = fopen(city->filename, "w");
-    fputs(ret, city->file_times);
-    fflush(city->file_times);
+		char* ret = http_get(host, buffer, 0);
+		char* mode = preserve_old_data ? "a" : "w";     // Append file or not
+		if(city->file_times)
+			city->file_times = freopen(city->filename, mode, city->file_times);
+		else
+			city->file_times = fopen(city->filename, "w");
+		fputs(ret, city->file_times);
+		fflush(city->file_times);
 
-    city->file_times = freopen(city->filename, "r", city->file_times);  // reopen for reading
+		city->file_times = freopen(city->filename, "r", city->file_times);  // reopen for reading
+	}
     return 0;
 }
 
