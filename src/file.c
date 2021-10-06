@@ -1,8 +1,15 @@
 #include "file.h"
 #include <assert.h>
 
-size_t file_find_length(FILE* file)
-{
+#define FILE_ADDITIONAL_BUFFER 10
+
+/** \brief Returns length of file
+ *
+ * \param file FILE* of which the lengh shall be determined
+ * \return size_t file length, including terminating zero
+ *
+ */
+static size_t file_find_actual_length(FILE* file) {
     size_t ret = 0;
     if(file) {
         rewind(file);
@@ -14,11 +21,16 @@ size_t file_find_length(FILE* file)
     return ret;
 }
 
+size_t file_find_length(FILE* file)
+{
+    return file_find_actual_length(file) + FILE_ADDITIONAL_BUFFER;
+}
+
 bool file_read_all(FILE* file, size_t max_len, char dest[max_len])
 {
     bool ret = false;
     if(file) {
-        size_t file_length = file_find_length(file);
+        size_t file_length = file_find_actual_length(file);
         if(file_length > max_len)
             return ret;
 

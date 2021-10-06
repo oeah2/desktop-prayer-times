@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-/** \brief Returns length of file
+/** \brief Returns length of file with additional buffer
  *
  * \param file FILE* of which the lengh shall be determined
- * \return size_t file length, including terminating zero
+ * \return size_t file length, including terminating zero and additional buffer
  *
  */
 size_t file_find_length(FILE* file);
