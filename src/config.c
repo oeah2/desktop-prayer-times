@@ -227,7 +227,6 @@ static bool config_diyanet_read_city(const cJSON* element, char* name, City* cit
     cJSON* prayer_file = cJSON_GetObjectItem(element, config_format_json_specifiers[json_filename]);
     assert(prayer_file); assert(id);
 
-    printf("config_diyanet_read_city: id: %d", id->valueint);
     City* c = city_init_diyanet(city, name, prov_diyanet, prayer_file->valuestring, id->valueint);
     if(c) ret = true;
 
@@ -292,7 +291,7 @@ int config_read(char const* filename, Config* cfg)
             cfg->counter_parsed_cities++;
         }
         if(cfg->counter_parsed_cities != cfg->num_cities) {
-        	printf("Something went wrong while parsing cities. Not all cities could be parsed.\n");
+        	myperror("Something went wrong while parsing cities. Not all cities could be parsed.\n");
         }
     }
 
@@ -419,7 +418,6 @@ int config_json_save(char const*const filename, Config*const cfg) {
     	myperror("Error printing json");
         goto ERR;
     }
-    puts(string);
     fprintf(cfg_file, "%s\n", string);
     free(string);
     string = 0;

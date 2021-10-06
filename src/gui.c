@@ -404,7 +404,7 @@ void dlg_calc_error_retry_btn_clicked(GtkWidget* widget, gpointer data)
     City* city = &(cfg->cities[city_ptr]);
     if(city->pr_time_provider == prov_diyanet) {
         if(!socket_check_connection()) {
-            puts("No internet connection");
+            myperror("dlg_calc_error_retry_btn_clicked: No internet connection");
         }
     }
     display_city(*city);
@@ -416,7 +416,6 @@ void on_dlg_about_response(GtkWidget* dlg_about, gpointer data)
 }
 
 bool on_dlg_about_delete_event(GtkWidget* dlg_about, gpointer data) {
-	puts("on_dlg_about_delete_event");
 	gtk_widget_hide(dlg_about);
 	return true;
 }
@@ -854,12 +853,10 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 
 	}
 	//assistant_addcity_radiobutton_calc
-	printf("on_assistant_addcity_prepare: page %d\n", current_page);
 }
 
 void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
-	puts("on_assistant_addcity_cancel");
 	gtk_widget_hide(GTK_WIDGET(assistant));
 }
 

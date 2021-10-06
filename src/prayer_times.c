@@ -18,7 +18,7 @@ char const*const provider_names[prov_num] = {
     [prov_empty] = "",
 };
 
-void prayer_print_times(char const*const city_name, prayer times[prayers_num])
+void prayer_print_times(char const*const city_name, prayer times[prayers_num]) // Todo check if this function is depreciated
 {
     size_t buffer_length = 200;
     char buffer[buffer_length];
