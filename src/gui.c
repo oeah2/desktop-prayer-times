@@ -280,7 +280,7 @@ enum AddChildToListbox {
 	createCheckButton,
 };
 
-static GtkWidget* gui_create_and_add_child_to_listbox(GtkListBox* listbox, enum AddChildToListbox command, char const*const label, char const*const name, GtkRadioButton const*const parent) {
+static GtkWidget* gui_create_and_add_child_to_listbox(GtkListBox* listbox, enum AddChildToListbox command, char const*const label, char const*const name, GtkRadioButton* parent) {
 	GtkWidget* ret = 0;
 	if(listbox && label) {
 	    GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
@@ -333,7 +333,7 @@ bool Callback_Minutes(gpointer data)
 bool Callback_Seconds(gpointer data)
 {
     prayer prayer_times[prayers_num];
-    if(city_ptr < cfg->num_cities && (cfg->num_cities == 0 || cfg->cities[city_ptr].pr_time_provider == prov_empty)) {
+    if(cfg->num_cities == 0 || cfg->cities[city_ptr].pr_time_provider == prov_empty) {
         gtk_label_set_text(GTK_LABEL(labels[gui_id_remainingtime]), "");
     	display_empty_city();
     	return true;
