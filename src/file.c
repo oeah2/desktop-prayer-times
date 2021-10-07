@@ -17,6 +17,7 @@
 */
 
 #include <assert.h>
+#include "error.h"
 #include "file.h"
 
 #define FILE_ADDITIONAL_BUFFER 10

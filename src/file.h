@@ -17,8 +17,8 @@
 */
 
 
-//#ifndef FILE_H_INCLUDED
-//#define FILE_H_INCLUDED
+#ifndef FILE_H_INCLUDED
+#define FILE_H_INCLUDED
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -41,4 +41,4 @@ size_t file_find_length(FILE* file);
  */
 bool file_read_all(FILE* file, size_t max_len, char dest[max_len]);
 
-//#endif // FILE_H_INCLUDED
+#endif // FILE_H_INCLUDED
