@@ -761,6 +761,7 @@ void assistant_addcity_diyanet_parse_city(char const*const combobox_city_str) {
 
 		city_init_diyanet(&city_buffer, name, prov_diyanet, filename, 0);
 		config_add_city(city_buffer, cfg);
+		// todo hier
 	}
 }
 
@@ -811,6 +812,7 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 			char const*const chosen_element = gtk_combo_box_text_get_active_text(combobox_diyanet_city);
 			if(chosen_element) {
 				assistant_addcity_diyanet_parse_city(chosen_element);
+				gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
 				gtk_widget_hide(GTK_WIDGET(assistant));
 				//diyanet_update_file(&city_buffer, false);
 			} else {
