@@ -227,7 +227,7 @@ int main(int argc, char** argv)
     }
     char puffer_julian_date[buff_len];
     char puffer_hijri_date[buff_len];
-    prayer pr_hijri_date = {0}, pr_julian_date = {0};
+    prayer pr_hijri_date = {0};
     if(config.cities[0].pr_time_provider == prov_calc) {
         time_t now = time(0);
         struct tm tm = *localtime(&now);
