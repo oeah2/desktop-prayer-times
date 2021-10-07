@@ -72,11 +72,6 @@ enum pr_time_providers { /**< enum for indexing prayer times providers */
     prov_num
 };
 
-//extern enum ST_calculation_method;
-//extern enum ST_juristic_method;
-//extern enum ST_adjusting_method;
-
-
 extern char const*const prayer_names[prayers_num]; /**< Referenced to prayer names */
 extern char const*const provider_names[prov_num]; /**< Referencing to prayer times providers names */
 extern char const*const ST_cm_names[ST_cm_num];
