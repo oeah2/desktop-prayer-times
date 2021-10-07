@@ -51,12 +51,11 @@ void prayer_print_times(char const*const city_name, prayer times[prayers_num]) /
 int empty_get_todays_prayers(City city, prayer prayer_times[prayers_num])
 {
     for(size_t i = 0; i < prayers_num; i++) {
-        prayer_times[i].time_at = (struct tm) {
-            0
-        };
-        prayer_times[i].hicri_date = (struct tm) {
-            0
-        };
+    	prayer_times[i] = (prayer) {
+    		.time_at = (struct tm) {0},
+    		.hicri_date = (struct tm) {0},
+			.name = city.name,
+    	};
     }
     return EXIT_SUCCESS;
 }

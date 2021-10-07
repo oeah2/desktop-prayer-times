@@ -152,6 +152,12 @@ static void display_city(City city)
     gtk_label_set_text(labels[gui_id_hijridate], hijri_date);
 }
 
+static void display_empty_city(void) {
+	City c = {0};
+	c = *city_init_empty(&c);
+	display_city(c);
+}
+
 static int gui_calc_preview(City city, prayer prayer_times[prayers_num], int days)
 {
     preview_function* preview = preview_functions[city.pr_time_provider];
@@ -226,7 +232,14 @@ static GtkWidget* find_child(GtkWidget* parent, const char*const name)
     return NULL;
 }
 
-static GtkListBox* gtk_listbox_clear(GtkListBox* listbox) {
+enum ListboxClearCommand {
+	ListboxClearUndefined,
+	ListboxClearAssistantAddCity,
+	ListboxClearDialogRemoveCity,
+
+};
+
+static GtkListBox* gtk_listbox_clear(GtkListBox* listbox, enum ListboxClearCommand command) {
     GtkListBox* box_return = listbox;
     if(!listbox) return box_return;
 
@@ -235,15 +248,74 @@ static GtkListBox* gtk_listbox_clear(GtkListBox* listbox) {
 
     GtkListBox* new_listbox = GTK_LIST_BOX(gtk_list_box_new());
     if(!new_listbox) return box_return;
-    gtk_widget_set_name(GTK_WIDGET(new_listbox), "assistant_add_city_page1_listbox");
+
+    if(command == ListboxClearAssistantAddCity) {
+    	gtk_widget_set_name(GTK_WIDGET(new_listbox), "assistant_add_city_page1_listbox");
+        assert(GTK_IS_GRID(parent));
+        GtkGrid* grid = GTK_GRID(parent);
+        gtk_grid_attach(grid, GTK_WIDGET(new_listbox), 1, 1, 1, 1);
+    } else if(command == ListboxClearDialogRemoveCity) {
+    	gtk_widget_set_name(GTK_WIDGET(new_listbox), "dlg_removecity_listbox");
+        assert(GTK_IS_BOX(parent));
+        GtkBox* box = GTK_BOX(parent);
+        gtk_box_pack_end(box, GTK_WIDGET(new_listbox), false, false, 6);
+    }
 
     gtk_widget_destroy(GTK_WIDGET(listbox));
-    assert(GTK_IS_GRID(parent));
-    GtkGrid* grid = GTK_GRID(parent);
-    gtk_grid_attach(grid, GTK_WIDGET(new_listbox), 1, 1, 1, 1);
-    //gtk_container_add(GTK_CONTAINER(parent), GTK_WIDGET(new_listbox));
     box_return = new_listbox;
     return box_return;
+}
+
+static GtkListBox* gtk_listbox_clear_assistant_addcity(GtkListBox* listbox) {
+	return gtk_listbox_clear(listbox, ListboxClearAssistantAddCity);
+}
+
+static GtkListBox* gtk_listbox_clear_dialog_removeCity(GtkListBox* listbox) {
+	return gtk_listbox_clear(listbox, ListboxClearDialogRemoveCity);
+}
+
+enum AddChildToListbox {
+	createUndefined,
+	createRadioButton,
+	createCheckButton,
+};
+
+static GtkWidget* gui_create_and_add_child_to_listbox(GtkListBox* listbox, enum AddChildToListbox command, char const*const label, char const*const name, GtkRadioButton const*const parent) {
+	GtkWidget* ret = 0;
+	if(listbox && label) {
+	    GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
+	    if(!list_element) goto ERR;
+
+	    switch(command) {
+	    case createCheckButton:
+	    	ret = gtk_check_button_new_with_label(label);
+	    	break;
+
+	    case createRadioButton:
+	    	ret = gtk_radio_button_new_with_label_from_widget(parent, label);
+	    	break;
+
+	    default:
+	    	assert(false);
+	    }
+	    if(!ret) goto ERR;
+	    if(name) gtk_widget_set_name(GTK_WIDGET(ret), name);
+
+	    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(ret));
+	    gtk_list_box_insert(listbox, GTK_WIDGET(list_element), -1);
+	}
+	return ret;
+ERR:
+	myperror("gui_create_and_add_child_to_listbox: Error creating element");
+	return ret;
+}
+
+static GtkCheckButton* gui_create_and_add_check_button(GtkListBox* listbox, char const*const label, char const*const name) {
+	return GTK_CHECK_BUTTON(gui_create_and_add_child_to_listbox(listbox, createCheckButton, label, name, NULL));
+}
+
+static GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkRadioButton* group, char const*const label, char const*const name) {
+    return GTK_RADIO_BUTTON(gui_create_and_add_child_to_listbox(listbox, createRadioButton, label, name, group));
 }
 
 static bool gui_apply_language(size_t lang_id)
@@ -261,11 +333,14 @@ bool Callback_Minutes(gpointer data)
 bool Callback_Seconds(gpointer data)
 {
     prayer prayer_times[prayers_num];
-    gui_calc_prayer(cfg->cities[city_ptr], prayer_times);
-    if(cfg->cities[city_ptr].pr_time_provider == prov_empty) {
+    if(city_ptr < cfg->num_cities && (cfg->num_cities == 0 || cfg->cities[city_ptr].pr_time_provider == prov_empty)) {
         gtk_label_set_text(GTK_LABEL(labels[gui_id_remainingtime]), "");
-        return true;           // In case the calculation method failed, remaining time will also not be calculated
+    	display_empty_city();
+    	return true;
+    } else if(city_ptr >= cfg->num_cities) {
+    	city_ptr = 0;
     }
+    gui_calc_prayer(cfg->cities[city_ptr], prayer_times);
 
     int rem_hours = 0, rem_mins = 0, rem_secs = 0, ret_val = 0;
 CALC_REMAINING:
@@ -479,62 +554,76 @@ void on_menuitm_movecities_activate(GtkWidget* widget, gpointer data) {
 }
 
 void on_menuitm_removecity_activate(GtkWidget* widget, gpointer data) {
+	GtkDialog* dlg_removecity = GTK_DIALOG(data);
+	gtk_window_resize(GTK_WINDOW(dlg_removecity), -1, 200); // todo remove?
+	char const*const listbox_name = "dlg_removecity_listbox";
+	GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_removecity), listbox_name));
+	if(!listbox) return;
 
+ADD_CITIES:
+	for(size_t i = 0; i < cfg->num_cities; i++) {
+		gui_create_and_add_check_button(listbox, cfg->cities[i].name, NULL);
+	}
+
+	gtk_widget_show_all(GTK_WIDGET(dlg_removecity));
+	int ret = 0;
+RUN_DIALOG:
+	ret = gtk_dialog_run(dlg_removecity);
+	printf("ret: %d\n", ret);
+	switch(ret) {
+	case GTK_RESPONSE_APPLY:
+	case GTK_RESPONSE_OK:
+		(void) ret;
+		GList* children = gtk_container_get_children(GTK_CONTAINER(listbox));
+		for(GList* child = children; child; child = child->next) {
+			GtkListBoxRow* row = GTK_LIST_BOX_ROW(child->data);
+			if(!row) return;
+			GtkCheckButton* check_button = GTK_CHECK_BUTTON(gtk_bin_get_child(GTK_BIN(row)));
+			if(!check_button) return;
+			if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_button))) {
+				size_t i = gtk_list_box_row_get_index(row);
+				config_remove_city(i, cfg);
+				if((i == city_ptr || i > cfg->num_cities) && cfg->num_cities) {
+					city_ptr = 0;
+					display_city(cfg->cities[city_ptr]);
+				} else if(cfg->num_cities == 0) {
+					display_empty_city();
+					gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), false);
+					gtk_widget_set_sensitive(GTK_WIDGET(btn_prev_city), false);
+				}
+				i++;
+			}
+		}
+		g_list_free(children);
+		if(ret == GTK_RESPONSE_APPLY) {
+			gtk_listbox_clear_dialog_removeCity(listbox);
+			goto ADD_CITIES;
+		}
+		break;
+
+	default:
+		puts("on_menuitm_removecity_activate, default-pfad");
+		goto RUN_DIALOG;
+		break;
+
+	case GTK_RESPONSE_DELETE_EVENT:
+	case GTK_RESPONSE_CANCEL:
+		// do nothing, hide widget at end of function
+		break;
+	}
+	if(cfg->num_cities == 1 || city_ptr == 0) {
+		gtk_widget_set_sensitive(GTK_WIDGET(btn_prev_city), false);
+	}
+	if(cfg->num_cities == 1 || city_ptr == cfg->num_cities) {
+		gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), false);
+	}
+	gtk_listbox_clear_dialog_removeCity(listbox);
+	gtk_widget_hide(GTK_WIDGET(dlg_removecity));
 }
 
 void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
-#define ASSISTANT_ADDCITY
-#ifdef ASSISTANT_ADDCITY
 	GtkAssistant* assistant_addcity = data;
 	gtk_widget_show_all(GTK_WIDGET(assistant_addcity));
-#else
-	GtkDialog* dlg_addcity = data;
-
-    GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "assistant_add_city_page1_listbox"));
-    if(!listbox) return;
-
-    gtk_widget_show_all(GTK_WIDGET(dlg_addcity));
-    int dialog_ret = gtk_dialog_run(dlg_addcity);
-    if(dialog_ret == GTK_RESPONSE_APPLY) {
-        gtk_widget_hide(GTK_WIDGET(dlg_addcity));
-    } else if(dialog_ret == GTK_RESPONSE_CANCEL) {
-        gtk_widget_hide(GTK_WIDGET(dlg_addcity));
-    } else {
-        gtk_widget_hide(GTK_WIDGET(dlg_addcity));
-    }
-
-    // Clear Search
-    GtkSearchEntry* entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(dlg_addcity), "assistant_add_city_page1_search"));
-    if(entry) {
-        gtk_entry_set_text(GTK_ENTRY(entry), "");
-    }
-    GtkListBox* list = GTK_LIST_BOX(find_child(GTK_WIDGET(dlg_addcity), "assistant_add_city_page1_listbox"));
-    if(list) {
-       list =  gtk_listbox_clear(list);
-    }
-    gtk_window_resize(GTK_WINDOW(dlg_addcity), 350, 200);
-#endif
-}
-
-static GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkRadioButton* group, char const*const label, char const*const name) {
-    GtkRadioButton* ret = 0;
-    if(!listbox || !label) return ret;
-
-    GtkListBoxRow* list_element = GTK_LIST_BOX_ROW(gtk_list_box_row_new());
-    if(!list_element) goto ERR;
-
-    ret = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label_from_widget(group, label));
-    //ret = GTK_RADIO_BUTTON(gtk_radio_button_new_with_label(list, label));
-    if(!ret) goto ERR;
-    if(name) gtk_widget_set_name(GTK_WIDGET(ret), name);
-
-    gtk_container_add(GTK_CONTAINER(list_element), GTK_WIDGET(ret));
-    gtk_list_box_insert(listbox, GTK_WIDGET(list_element), -1);
-
-    return ret;
-ERR:
-	myperror("Error creating radio button");
-    return ret;
 }
 
 void assistant_set_current_page_complete(GtkAssistant* assistant) {
@@ -567,7 +656,7 @@ void assistant_clearCityname_page(GtkAssistant* assistant) {
 		GtkListBox* listbox = GTK_LIST_BOX(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_listbox")); // Todo statt listbox die grid �bertragen; dann kann ich die listbox l�schen. Denn wenn ich die listbox l�sche, kann der gpointer nicht mehr ordnungsgem�� arbeitne.
 		GtkSearchEntry* search_entry = GTK_SEARCH_ENTRY(find_child(GTK_WIDGET(assistant), "assistant_add_city_page1_search"));
 		if(listbox)
-			gtk_listbox_clear(listbox);
+			gtk_listbox_clear_assistant_addcity(listbox);
 		if(search_entry)
 			gtk_entry_set_text(GTK_ENTRY(search_entry), "");
 	}
@@ -761,6 +850,10 @@ void assistant_addcity_diyanet_parse_and_add_city(char const*const combobox_city
 
 		city_init_diyanet(&city_buffer, name, prov_diyanet, filename, 0);
 		config_add_city(city_buffer, cfg);
+		if(cfg->num_cities == 1) {
+			city_ptr = 0;
+			display_city(cfg->cities[0]);
+		}
 	}
 }
 
@@ -799,7 +892,11 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 			if(config_add_city(city_buffer, cfg) == EXIT_FAILURE) {
 				assert(false);
 			}
-			gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
+			if(cfg->num_cities == 1) {
+				city_ptr = 0;
+				display_city(cfg->cities[city_ptr]);
+			} else
+				gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
 			gtk_widget_hide(GTK_WIDGET(assistant));
 			//next_page = AssistantPages_Apply;
 		}
@@ -813,7 +910,6 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 				assistant_addcity_diyanet_parse_and_add_city(chosen_element);
 				gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
 				gtk_widget_hide(GTK_WIDGET(assistant));
-				//diyanet_update_file(&city_buffer, false);
 			} else {
 				next_page = current_page;
 			}
@@ -825,10 +921,6 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 
 	}
 	return next_page;
-}
-
-void assistant_addcity_destroy(gpointer data) {
-
 }
 
 void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
@@ -872,7 +964,6 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 		break;
 
 	}
-	//assistant_addcity_radiobutton_calc
 }
 
 void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
@@ -898,7 +989,7 @@ void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpoint
         GtkRadioButton* first_radio_button = GTK_RADIO_BUTTON(find_child(GTK_WIDGET(grid), "radio_button_first"));
         if(first_radio_button) { // Destroy remaining radio buttons
             assert(listbox);
-            GtkListBox* newList = gtk_listbox_clear(listbox);
+            GtkListBox* newList = gtk_listbox_clear_assistant_addcity(listbox);
             if(newList) listbox = newList;
         }
 
@@ -927,7 +1018,7 @@ void on_dlg_add_city_close(GtkWidget* widget, gpointer data) {
     }
     GtkListBox* list = GTK_LIST_BOX(find_child(widget, "assistant_add_city_page1_listbox"));
     if(list) {
-       list =  gtk_listbox_clear(list);
+       list =  gtk_listbox_clear_assistant_addcity(list);
     }
     gtk_widget_hide(widget);
 }
@@ -1195,8 +1286,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
 
     // Todo check
     GtkAssistant* assistant_addcity = GTK_ASSISTANT(gtk_builder_get_object(builder, "assistant_addcity")); CHECK_OBJ(assistant_addcity);
-	gtk_assistant_set_forward_page_func(assistant_addcity, assistant_addcity_nextpage_func, assistant_addcity, assistant_addcity_destroy);
-
+	gtk_assistant_set_forward_page_func(assistant_addcity, assistant_addcity_nextpage_func, assistant_addcity, NULL);
 
     /* About dialog */
     GtkAboutDialog* dlg_about = GTK_ABOUT_DIALOG(gtk_builder_get_object(builder, "dlg_about"));

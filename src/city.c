@@ -105,6 +105,7 @@ City* city_set_name(City* c, char const*const name) {
 City* city_init_empty(City* c) {
 	if(c) {
 		*c = (City) {
+			.name = " ",
 			.pr_time_provider = prov_empty,
 		};
 	}

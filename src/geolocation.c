@@ -61,7 +61,8 @@ char* geolocation_get(char const*const city_name)
             cJSON* lat_str = cJSON_GetObjectItem(element, "lat");
             cJSON* long_str = cJSON_GetObjectItem(element, "lon");
 
-            char* prev_locale = setlocale(LC_ALL, NULL);
+            char prev_locale[30];
+            strcpy(prev_locale, setlocale(LC_ALL, NULL));
             setlocale(LC_ALL, "C");     // needed to guarantee correct conversion independent of user locale
             double latitude = strtof(cJSON_GetStringValue(lat_str), NULL);
             double longitude = strtof(cJSON_GetStringValue(long_str), NULL);
