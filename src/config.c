@@ -581,7 +581,11 @@ int config_add_city(City c, Config* cfg)
 {
     int ret = EXIT_FAILURE;
     if(cfg) {
-        City* new_pointer = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
+    	City* new_pointer = 0;
+    	if(cfg->num_cities)
+    		new_pointer = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
+    	else
+    		new_pointer = malloc((cfg->num_cities + 1) * sizeof(City));
         if(!new_pointer) return EXIT_FAILURE;
         cfg->cities = new_pointer;
         c.id = config_get_first_free_id(cfg);

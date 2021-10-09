@@ -574,7 +574,9 @@ RUN_DIALOG:
 	case GTK_RESPONSE_APPLY:
 	case GTK_RESPONSE_OK:
 		(void) ret;
+
 		GList* children = gtk_container_get_children(GTK_CONTAINER(listbox));
+		size_t counter_deleted = 0;
 		for(GList* child = children; child; child = child->next) {
 			GtkListBoxRow* row = GTK_LIST_BOX_ROW(child->data);
 			if(!row) return;
@@ -582,23 +584,27 @@ RUN_DIALOG:
 			if(!check_button) return;
 			if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_button))) {
 				size_t i = gtk_list_box_row_get_index(row);
-				config_remove_city(i, cfg);
+				config_remove_city(i - counter_deleted, cfg);
 				if((i == city_ptr || i > cfg->num_cities) && cfg->num_cities) {
 					city_ptr = 0;
-					display_city(cfg->cities[city_ptr]);
 				} else if(cfg->num_cities == 0) {
+					ret = GTK_RESPONSE_OK;
 					display_empty_city();
 					gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), false);
 					gtk_widget_set_sensitive(GTK_WIDGET(btn_prev_city), false);
 				}
+				if(city_ptr && i < city_ptr) city_ptr--;
+				counter_deleted++;
 				i++;
 			}
 		}
 		g_list_free(children);
 		if(ret == GTK_RESPONSE_APPLY) {
-			gtk_listbox_clear_dialog_removeCity(listbox);
+			listbox = gtk_listbox_clear_dialog_removeCity(listbox);
 			goto ADD_CITIES;
 		}
+		if(cfg->num_cities)
+			display_city(cfg->cities[city_ptr]);
 		break;
 
 	default:
@@ -611,11 +617,15 @@ RUN_DIALOG:
 		// do nothing, hide widget at end of function
 		break;
 	}
+	if(cfg->num_cities)
+		assert(city_ptr < cfg->num_cities);
 	if(cfg->num_cities == 1 || city_ptr == 0) {
 		gtk_widget_set_sensitive(GTK_WIDGET(btn_prev_city), false);
 	}
-	if(cfg->num_cities == 1 || city_ptr == cfg->num_cities) {
+	if(cfg->num_cities == 1 || city_ptr == cfg->num_cities - 1) {
 		gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), false);
+	} else if((cfg->num_cities > 1 && city_ptr == 0)) {
+		gtk_widget_set_sensitive(GTK_WIDGET(btn_next_city), true);
 	}
 	gtk_listbox_clear_dialog_removeCity(listbox);
 	gtk_widget_hide(GTK_WIDGET(dlg_removecity));

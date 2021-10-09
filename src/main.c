@@ -63,12 +63,15 @@ int main(int argc, char** argv)
     char* config_file = "Config.cfg";
     prayer prayer_times[prayers_num];
 
-    if(config_read(config_file, &config) == EXIT_FAILURE) {
-        config = *config_init(&config);
-        // Create Makkah as reference city
-        City c;
-        city_init_calc(&c, "Makkah", prov_calc, ST_cm_Makkah, 0, 39.814838, 21.427378, ST_jm_Shafii, ST_am_None);
-        config_add_city(c, &config);
+    {
+		int cfg_read_result = config_read(config_file, &config);
+		if(cfg_read_result == EXIT_FAILURE || !config.num_cities) {
+			if(cfg_read_result == EXIT_FAILURE) config = *config_init(&config);
+			// Create Makkah as reference city
+			City c;
+			city_init_calc(&c, "Makkah", prov_calc, ST_cm_Makkah, 0, 39.814838, 21.427378, ST_jm_Shafii, ST_am_None);
+			config_add_city(c, &config);
+		}
     }
 
 #define SKIP_UPDATE
@@ -195,14 +198,16 @@ int main(int argc, char** argv)
             prayer_print_times(curr_city->name, prayer_times);
         }
 #else // CALC_ALL_CITIES
-        curr_city = &config.cities[0];
-        calc_func = calc_functions[curr_city->pr_time_provider];
-        int CALC_RESULT = calc_func(config.cities[0], prayer_times);
-        if(CALC_RESULT == ENETDOWN) {
-            config.cities[0].pr_time_provider = prov_empty;
-            calc_functions[curr_city->pr_time_provider](config.cities[0], prayer_times);              // Reset to 00:00
-        } else if(CALC_RESULT != EXIT_SUCCESS) {
-            assert(0);
+        if(config.num_cities) {
+			curr_city = &config.cities[0];
+			calc_func = calc_functions[curr_city->pr_time_provider];
+			int CALC_RESULT = calc_func(config.cities[0], prayer_times);
+			if(CALC_RESULT == ENETDOWN) {
+				config.cities[0].pr_time_provider = prov_empty;
+				calc_functions[curr_city->pr_time_provider](config.cities[0], prayer_times);              // Reset to 00:00
+			} else if(CALC_RESULT != EXIT_SUCCESS) {
+				assert(0);
+			}
         }
 #endif // CALC_ALL_CITIES
 
@@ -275,7 +280,8 @@ int main(int argc, char** argv)
     if(config.config_changed)
         config_json_save(config.cfg_filename, &config);
 
-    free(config.cities);
+    if(config.num_cities)
+    	free(config.cities);
     free(config.cfg_filename);
 
     return 0;
