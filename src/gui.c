@@ -516,7 +516,7 @@ void on_label_randomhadith_clicked(GtkWidget* widget, gpointer data) {
 			gtk_label_set_text(random_hadith, hadith);
 			free(hadith);
 		} else {
-			GtkLabel* dlg_hadith_label = GTK_LABEL(find_child(dlg_hadith, "dlg_hadith_label"));
+			GtkLabel* dlg_hadith_label = GTK_LABEL(find_child(GTK_WIDGET(dlg_hadith), "dlg_hadith_label"));
 			gtk_label_set_text(dlg_hadith_label, hadith);
 
 		    gtk_widget_show(GTK_WIDGET(dlg_hadith));
