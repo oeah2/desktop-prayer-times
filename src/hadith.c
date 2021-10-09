@@ -59,49 +59,63 @@ static bool hadith_contains_salawat(char* hadith) {
 	return strstr(hadith, "(\\ufdfa)");
 }
 
-static size_t hadith_find_markup_length(char* start_pos) {
+static bool hadith_letter_is_salawat(char* start_pos) {
+	return start_pos == strstr(start_pos, "\\ufdfa");
+}
+
+static void hadith_replace_salawat(size_t len, char position[len]) {
+	assert(hadith_letter_is_salawat(position));
+
+	size_t salawat_length = strlen("\\ufdfa");
+	char letter_after_salawat = position[salawat_length];
+	assert(letter_after_salawat == ')');
+
+	wchar_t* salawat_utf = '\uFDFA';
+	strcpy(position, salawat_utf);
+	position[letter_after_salawat] = ')';
+	/*
+	char* start_copy = position + salawat_length;
+
+	char buffer[length - salawat_length];
+	strcpy(buffer, start_copy);
+	*/
+
+}
+
+static size_t hadith_find_markup_length(size_t len, char start_pos[len]) {
 	size_t ret = 0;
-	if(start_pos) {
-		assert(hadith_letter_is_markup(*start_pos));
-		size_t counter = 1;
-		while( start_pos[counter] && (
-				hadith_letter_is_markup(start_pos[counter]) ||
-				hadith_letter_could_be_markup(start_pos[counter]))) {
-			counter++;
-		}
-		ret = counter;
+	assert(hadith_letter_is_markup(*start_pos));
+	size_t counter = 1;
+	while( start_pos[counter] != '\0' && (
+			hadith_letter_is_markup(start_pos[counter]) ||
+			hadith_letter_could_be_markup(start_pos[counter]))) {
+		counter++;
 	}
+	ret = counter;
 	return ret;
 }
 
-static char* hadith_remove_markup(char* start_pos) {
-	char* ret = 0;
-	if(start_pos) {
-		assert(hadith_letter_is_markup(*start_pos));
-		size_t markup_length = hadith_find_markup_length(start_pos);
+static void hadith_remove_markup(size_t len, char start_pos[len]) {
+	assert(hadith_letter_is_markup(start_pos[0]));
+	size_t markup_length = hadith_find_markup_length(len, start_pos);
 
-		size_t hadith_length = strlen(start_pos);
-		char buffer[hadith_length - markup_length + 1];
-		strcpy(buffer, start_pos + markup_length);
-		strcpy(start_pos, buffer);
-		ret = start_pos;
-	}
-	return ret;
+	size_t hadith_length = strlen(start_pos);
+	char buffer[hadith_length - markup_length + 1];
+	strcpy(buffer, start_pos + markup_length);
+	strcpy(start_pos, buffer);
 }
 
-static char* hadith_remove_all_markups(char* hadith) {
-	char* ret = 0;
-	if(hadith) {
-		for(size_t i = 0; i < strlen(hadith); i++) {
-			if(hadith_letter_is_markup(hadith[i])) {
-				hadith = hadith_remove_markup(hadith + i);
-				i--;
-			}
+static void hadith_remove_all_markups(size_t len, char hadith[len]) {
+	for(size_t i = 0; i < strlen(hadith); i++) {
+		if(hadith_letter_is_markup(hadith[i]) &&
+			!hadith_letter_is_salawat(&hadith[i])) {
+			hadith_remove_markup(len - i, hadith + i);
+			i--;
+		} else if(hadith_letter_is_salawat(&hadith[i])) {
+			//hadith_replace_salawat(len - i, &hadith[i]);
 		}
-		ret = hadith;
-		printf("All markups removed: \n %s\n", ret);
 	}
-	return ret;
+	printf("All markups removed: \n %s\n", hadith);
 }
 
 static char* hadith_cut_relevant(char* hadith) {
@@ -118,7 +132,7 @@ static char* hadith_cut_relevant(char* hadith) {
 			*pos_end = '\0';
 			strcpy(buffer, pos_start + strlen(start));
 
-			hadith_remove_all_markups(buffer);
+			hadith_remove_all_markups(len, buffer);
 
 			char* new = realloc(hadith, strlen(buffer) + 10);
 			if(new) {
@@ -140,6 +154,7 @@ char* hadith_get_random(void) {
 
 	ret = https_get("api.sunnah.com", "/v1/hadiths/random", buffer);
 	if(ret) {
+		printf("Raw hadith: \n %s \n", ret);
 		ret = hadith_cut_relevant(ret);
 		puts(ret);
 	}
