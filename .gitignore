@@ -1,5 +1,6 @@
 
 *.o
+!hadith_key.o
 *.res
 /.cproject
 /.project
