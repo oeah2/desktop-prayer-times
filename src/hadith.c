@@ -115,7 +115,6 @@ static void hadith_remove_all_markups(size_t len, char hadith[len]) {
 			//hadith_replace_salawat(len - i, &hadith[i]);
 		}
 	}
-	printf("All markups removed: \n %s\n", hadith);
 }
 
 static char* hadith_cut_relevant(char* hadith) {
@@ -154,11 +153,7 @@ char* hadith_get_random(void) {
 
 	ret = https_get("api.sunnah.com", "/v1/hadiths/random", buffer);
 	if(ret) {
-		printf("Raw hadith: \n %s \n", ret);
 		ret = hadith_cut_relevant(ret);
-		puts(ret);
 	}
-
-	puts("on_label_randomhadith_clicked");
 	return ret;
 }

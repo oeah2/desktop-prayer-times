@@ -521,7 +521,6 @@ void on_label_randomhadith_clicked(GtkWidget* widget, gpointer data) {
 
 		    gtk_widget_show(GTK_WIDGET(dlg_hadith));
 		    int dialog_ret = gtk_dialog_run(GTK_DIALOG(dlg_hadith));
-		    printf("dialog_ret = %d\n", dialog_ret);
 		    gtk_widget_hide(GTK_WIDGET(dlg_hadith));
 		}
 	}

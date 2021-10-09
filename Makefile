@@ -125,6 +125,9 @@ $(OBJ_RELEASE_PATH)/error.o:
 $(OBJ_RELEASE_PATH)/hadith.o:
 	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/hadith.c -o $(OBJ_RELEASE_PATH)/hadith.o
 	
+$(OBJ_RELEASE_PATH)/hadith_key.o:
+	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/hadith_key.c -o $(OBJ_RELEASE_PATH)/hadith_key.o
+	
 $(OBJ_RELEASE_PATH)/gui.o:
 	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui.c -o $(OBJ_RELEASE_PATH)/gui.o
 	
