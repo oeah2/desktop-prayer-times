@@ -29,6 +29,7 @@
 #include "socket.h"
 #include "update.h"
 #include "error.h"
+#include "hadith.h"
 
 #define USE_STATUSICON
 //#define SHOW_MOON         // not really implemented
@@ -77,6 +78,7 @@ GtkButton* btn_next_date = 0;
 GtkButton* btn_prev_city = 0;
 GtkButton* btn_next_city = 0;
 GtkDialog* dlg_calc_error = 0;
+GtkDialog* dlg_hadith = 0;
 #ifdef SHOW_MOON
 GtkImage* img_mondphase = 0;
 #endif // SHOW_MOON
@@ -502,6 +504,27 @@ void dlg_calc_error_retry_btn_clicked(GtkWidget* widget, gpointer data)
         }
     }
     display_city(*city);
+}
+
+void on_label_randomhadith_clicked(GtkWidget* widget, gpointer data) {
+	GtkLabel* random_hadith = GTK_LABEL(widget);
+	assert(GTK_IS_LABEL(random_hadith));
+	char* hadith = hadith_get_random();
+
+	if(hadith) {
+		if(strlen(hadith) < 240) {
+			gtk_label_set_text(random_hadith, hadith);
+			free(hadith);
+		} else {
+			GtkLabel* dlg_hadith_label = GTK_LABEL(find_child(dlg_hadith, "dlg_hadith_label"));
+			gtk_label_set_text(dlg_hadith_label, hadith);
+
+		    gtk_widget_show(GTK_WIDGET(dlg_hadith));
+		    int dialog_ret = gtk_dialog_run(GTK_DIALOG(dlg_hadith));
+		    printf("dialog_ret = %d\n", dialog_ret);
+		    gtk_widget_hide(GTK_WIDGET(dlg_hadith));
+		}
+	}
 }
 
 void on_dlg_about_response(GtkWidget* dlg_about, gpointer data)
@@ -1273,6 +1296,10 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     dlg_calc_error = GTK_DIALOG(gtk_builder_get_object(builder, "dlg_calc_error"));
     CHECK_OBJ(dlg_calc_error);
 
+    /* Dialog for showing long hadithes */
+    dlg_hadith = GTK_DIALOG(gtk_builder_get_object(builder, "dlg_hadith"));
+    CHECK_OBJ(dlg_hadith);
+
     /* Callback functions */
     gtk_builder_add_callback_symbol(builder, "on_dlg_calc_error_ok_clicked", G_CALLBACK(on_dlg_calc_error_ok_clicked));
     gtk_builder_add_callback_symbol(builder, "dlg_calc_error_retry_btn_clicked", G_CALLBACK(dlg_calc_error_retry_btn_clicked));
@@ -1291,8 +1318,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_diyanet_combobox_country_changed", G_CALLBACK(on_assistant_addcity_diyanet_combobox_country_changed));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_diyanet_combobox_province_changed", G_CALLBACK(on_assistant_addcity_diyanet_combobox_province_changed));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_diyanet_combobox_city_changed", G_CALLBACK(on_assistant_addcity_diyanet_combobox_city_changed));
-
-
+    gtk_builder_add_callback_symbol(builder, "on_label_randomhadith_clicked", G_CALLBACK(on_label_randomhadith_clicked));
 
     // Todo check
     GtkAssistant* assistant_addcity = GTK_ASSISTANT(gtk_builder_get_object(builder, "assistant_addcity")); CHECK_OBJ(assistant_addcity);

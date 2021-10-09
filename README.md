@@ -2,7 +2,7 @@
 
 Known Issues:
 - Socket implementation is buggy and blocking
-- Adding, renaming, moving and removing cities not working.
+- moving and editing cities not implemented.
 
 
 Todo:
