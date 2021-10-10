@@ -304,7 +304,7 @@ Author: Ahmet Öztürk
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
-                        <signal name="activate" handler="gtk_widget_show" object="dlg_about" swapped="yes"/>
+                        <signal name="activate" handler="on_menuitm_about_activate" object="dlg_about" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -821,7 +821,6 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <signal name="clicked" handler="dlg_calc_error_retry_btn_clicked" object="dlg_calc_error" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -836,7 +835,6 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
                 <property name="use-stock">True</property>
-                <signal name="clicked" handler="on_dlg_calc_error_ok_clicked" object="dlg_calc_error" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -855,6 +853,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-start">6</property>
+            <property name="margin-end">6</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">6</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -870,10 +872,14 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="dlg_calc_error_label">
+                <property name="name">dlg_calc_error_label</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Fehler beim Berechnen der Gebetszeiten!</property>
+                <property name="label" translatable="yes">Fehler beim Berechnen der Gebetszeiten!
+
+Füge entweder eine neue Stadt hinzu, oder 
+überprüfe deine Internetverbindung.</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -890,6 +896,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="-8">dlg_calc_error_retry</action-widget>
+      <action-widget response="-5">dlg_calc_error_ok</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkFileChooserDialog" id="dlg_loadfile">
     <property name="can-focus">False</property>

@@ -47,13 +47,13 @@ enum GUI_IDS {
     gui_id_num,
 };
 
+#ifdef OLD
 void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char* strings[num_strings]);
 void on_btn_next_city_clicked(GtkWidget* widget, gpointer data);
 void on_btn_prev_date_clicked(GtkWidget* widget, gpointer data);
 void on_btn_next_date_clicked(GtkWidget* widget, gpointer data);
 void on_dlg_calc_error_ok_clicked(GtkWidget* widget, gpointer data);
 void dlg_calc_error_retry_btn_clicked(GtkWidget* widget, gpointer data);
-void on_dlg_about_response(GtkWidget* dlg_about, gpointer data);
 void on_menuitm_load_activate(GtkWidget* widget, gpointer data);
 void on_menuitm_movecities_activate(GtkWidget* widget, gpointer data);
 void on_menuitm_removecity_activate(GtkWidget* widget, gpointer data);
@@ -70,5 +70,45 @@ bool Callback_Minutes(gpointer data);
 bool Callback_Seconds(gpointer data);
 void on_btn_prev_city_clicked(GtkWidget* widget, gpointer data);
 void on_dlg_add_city_close(GtkWidget* widget, gpointer data);
+#else
+
+// General Functions
+void label_append_text(GtkLabel* label, char const*const text);
+GtkWidget* find_child(GtkWidget* parent, const char*const name);
+void sprint_dates(prayer times, size_t buff_len, char dest_julian_date[buff_len], char dest_hijri_date[buff_len]);
+
+// Main Window Functions
+void display_city(City city);
+void display_empty_city(void);
+void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char* strings[num_strings]);
+
+// Menuitem
+void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_removecity_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_movecities_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_load_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_about_activate(GtkWidget* menuitm, gpointer data);
+
+// Assistant
+void on_assistant_addcity_diyanet_combobox_country_changed(GtkWidget* widget, gpointer data);
+void on_assistant_addcity_diyanet_combobox_province_changed(GtkWidget* widget, gpointer data) ;
+void on_assistant_addcity_diyanet_combobox_city_changed(GtkWidget* widget, gpointer data);
+int assistant_addcity_nextpage_func(int current_page, gpointer data) ;
+void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) ;
+void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) ;
+void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpointer data);
+void on_dlg_add_city_close(GtkWidget* widget, gpointer data);
+
+// Listbox functions
+GtkListBox* gtk_listbox_clear_assistant_addcity(GtkListBox* listbox);
+GtkListBox* gtk_listbox_clear_dialog_removeCity(GtkListBox* listbox);
+GtkCheckButton* gui_create_and_add_check_button(GtkListBox* listbox, char const*const label, char const*const name);
+GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkRadioButton* group, char const*const label, char const*const name);
+
+// Settings
+void on_menuitm_settings_activate(GtkWidget* widget, gpointer data);
+
+#endif
 
 #endif // GUI_H_INCLUDED

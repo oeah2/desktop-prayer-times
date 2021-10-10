@@ -63,6 +63,7 @@ static bool hadith_letter_is_salawat(char* start_pos) {
 	return start_pos == strstr(start_pos, "\\ufdfa");
 }
 
+#ifdef REMOVE
 static void hadith_replace_salawat(size_t len, char position[len]) {
 	assert(hadith_letter_is_salawat(position));
 
@@ -81,6 +82,7 @@ static void hadith_replace_salawat(size_t len, char position[len]) {
 	*/
 
 }
+#endif
 
 static size_t hadith_find_markup_length(size_t len, char start_pos[len]) {
 	size_t ret = 0;

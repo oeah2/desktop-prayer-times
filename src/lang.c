@@ -27,6 +27,12 @@ char const*const lang_names[LANG_NUM] = {
 };
 
 
+char const*const language_specific_strings[LangStrings_Num] = {
+	[LangStrings_CalcError_NoConnection] = "\n\nBitte überprüfe deine Internetverbindung",
+	[LangStrings_CalcError_Unknown] = "\n\nUnbekannter Fehler. Bitte wähle eine andere Stadt aus und melde den Fehler an unsere Entwickler.",
+};
+
+
 bool lang_is_available(enum Languages ID)
 {
     bool ret = true;
