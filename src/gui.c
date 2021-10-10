@@ -218,12 +218,6 @@ static int display_preview(City city, int days)
     return ret;
 }
 
-static bool gui_apply_language(size_t lang_id)
-{
-    bool ret = true;
-    return ret;
-}
-
 bool Callback_Minutes(gpointer data)
 {
     bool ret = true;
