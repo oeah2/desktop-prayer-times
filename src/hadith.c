@@ -75,13 +75,6 @@ static bool hadith_letter_could_be_markup(char letter) {
 	return ret;
 }
 
-/** \brief Decide if salawat is present
- *
- */
-static bool hadith_contains_salawat(char* hadith) {
-	return strstr(hadith, "(\\ufdfa)");
-}
-
 /** \brief Detect salawat.
  *
  */
