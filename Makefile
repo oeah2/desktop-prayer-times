@@ -6,7 +6,7 @@ OBJ_DEBUG_PATH = ./obj/Debug
 OBJ_RELEASE_PATH = ./obj/Release
 SRC_PATH = ./src
 CFLAGS_DEBUG = -Wall -std=c11 -g -O0 -fsanitize=address
-CLAGS_RELEASE = -Wall -std=c11 -O3
+CFLAGS_RELEASE = -Wall -std=c11 -O3 
 
 all: DebugLinux
 
@@ -17,10 +17,10 @@ $(OUT_RELEASE): Release
 $(OUT_DEBUG): Debug
 
 Release: $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/gui_assistant.o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o $(OBJ_RELEASE_PATH)/gui_general.o $(OBJ_RELEASE_PATH)/gui_listbox.o $(OBJ_RELEASE_PATH)/gui_menuitm.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o $(OBJ_RELEASE_PATH)/error.o $(OBJ_RELEASE_PATH)/hadith.o $(OBJ_RELEASE_PATH)/hadith_key.o ./Graphics/icon.res
-	gcc $(CLAGS_RELEASE) -o $(OUT_RELEASE) $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/gui_assistant.o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o $(OBJ_RELEASE_PATH)/gui_general.o $(OBJ_RELEASE_PATH)/gui_listbox.o $(OBJ_RELEASE_PATH)/gui_menuitm.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o $(OBJ_RELEASE_PATH)/error.o $(OBJ_RELEASE_PATH)/hadith.o $(OBJ_RELEASE_PATH)/hadith_key.o ./Graphics/icon.res `pkg-config gtk+-3.0 --libs` -lws2_32 -lssl -lcrypto -lm
+	gcc $(CFLAGS_RELEASE) -o $(OUT_RELEASE) $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/gui_assistant.o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o $(OBJ_RELEASE_PATH)/gui_general.o $(OBJ_RELEASE_PATH)/gui_listbox.o $(OBJ_RELEASE_PATH)/gui_menuitm.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o $(OBJ_RELEASE_PATH)/error.o $(OBJ_RELEASE_PATH)/hadith.o $(OBJ_RELEASE_PATH)/hadith_key.o ./Graphics/icon.res `pkg-config gtk+-3.0 --libs` -mwindows -lws2_32 -lssl -lcrypto -lm
 	
 ReleaseLinux: $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/gui_assistant.o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o $(OBJ_RELEASE_PATH)/gui_general.o $(OBJ_RELEASE_PATH)/gui_listbox.o $(OBJ_RELEASE_PATH)/gui_menuitm.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o $(OBJ_RELEASE_PATH)/error.o $(OBJ_RELEASE_PATH)/hadith.o $(OBJ_RELEASE_PATH)/hadith_key.o
-	gcc $(CLAGS_RELEASE) -o $(OUT_RELEASE_LINUX) $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/gui_assistant.o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o $(OBJ_RELEASE_PATH)/gui_general.o $(OBJ_RELEASE_PATH)/gui_listbox.o $(OBJ_RELEASE_PATH)/gui_menuitm.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o $(OBJ_RELEASE_PATH)/error.o $(OBJ_RELEASE_PATH)/hadith.o $(OBJ_RELEASE_PATH)/hadith_key.o `pkg-config gtk+-3.0 --libs` -lssl -lcrypto -lm
+	gcc $(CFLAGS_RELEASE) -o $(OUT_RELEASE_LINUX) $(OBJ_RELEASE_PATH)/city.o $(OBJ_RELEASE_PATH)/cJSON.o $(OBJ_RELEASE_PATH)/config.o $(OBJ_RELEASE_PATH)/file.o $(OBJ_RELEASE_PATH)/geolocation.o $(OBJ_RELEASE_PATH)/gui.o $(OBJ_RELEASE_PATH)/gui_assistant.o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o $(OBJ_RELEASE_PATH)/gui_general.o $(OBJ_RELEASE_PATH)/gui_listbox.o $(OBJ_RELEASE_PATH)/gui_menuitm.o $(OBJ_RELEASE_PATH)/lang.o $(OBJ_RELEASE_PATH)/main.o $(OBJ_RELEASE_PATH)/prayer_times.o $(OBJ_RELEASE_PATH)/prayer_times_calc.o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o $(OBJ_RELEASE_PATH)/Salah_times_calc.o $(OBJ_RELEASE_PATH)/socket.o $(OBJ_RELEASE_PATH)/update.o $(OBJ_RELEASE_PATH)/error.o $(OBJ_RELEASE_PATH)/hadith.o $(OBJ_RELEASE_PATH)/hadith_key.o `pkg-config gtk+-3.0 --libs` -lssl -lcrypto -lm
  
 Debug: $(OBJ_DEBUG_PATH)/city.o $(OBJ_DEBUG_PATH)/cJSON.o $(OBJ_DEBUG_PATH)/config.o $(OBJ_DEBUG_PATH)/file.o $(OBJ_DEBUG_PATH)/geolocation.o $(OBJ_DEBUG_PATH)/gui.o $(OBJ_DEBUG_PATH)/gui_assistant.o $(OBJ_DEBUG_PATH)/gui_dlg_settings.o $(OBJ_DEBUG_PATH)/gui_general.o $(OBJ_DEBUG_PATH)/gui_listbox.o $(OBJ_DEBUG_PATH)/gui_menuitm.o $(OBJ_DEBUG_PATH)/lang.o $(OBJ_DEBUG_PATH)/main.o $(OBJ_DEBUG_PATH)/prayer_times.o $(OBJ_DEBUG_PATH)/prayer_times_calc.o $(OBJ_DEBUG_PATH)/prayer_times_diyanet.o $(OBJ_DEBUG_PATH)/Salah_times_calc.o $(OBJ_DEBUG_PATH)/socket.o $(OBJ_DEBUG_PATH)/update.o $(OBJ_DEBUG_PATH)/error.o $(OBJ_DEBUG_PATH)/hadith.o $(OBJ_DEBUG_PATH)/hadith_key.o ./Graphics/icon.res
 	gcc $(CFLAGS_DEBUG) -o $(OUT_DEBUG) $(OBJ_DEBUG_PATH)/city.o $(OBJ_DEBUG_PATH)/cJSON.o $(OBJ_DEBUG_PATH)/config.o $(OBJ_DEBUG_PATH)/file.o $(OBJ_DEBUG_PATH)/geolocation.o $(OBJ_DEBUG_PATH)/gui.o $(OBJ_DEBUG_PATH)/gui_assistant.o $(OBJ_DEBUG_PATH)/gui_dlg_settings.o $(OBJ_DEBUG_PATH)/gui_general.o $(OBJ_DEBUG_PATH)/gui_listbox.o $(OBJ_DEBUG_PATH)/gui_menuitm.o $(OBJ_DEBUG_PATH)/lang.o $(OBJ_DEBUG_PATH)/main.o $(OBJ_DEBUG_PATH)/prayer_times.o $(OBJ_DEBUG_PATH)/prayer_times_calc.o $(OBJ_DEBUG_PATH)/prayer_times_diyanet.o $(OBJ_DEBUG_PATH)/Salah_times_calc.o $(OBJ_DEBUG_PATH)/socket.o $(OBJ_DEBUG_PATH)/update.o $(OBJ_DEBUG_PATH)/error.o $(OBJ_DEBUG_PATH)/hadith.o $(OBJ_DEBUG_PATH)/hadith_key.o ./Graphics/icon.res `pkg-config gtk+-3.0 --libs` -lws2_32 -lssl -lcrypto -lm
@@ -99,70 +99,70 @@ $(OBJ_DEBUG_PATH)/main.o:
 	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_DEBUG) -c $(SRC_PATH)/main.c -o $(OBJ_DEBUG_PATH)/main.o
 	
 $(OBJ_RELEASE_PATH)/city.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/city.c -o $(OBJ_RELEASE_PATH)/city.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/city.c -o $(OBJ_RELEASE_PATH)/city.o
 
 $(OBJ_RELEASE_PATH)/cJSON.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/cJSON.c -o $(OBJ_RELEASE_PATH)/cJSON.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/cJSON.c -o $(OBJ_RELEASE_PATH)/cJSON.o
 
 $(OBJ_RELEASE_PATH)/config.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/config.c -o $(OBJ_RELEASE_PATH)/config.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/config.c -o $(OBJ_RELEASE_PATH)/config.o
 
 $(OBJ_RELEASE_PATH)/file.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/file.c -o $(OBJ_RELEASE_PATH)/file.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/file.c -o $(OBJ_RELEASE_PATH)/file.o
 
 $(OBJ_RELEASE_PATH)/geolocation.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/geolocation.c -o $(OBJ_RELEASE_PATH)/geolocation.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/geolocation.c -o $(OBJ_RELEASE_PATH)/geolocation.o
 
 $(OBJ_RELEASE_PATH)/lang.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/lang.c -o $(OBJ_RELEASE_PATH)/lang.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/lang.c -o $(OBJ_RELEASE_PATH)/lang.o
 
 $(OBJ_RELEASE_PATH)/prayer_times.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/prayer_times.c -o $(OBJ_RELEASE_PATH)/prayer_times.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/prayer_times.c -o $(OBJ_RELEASE_PATH)/prayer_times.o
 
 $(OBJ_RELEASE_PATH)/prayer_times_calc.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/prayer_times_calc.c -o $(OBJ_RELEASE_PATH)/prayer_times_calc.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/prayer_times_calc.c -o $(OBJ_RELEASE_PATH)/prayer_times_calc.o
 
 $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/prayer_times_diyanet.c -o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/prayer_times_diyanet.c -o $(OBJ_RELEASE_PATH)/prayer_times_diyanet.o
 
 $(OBJ_RELEASE_PATH)/Salah_times_calc.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/Salah_times_calc.c -o $(OBJ_RELEASE_PATH)/Salah_times_calc.o -lm
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/Salah_times_calc.c -o $(OBJ_RELEASE_PATH)/Salah_times_calc.o -lm
 
 $(OBJ_RELEASE_PATH)/socket.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/socket.c -o $(OBJ_RELEASE_PATH)/socket.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/socket.c -o $(OBJ_RELEASE_PATH)/socket.o
 
 $(OBJ_RELEASE_PATH)/update.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/update.c -o $(OBJ_RELEASE_PATH)/update.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/update.c -o $(OBJ_RELEASE_PATH)/update.o
 	
 $(OBJ_RELEASE_PATH)/error.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/error.c -o $(OBJ_RELEASE_PATH)/error.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/error.c -o $(OBJ_RELEASE_PATH)/error.o
 	
 $(OBJ_RELEASE_PATH)/hadith.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/hadith.c -o $(OBJ_RELEASE_PATH)/hadith.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/hadith.c -o $(OBJ_RELEASE_PATH)/hadith.o
 	
 $(OBJ_RELEASE_PATH)/hadith_key.o:
-	gcc $(CLAGS_RELEASE) -c $(SRC_PATH)/hadith_key.c -o $(OBJ_RELEASE_PATH)/hadith_key.o
+	gcc $(CFLAGS_RELEASE) -c $(SRC_PATH)/hadith_key.c -o $(OBJ_RELEASE_PATH)/hadith_key.o
 	
 $(OBJ_RELEASE_PATH)/gui.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui.c -o $(OBJ_RELEASE_PATH)/gui.o
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/gui.c -o $(OBJ_RELEASE_PATH)/gui.o
 	
 $(OBJ_RELEASE_PATH)/gui_assistant.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui_assistant.c -o $(OBJ_RELEASE_PATH)/gui_assistant.o
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/gui_assistant.c -o $(OBJ_RELEASE_PATH)/gui_assistant.o
 	
 $(OBJ_RELEASE_PATH)/gui_dlg_settings.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui_dlg_settings.c -o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/gui_dlg_settings.c -o $(OBJ_RELEASE_PATH)/gui_dlg_settings.o
 	
 $(OBJ_RELEASE_PATH)/gui_general.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui_general.c -o $(OBJ_RELEASE_PATH)/gui_general.o
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/gui_general.c -o $(OBJ_RELEASE_PATH)/gui_general.o
 	
 $(OBJ_RELEASE_PATH)/gui_listbox.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui_listbox.c -o $(OBJ_RELEASE_PATH)/gui_listbox.o
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/gui_listbox.c -o $(OBJ_RELEASE_PATH)/gui_listbox.o
 	
 $(OBJ_RELEASE_PATH)/gui_menuitm.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/gui_menuitm.c -o $(OBJ_RELEASE_PATH)/gui_menuitm.o
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/gui_menuitm.c -o $(OBJ_RELEASE_PATH)/gui_menuitm.o
 	
 $(OBJ_RELEASE_PATH)/main.o:
-	gcc `pkg-config gtk+-3.0 --cflags` $(CLAGS_RELEASE) -c $(SRC_PATH)/main.c -o $(OBJ_RELEASE_PATH)/main.o	
+	gcc `pkg-config gtk+-3.0 --cflags` $(CFLAGS_RELEASE) -c $(SRC_PATH)/main.c -o $(OBJ_RELEASE_PATH)/main.o	
 	
 cleanDebug:
 	rm $(OUT_DEBUG) $(OBJ_DEBUG_PATH)/city.o $(OBJ_DEBUG_PATH)/cJSON.o $(OBJ_DEBUG_PATH)/config.o $(OBJ_DEBUG_PATH)/file.o $(OBJ_DEBUG_PATH)/geolocation.o $(OBJ_DEBUG_PATH)/gui.o $(OBJ_DEBUG_PATH)/gui_assistant.o $(OBJ_DEBUG_PATH)/gui_dlg_settings.o $(OBJ_DEBUG_PATH)/gui_general.o $(OBJ_DEBUG_PATH)/gui_listbox.o $(OBJ_DEBUG_PATH)/gui_menuitm.o $(OBJ_DEBUG_PATH)/lang.o $(OBJ_DEBUG_PATH)/main.o $(OBJ_DEBUG_PATH)/prayer_times.o $(OBJ_DEBUG_PATH)/prayer_times_calc.o $(OBJ_DEBUG_PATH)/prayer_times_diyanet.o $(OBJ_DEBUG_PATH)/Salah_times_calc.o $(OBJ_DEBUG_PATH)/socket.o $(OBJ_DEBUG_PATH)/update.o $(OBJ_DEBUG_PATH)/error.o $(OBJ_DEBUG_PATH)/hadith.o
