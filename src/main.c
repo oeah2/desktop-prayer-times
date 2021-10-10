@@ -255,20 +255,30 @@ int main(int argc, char** argv)
         [gui_id_datename]       = puffer_julian_date,
         [gui_id_hijridate]      = puffer_hijri_date,
         [gui_id_remainingtime]  = "",
-        //[gui_id_randomhadith]   = "Hadith",
     };
 
     /* Now GUI Stuff */
     gtk_init(&argc, &argv);
-    char* glade_filename = "./bin/Prayer_times_GTK.glade";
-    //char* glade_filename = lang_get_filename(config.lang);
-#ifdef RELEASE
-    char* glade_filename = lang_get_filename(LANG_DE);
-#endif // RELEASE
+    char* glade_filename = 0;
+    if(lang_is_available(config.lang)) {
+    	glade_filename = lang_get_filename(config.lang);
+    } else {
+    	char buffer[100];
+    	sprintf(buffer, "%s: %d, Error finding glade file. Lang: %ld", __FILE__, __LINE__, config.lang);
+    	myperror(buffer);
+
+    	// Switch to english
+        if(lang_is_available(LANG_EN)) {
+        	glade_filename = lang_get_filename(LANG_EN);
+
+        	sprintf(buffer, "%s: %d, English is available, switching to english.", __FILE__, __LINE__);
+        	myperror(buffer);
+        }
+        else
+        	return EXIT_FAILURE;
+    }
     build_glade(&config, gui_id_num, glade_filename, gui_strings);
-#ifdef RELEASE
     free(glade_filename);
-#endif // RELEASE
 
 #ifdef WAIT_USER
 #ifdef _WIN32

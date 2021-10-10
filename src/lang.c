@@ -37,14 +37,23 @@ char const*const language_specific_strings[LangStrings_Num] = {
 
 bool lang_is_available(enum Languages ID)
 {
-    bool ret = true;
+    bool ret = false;
+
+    char* filename = lang_get_filename(ID);
+    if(filename) {
+    	FILE* glade_file = fopen(filename, "r");
+    	if(glade_file) {
+    		fclose(glade_file);
+    		ret = true;
+    	}
+    }
     return ret;
 }
 
 
 char* lang_get_filename(enum Languages ID)
 {
-	char const*const filename_format = "./gui/%s.glade";
+	char const*const filename_format = "./lang/%s.glade";
     char* ret = malloc(strlen(filename_format) + strlen(lang_names[ID]) + 1);
     sprintf(ret, filename_format, lang_names[ID]);
     return ret;
