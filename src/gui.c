@@ -550,8 +550,6 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_label_randomhadith_clicked", G_CALLBACK(on_label_randomhadith_clicked));
 
 
-
-
     // Todo check
     GtkAssistant* assistant_addcity = GTK_ASSISTANT(gtk_builder_get_object(builder, "assistant_addcity")); CHECK_OBJ(assistant_addcity);
 	gtk_assistant_set_forward_page_func(assistant_addcity, assistant_addcity_nextpage_func, assistant_addcity, NULL);
