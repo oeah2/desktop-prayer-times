@@ -250,7 +250,7 @@ CALC_REMAINING:
         char buffer[buff_len];
         char buffer_prayertime[buff_len];
         sprint_prayer_time(prayer_times[i], buff_len, buffer_prayertime);
-        sprintf(buffer, "Next prayer for %s: %s", cfg->cities[city_ptr].name, buffer_prayertime);
+        sprintf(buffer, "%s %s: %s", language_specific_strings[LangStrings_Statusicon_Text], cfg->cities[city_ptr].name, buffer_prayertime);
         gtk_status_icon_set_tooltip_text(statusicon, buffer);
         break;
     }

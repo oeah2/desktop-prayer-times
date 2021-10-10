@@ -32,6 +32,7 @@ enum Languages {
 enum language_strings {
 	LangStrings_CalcError_NoConnection,
 	LangStrings_CalcError_Unknown,
+	LangStrings_Statusicon_Text,
 
 	LangStrings_Num,
 };
@@ -44,8 +45,10 @@ bool lang_is_available(enum Languages ID);
  */
 char* lang_get_filename(enum Languages ID);
 
+void lang_strings_init(enum Languages ID);
+
 extern char const*const lang_names[LANG_NUM];
-extern char const*const language_specific_strings[LangStrings_Num];
+extern char const*const* language_specific_strings;
 
 
 #endif // LANG_H_INCLUDED

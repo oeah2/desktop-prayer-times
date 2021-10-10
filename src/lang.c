@@ -29,11 +29,33 @@ char const*const lang_names[LANG_NUM] = {
 };
 
 /**< @brief Array containing specific language dependent strings */
-char const*const language_specific_strings[LangStrings_Num] = {
+char const*const* language_specific_strings;
+
+static char const*const language_specific_strings_german[LangStrings_Num] = {
 	[LangStrings_CalcError_NoConnection] = "\n\nBitte überprüfe deine Internetverbindung",
 	[LangStrings_CalcError_Unknown] = "\n\nUnbekannter Fehler. Bitte wähle eine andere Stadt aus und melde den Fehler an unsere Entwickler.",
+	[LangStrings_Statusicon_Text] = "Nächstes Gebet für",
 };
 
+static char const*const language_specific_strings_english[LangStrings_Num] = {
+	[LangStrings_CalcError_NoConnection] = "\n\nPlease check your internet connection",
+	[LangStrings_CalcError_Unknown] = "\n\nUnknown error. Please switch to another city and report this error to our developers.",
+	[LangStrings_Statusicon_Text] = "Next prayer for",
+};
+
+void lang_strings_init(enum Languages ID) {
+	switch(ID) {
+		case LANG_DE:
+			language_specific_strings = language_specific_strings_german;
+			break;
+		
+		case LANG_TR:
+		case LANG_EN:
+		default:
+			language_specific_strings = language_specific_strings_english;
+		break;
+	}
+}
 
 bool lang_is_available(enum Languages ID)
 {
@@ -49,7 +71,6 @@ bool lang_is_available(enum Languages ID)
     }
     return ret;
 }
-
 
 char* lang_get_filename(enum Languages ID)
 {
