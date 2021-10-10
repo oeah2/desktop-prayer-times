@@ -264,7 +264,7 @@ int main(int argc, char** argv)
     	glade_filename = lang_get_filename(config.lang);
     } else {
     	char buffer[100];
-    	sprintf(buffer, "%s: %d, Error finding glade file. Lang: %ld", __FILE__, __LINE__, config.lang);
+    	sprintf(buffer, "%s: %d, Error finding glade file. Lang: %zu", __FILE__, __LINE__, config.lang);
     	myperror(buffer);
 
     	// Switch to english
