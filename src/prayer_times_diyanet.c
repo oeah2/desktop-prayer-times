@@ -34,7 +34,7 @@ static char const*const diyanet_format_keywords[prayers_num] = {
     [pr_ishaa] = "Yatsi"
 };
 
-char const*const diyanet_prayer_times_file_destination = "./bin/";
+char const*const diyanet_prayer_times_file_destination = "./Diyanet/";
 
 //#define OLD_CODE
 #ifdef OLD_CODE
