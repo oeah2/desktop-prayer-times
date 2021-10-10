@@ -27,10 +27,6 @@ Author: Ahmet Öztürk
   <!-- interface-name Desktop Prayer Times -->
   <!-- interface-description A desktop tool to display islamic prayer times -->
   <!-- interface-authors Ahmet \303\226zt\303\274rk -->
-  <object class="GtkAction" id="action_open_url_participate">
-    <property name="label" translatable="yes">Mitmachen</property>
-    <property name="icon-name">applications-internet</property>
-  </object>
   <object class="GtkDialog" id="dlg_hadith">
     <property name="name">dlg_hadith</property>
     <property name="can-focus">False</property>
@@ -318,7 +314,6 @@ Author: Ahmet Öztürk
                     </child>
                     <child>
                       <object class="GtkMenuItem" id="menuitm_participate">
-                        <property name="related-action">action_open_url_participate</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Unterstütze uns bei der Entwicklung dieses Programms</property>
@@ -769,8 +764,6 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <property name="authors">Ahmet Öztürk</property>
     <property name="logo">Graphics\Logo_small.png</property>
     <property name="license-type">gpl-3-0</property>
-    <signal name="delete-event" handler="on_dlg_about_delete_event" swapped="no"/>
-    <signal name="response" handler="on_dlg_about_response" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox">
         <property name="can-focus">False</property>
@@ -798,7 +791,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
   </object>
   <object class="GtkDialog" id="dlg_calc_error">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Warning!</property>
+    <property name="title" translatable="yes">Fehler</property>
     <property name="window-position">center</property>
     <property name="default-width">300</property>
     <property name="default-height">75</property>
@@ -968,6 +961,7 @@ Füge entweder eine neue Stadt hinzu, oder
     <property name="name">dlg_remove_city</property>
     <property name="height-request">200</property>
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Stadt löschen</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <child internal-child="vbox">
@@ -1130,6 +1124,7 @@ Füge entweder eine neue Stadt hinzu, oder
   </object>
   <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Einstellungen</property>
     <property name="icon">Graphics\Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
@@ -1360,6 +1355,7 @@ Füge entweder eine neue Stadt hinzu, oder
     <property name="width-request">500</property>
     <property name="height-request">200</property>
     <property name="can-focus">False</property>
+    <property name="title" translatable="yes">Stadt hinzufügen</property>
     <property name="transient-for">window_main</property>
     <signal name="cancel" handler="on_assistant_addcity_cancel" swapped="no"/>
     <signal name="prepare" handler="on_assistant_addcity_prepare" swapped="no"/>
@@ -1711,14 +1707,5 @@ Füge entweder eine neue Stadt hinzu, oder
         <property name="has-padding">False</property>
       </packing>
     </child>
-  </object>
-  <object class="GtkTreeStore" id="treestore1"/>
-  <object class="GtkTreeStore" id="treestore_cities">
-    <columns>
-      <!-- column-name Name -->
-      <column type="gchararray"/>
-      <!-- column-name Methode -->
-      <column type="gchararray"/>
-    </columns>
   </object>
 </interface>
