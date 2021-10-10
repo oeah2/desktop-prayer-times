@@ -180,3 +180,19 @@ void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant_addcity = data;
 	gtk_widget_show_all(GTK_WIDGET(assistant_addcity));
 }
+
+void on_menuitm_participate_activate(GtkWidget* widget, gpointer data) {
+
+}
+
+void on_menutim_report_error_activate(GtkWidget* widget, gpointer data) {
+
+}
+
+void on_menuitm_edit_city_activate(GtkWidget* widget, gpointer data) {
+
+}
+
+void on_menuitm_reset_activate(GtkWidget* widget, gpointer data) {
+
+}

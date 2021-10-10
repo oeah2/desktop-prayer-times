@@ -590,6 +590,10 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     gtk_builder_add_callback_symbol(builder, "on_menuitm_movecities_activate", G_CALLBACK(on_menuitm_movecities_activate));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_removecity_activate", G_CALLBACK(on_menuitm_removecity_activate));
     gtk_builder_add_callback_symbol(builder, "on_menuitm_addcity_activate", G_CALLBACK(on_menuitm_addcity_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menuitm_participate_activate", G_CALLBACK(on_menuitm_participate_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menutim_report_error_activate", G_CALLBACK(on_menutim_report_error_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menuitm_edit_city_activate", G_CALLBACK(on_menuitm_edit_city_activate));
+    gtk_builder_add_callback_symbol(builder, "on_menuitm_reset_activate", G_CALLBACK(on_menuitm_reset_activate));
     gtk_builder_add_callback_symbol(builder, "on_assistant_add_city_page1_search_search_changed", G_CALLBACK(on_assistant_add_city_page1_search_search_changed));
     gtk_builder_add_callback_symbol(builder, "on_dlg_add_city_close", G_CALLBACK(on_dlg_add_city_close));
     gtk_builder_add_callback_symbol(builder, "on_assistant_addcity_prepare", G_CALLBACK(on_assistant_addcity_prepare));

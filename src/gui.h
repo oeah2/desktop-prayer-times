@@ -108,6 +108,11 @@ void on_menuitm_load_activate(GtkWidget* widget, gpointer data);
  */
 void on_menuitm_about_activate(GtkWidget* menuitm, gpointer data);
 
+void on_menuitm_participate_activate(GtkWidget* widget, gpointer data);
+void on_menutim_report_error_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_edit_city_activate(GtkWidget* widget, gpointer data);
+void on_menuitm_reset_activate(GtkWidget* widget, gpointer data);
+
 // Assistant
 void on_assistant_addcity_diyanet_combobox_country_changed(GtkWidget* widget, gpointer data);
 void on_assistant_addcity_diyanet_combobox_province_changed(GtkWidget* widget, gpointer data) ;
