@@ -25,7 +25,11 @@ enum AddChildToListbox {
 static GtkListBox* gtk_listbox_clear(GtkListBox* listbox, enum ListboxClearCommand command);
 static GtkWidget* gui_create_and_add_child_to_listbox(GtkListBox* listbox, enum AddChildToListbox command, char const*const label, char const*const name, GtkRadioButton* parent);
 
-
+/** \brief Clear @p listbox
+ *
+ * @param command determines if this function is applied to Add-City-Assistant or Remove-city-Dialog
+ *
+ */
 static GtkListBox* gtk_listbox_clear(GtkListBox* listbox, enum ListboxClearCommand command) {
     GtkListBox* box_return = listbox;
     if(!listbox) return box_return;
@@ -62,7 +66,15 @@ GtkListBox* gtk_listbox_clear_dialog_removeCity(GtkListBox* listbox) {
 }
 
 
-
+/** \brief Creates an child element and adds to listbox
+ *
+ * \param listbox parent
+ * \param command determines whether CheckButton or RadioButton shall be added
+ * \param label Label of newly created button
+ * \param name name of newly created button (optional)
+ * \param parent group of RadioButton (optional)
+ *
+ */
 static GtkWidget* gui_create_and_add_child_to_listbox(GtkListBox* listbox, enum AddChildToListbox command, char const*const label, char const*const name, GtkRadioButton* parent) {
 	GtkWidget* ret = 0;
 	if(listbox && label) {

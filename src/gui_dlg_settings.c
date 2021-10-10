@@ -8,7 +8,9 @@
 
 #include "gui_internal.h"
 
-
+/** \brief Apply settings from config to @p dlg_settings
+ *
+ */
 static bool dlg_settings_apply_config(GtkDialog* dlg_settings) {
     char buffer[200];
     char* widget_name = "combobox_lang";
@@ -39,6 +41,9 @@ ERR:
     return false;
 }
 
+/** \brief Apply settings from Settings-Dialog to Config
+ *
+ */
 void on_menuitm_settings_activate(GtkWidget* widget, gpointer data)
 {
     GtkDialog* dlg_settings = data;

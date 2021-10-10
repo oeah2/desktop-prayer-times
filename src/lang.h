@@ -37,6 +37,11 @@ enum language_strings {
 };
 
 bool lang_is_available(enum Languages ID);
+
+/** \brief Get filename for language @p ID.
+ *
+ * \return char* filename of glade file. Calling function takes ownership
+ */
 char* lang_get_filename(enum Languages ID);
 
 extern char const*const lang_names[LANG_NUM];

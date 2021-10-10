@@ -18,15 +18,17 @@
 
 #include "lang.h"
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
+/**< @brief Array containing language names */
 char const*const lang_names[LANG_NUM] = {
     [LANG_EN] = "en",
     [LANG_DE] = "de",
     [LANG_TR] = "tr",
 };
 
-
+/**< @brief Array containing specific language dependent strings */
 char const*const language_specific_strings[LangStrings_Num] = {
 	[LangStrings_CalcError_NoConnection] = "\n\nBitte überprüfe deine Internetverbindung",
 	[LangStrings_CalcError_Unknown] = "\n\nUnbekannter Fehler. Bitte wähle eine andere Stadt aus und melde den Fehler an unsere Entwickler.",
@@ -39,9 +41,11 @@ bool lang_is_available(enum Languages ID)
     return ret;
 }
 
+
 char* lang_get_filename(enum Languages ID)
 {
-    char* ret = malloc(50 * sizeof(char));
-    sprintf(ret, "./gui/%s.glade", lang_names[ID]);
+	char const*const filename_format = "./gui/%s.glade";
+    char* ret = malloc(strlen(filename_format) + strlen(lang_names[ID]) + 1);
+    sprintf(ret, filename_format, lang_names[ID]);
     return ret;
 }

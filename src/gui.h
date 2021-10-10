@@ -83,11 +83,29 @@ void display_empty_city(void);
 void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char* strings[num_strings]);
 
 // Menuitem
+
+/** \brief Menuitem Add City clicked handler
+ */
 void on_menuitm_addcity_activate(GtkWidget* widget, gpointer data);
+
+/** \brief Menuitem Remove clicked handler
+ */
 void on_menuitm_removecity_activate(GtkWidget* widget, gpointer data);
+
+/** \brief Menuitem Move clicked handler
+ */
 void on_menuitm_movecities_activate(GtkWidget* widget, gpointer data);
+
+/** \brief Menuitem Save clicked handler
+ */
 void on_menuitm_saveas_activate(GtkWidget* widget, gpointer data);
+
+/** \brief Menuitem Load clicked handler
+ */
 void on_menuitm_load_activate(GtkWidget* widget, gpointer data);
+
+/** \brief Menuitem About clicked handler
+ */
 void on_menuitm_about_activate(GtkWidget* menuitm, gpointer data);
 
 // Assistant
@@ -101,9 +119,29 @@ void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpoint
 void on_dlg_add_city_close(GtkWidget* widget, gpointer data);
 
 // Listbox functions
+
+/** \brief Clear @p listbox of Add-City-Assistant
+ *
+ * \return cleared listbox
+ */
 GtkListBox* gtk_listbox_clear_assistant_addcity(GtkListBox* listbox);
+
+/** \brief Clear @p listbox of Remove-City-Dialog
+ *
+ *	\return cleared listbox
+ */
 GtkListBox* gtk_listbox_clear_dialog_removeCity(GtkListBox* listbox);
+
+/** \brief Create checkbutton and add to @p listbox
+ *
+ * \return newly created checkbutton
+ */
 GtkCheckButton* gui_create_and_add_check_button(GtkListBox* listbox, char const*const label, char const*const name);
+
+/** \brief Create radiobutton and add to @p listbox
+ *
+ *	\return newly created radio button
+ */
 GtkRadioButton* gui_create_and_add_radio_button(GtkListBox* listbox, GtkRadioButton* group, char const*const label, char const*const name);
 
 // Settings

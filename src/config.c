@@ -216,6 +216,14 @@ enum ST_calculation_method config_get_calc_method(const cJSON* element) {
 	return ret;
 }
 
+/** \brief Copy @p num cities from @p src to @p dest
+ *
+ * \param num number of cities
+ * \param dest desination array
+ * \param src source array
+ * \return int EXIT_SUCCESS on success, EXIT_FAILURE otherwise
+ *
+ */
 static int config_copy_cities(size_t num, City dest[num], City src[num]) {
 	int ret = EXIT_FAILURE;
 	if(num) {
@@ -227,18 +235,27 @@ static int config_copy_cities(size_t num, City dest[num], City src[num]) {
 	return ret;
 }
 
+/** \brief Determine the smaller of two positions
+ *
+ */
 static size_t min(size_t const pos1, size_t const pos2) {
 	assert(pos1 != pos2);
 	if(pos1 < pos2) return pos1;
 	return pos2;
 }
 
+/** \brief Determine the greater of two positions
+ *
+ */
 static size_t max(size_t const pos1, size_t const pos2) {
 	assert(pos1 != pos2);
 	if(pos1 > pos2) return pos1;
 	return pos2;
 }
 
+/** \brief Move a city in Config @p cfg from position @p id_initial to @p id_after
+ *
+ */
 int config_move_city(size_t const id_initial, size_t const id_after, Config*const cfg) { // Todo verify function
 	int ret = EXIT_FAILURE;
 	if(cfg) {
@@ -268,6 +285,9 @@ int config_move_city(size_t const id_initial, size_t const id_after, Config*cons
 	return ret;
 }
 
+/** \brief Swap two cities in Config @p cfg
+ *
+ */
 int config_swap_cities(size_t const city1, size_t const city2, Config*const cfg) {
 	int ret = EXIT_FAILURE;
 	if(cfg) {
@@ -284,6 +304,9 @@ int config_swap_cities(size_t const city1, size_t const city2, Config*const cfg)
 	return ret;
 }
 
+/** \brief Parse City (calculation) from JSON
+ *
+ */
 static bool config_calc_read_city(const cJSON* element, char* name, City* city) {
     bool ret = false;
     if(!element || !city || !name)
@@ -304,6 +327,9 @@ static bool config_calc_read_city(const cJSON* element, char* name, City* city) 
     return ret;
 }
 
+/** \brief Parse City (diyanet) from JSON
+ *
+ */
 static bool config_diyanet_read_city(const cJSON* element, char* name, City* city) {
     bool ret = false;
     if(!element || !city || !name)
@@ -546,10 +572,16 @@ static bool is_id_valid(size_t city_id, Config const*const cfg)
     return false;
 }
 
+/** \brief Determine last used ID
+ *
+ */
 static size_t config_find_last_used_id(Config const*const cfg) {
 	return cfg->num_cities -1;
 }
 
+/** \brief Determine first free ID
+ *
+ */
 static size_t config_get_first_free_id(Config const*const cfg) {
 	return cfg->num_cities;
 }

@@ -23,7 +23,7 @@
 /** \brief Fetch the geolocation of a city
  *
  * \param city_name char* the name of the city
- * \return char* A string containing all matching cities and their latitudes and longitudes. (Format: Cityname lat long)
+ * \return char* A string containing all matching cities and their latitudes and longitudes. (Format: Cityname lat long). Must be freed by calling function.
  *
  */
 char* geolocation_get(char const*const city_name);

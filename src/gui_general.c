@@ -8,6 +8,9 @@
 
 #include "gui_internal.h"
 
+/** \brief Append @p text to @p label, but only if @p label does not already contain @p text
+ *
+ */
 void label_append_text(GtkLabel* label, char const*const text) {
 	if(label && text) {
 		char const*const current_content = gtk_label_get_text(label);
@@ -24,6 +27,9 @@ void label_append_text(GtkLabel* label, char const*const text) {
 	}
 }
 
+/** \brief Find child of @p parent with the name of @p name
+ *
+ */
 GtkWidget* find_child(GtkWidget* parent, const char*const name)
 {
     if(!parent || !name) return NULL;
@@ -51,6 +57,9 @@ GtkWidget* find_child(GtkWidget* parent, const char*const name)
     return NULL;
 }
 
+/** \brief Print Calender-Dates from @p times into @p dest_julian_date and @p dest_hijri_date
+ *
+ */
 void sprint_dates(prayer times, size_t buff_len, char dest_julian_date[buff_len], char dest_hijri_date[buff_len])
 {
     sprint_prayer_date(times, buff_len, dest_julian_date, false);

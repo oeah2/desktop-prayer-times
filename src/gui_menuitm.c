@@ -7,7 +7,6 @@
 
 #include "gui_internal.h"
 
-
 void on_menuitm_about_activate(GtkWidget* menuitm, gpointer data) {
 	GtkWidget* dlg_about = data;
 

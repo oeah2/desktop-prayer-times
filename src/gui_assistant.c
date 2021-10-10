@@ -42,6 +42,9 @@ void on_dlg_add_city_close(GtkWidget* widget, gpointer data) {
     gtk_widget_hide(widget);
 }
 
+/** \brief Set current page of GtkAssistant complete, so that the next page button can be activated
+ *
+ */
 static void assistant_set_current_page_complete(GtkAssistant* assistant) {
 	if(assistant) {
 		int current_page = gtk_assistant_get_current_page(assistant);
@@ -51,6 +54,9 @@ static void assistant_set_current_page_complete(GtkAssistant* assistant) {
 	}
 }
 
+/** \brief Set page of GtkAssistant incomplete, so that the next page button can not be activated
+ *
+ */
 static void assistant_set_page_incomplete(GtkAssistant* assistant, int page) {
 	if(assistant) {
 		GtkWidget* assistant_page = gtk_assistant_get_nth_page(assistant, page);
@@ -58,6 +64,9 @@ static void assistant_set_page_incomplete(GtkAssistant* assistant, int page) {
 	}
 }
 
+/** \brief Set current page of GtkAssistant incomplete, so that the next page button can not be activated
+ *
+ */
 static void assistant_set_current_page_incomplete(GtkAssistant* assistant) {
 	if(assistant) {
 		int current_page = gtk_assistant_get_current_page(assistant);
@@ -65,7 +74,9 @@ static void assistant_set_current_page_incomplete(GtkAssistant* assistant) {
 	}
 }
 
-
+/** \brief Clear "City name" Page of @p assistant
+ *
+ */
 static void assistant_clearCityname_page(GtkAssistant* assistant) {
 	if(assistant) {
 		assistant_set_page_incomplete(assistant, AssistantPages_Calc_Cityname);
@@ -78,6 +89,10 @@ static void assistant_clearCityname_page(GtkAssistant* assistant) {
 	}
 }
 
+/** \brief Read name of selected City in @p assistant, Apply settings of City @p c
+ * and return a City containing all information
+ *
+ */
 static City assistant_read_city_name(GtkAssistant* assistant, City c) {
 	City ret = c;
 	if(assistant) {
@@ -112,6 +127,15 @@ static City assistant_read_city_name(GtkAssistant* assistant, City c) {
 	return ret;
 }
 
+/** \brief Read selected calculation methods in @p assistant into City @p c and return
+ * City containing all informations
+ *
+ * \param c City with settings
+ * \param method GtkComboBox containing calculation method information
+ * \param asr GtkComboBox containing calculation information for asr method
+ * \param highlats GtkBomboBox containing calculation information for high lattitudes
+ * \return City containing all informations
+ */
 static City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkComboBox* method, GtkComboBox* asr, GtkComboBox* highlats) {
 	City* ret = 0;
 	if(c && assistant && method && asr && highlats) {
@@ -149,6 +173,8 @@ static City* assistant_read_calc_params(City* c, GtkAssistant* assistant, GtkCom
 	return ret;
 }
 
+/** \brief Parse chosen @p str GtkComboBox and return Code of chosen element
+ */
 static size_t assistant_get_diyanet_code(char const*const str) {
 	size_t ret = 0;
 	if(str) {
@@ -162,6 +188,8 @@ static size_t assistant_get_diyanet_code(char const*const str) {
 	return ret;
 }
 
+/** \brief Parse @p str of diyanet and add elements to @p combobox_dest
+ */
 static void assistant_apply_diyanet_to_combobox(GtkComboBoxText* combobox_dest, char* str) {
 	if(combobox_dest && str) {
 		gtk_combo_box_text_remove_all(combobox_dest);
@@ -175,6 +203,8 @@ static void assistant_apply_diyanet_to_combobox(GtkComboBoxText* combobox_dest, 
 	}
 }
 
+/** \brief (Diyanet) Get all countries and att to GtkComboBox
+ */
 static void assistant_diyanet_display_countries(GtkAssistant* assistant) {
 	if(assistant) {
 		char* countries = diyanet_get_country_codes(cfg->lang);
@@ -188,6 +218,8 @@ static void assistant_diyanet_display_countries(GtkAssistant* assistant) {
 	}
 }
 
+/** \brief Reset Combobox of Diyanet page
+ */
 static void assistant_diyanet_reset_combobox(GtkComboBoxText* combobox, bool set_sensitive) {
 	if(combobox) {
 		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), -1);
@@ -197,6 +229,8 @@ static void assistant_diyanet_reset_combobox(GtkComboBoxText* combobox, bool set
 	}
 }
 
+/** \brief Reset all comboboxes of diyanet page
+ */
 static void assistant_diyanet_reset_comboboxes(GtkComboBoxText* combobox_country, GtkComboBoxText* combobox_provinces, GtkComboBoxText* combobox_cities) {
 	if(combobox_country)
 		assistant_diyanet_reset_combobox(combobox_country, true);
@@ -206,6 +240,14 @@ static void assistant_diyanet_reset_comboboxes(GtkComboBoxText* combobox_country
 		assistant_diyanet_reset_combobox(combobox_cities, false);
 }
 
+/** \brief (Diyanet) Parse chosen element and update next combobox.
+ *  This function is called when the chosen element of a combobox chanes.
+ *
+ *  \param combobox_src Combobox which was changed by user
+ *  \param combobox_dest Next combobox to be filled
+ *  \param set_dest_sensitive whether desination is to be set sensitive
+ *  \param f function pointer returning codes for @p combobox_next
+ */
 static void on_assistant_addcity_diyanet_combobox_changed_func(GtkComboBoxText* combobox_src, GtkComboBoxText* combobox_dest, bool set_dest_sensitive, char* (*f)(size_t, enum Languages)) {
 	if(combobox_src && combobox_dest && f) {
 		char const*const chosen_element = gtk_combo_box_text_get_active_text(combobox_src);
@@ -225,6 +267,9 @@ static void on_assistant_addcity_diyanet_combobox_changed_func(GtkComboBoxText* 
 	}
 }
 
+/** \brief (Diyanet) Parse chosen Country and update provinces.
+ *
+ */
 void on_assistant_addcity_diyanet_combobox_country_changed(GtkWidget* widget, gpointer data) {
 	GtkComboBoxText* combobox_country = GTK_COMBO_BOX_TEXT(widget);
 	GtkComboBoxText* combobox_provinces = GTK_COMBO_BOX_TEXT(data);
@@ -233,6 +278,9 @@ void on_assistant_addcity_diyanet_combobox_country_changed(GtkWidget* widget, gp
 	}
 }
 
+/** \brief (Diyanet) Parse chosen Province and update Cities.
+ *
+ */
 void on_assistant_addcity_diyanet_combobox_province_changed(GtkWidget* widget, gpointer data) {
 	GtkComboBoxText* combobox_provinces = GTK_COMBO_BOX_TEXT(widget);
 	GtkComboBoxText* combobox_cities = GTK_COMBO_BOX_TEXT(data);
@@ -241,6 +289,9 @@ void on_assistant_addcity_diyanet_combobox_province_changed(GtkWidget* widget, g
 	}
 }
 
+/** \brief (Diyanet) Parse chosen City and set page complete or incomplete.
+ *
+ */
 void on_assistant_addcity_diyanet_combobox_city_changed(GtkWidget* widget, gpointer data) {
 	GtkComboBoxText* combobox_city = GTK_COMBO_BOX_TEXT(widget);
 	GtkAssistant* assistant = GTK_ASSISTANT(data);
@@ -253,6 +304,9 @@ void on_assistant_addcity_diyanet_combobox_city_changed(GtkWidget* widget, gpoin
 	}
 }
 
+/** \brief (Diyanet) Parse chosen City, add to config and show it, if it is the only city in config
+ *
+ */
 static void assistant_addcity_diyanet_parse_and_add_city(char const*const combobox_city_str) {
 	if(combobox_city_str) {
 		char buffer[strlen(combobox_city_str) + 5];
@@ -273,6 +327,9 @@ static void assistant_addcity_diyanet_parse_and_add_city(char const*const combob
 	}
 }
 
+/** \brief State machien for Addcity-Assistant determining next page
+ *
+ */
 int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 	AssistantAddcityPages next_page = 0;
 	AssistantAddcityPages curr_page = current_page;
@@ -339,6 +396,9 @@ int assistant_addcity_nextpage_func(int current_page, gpointer data) {
 	return next_page;
 }
 
+/** \brief Prepare next page of addcity assistant before it is shown
+ *
+ */
 void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
 
@@ -382,11 +442,17 @@ void on_assistant_addcity_prepare(GtkWidget* widget, gpointer data) {
 	}
 }
 
+/** \brief Cancel button of assistant add city is pressed
+ *
+ */
 void on_assistant_addcity_cancel(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(widget);
 	gtk_widget_hide(GTK_WIDGET(assistant));
 }
 
+/** \brief Search bar of add city assistant is changed (calc)
+ *
+ */
 void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpointer data) {
 	GtkAssistant* assistant = GTK_ASSISTANT(data);
     GtkGrid* grid = GTK_GRID(find_child(GTK_WIDGET(assistant), "assistant_addcity_page1_grid"));

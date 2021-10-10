@@ -102,6 +102,10 @@ int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int
 #endif
 }
 
+/** \brief Get print format for @p date
+ *
+ * \return char* format for printf
+ */
 static char const*const sprint_get_format(struct tm date, bool hijri) {
     char const* format = 0;
     if(date.tm_mday < 10 && date.tm_mon + (hijri ? 0 : 1) < 10) format = "0%d.0%d.%d";

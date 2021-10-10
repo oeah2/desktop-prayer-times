@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-/** \brief Returns length of file with additional buffer
+/** \brief Returns length of file with additional buffer at end
  *
  * \param file FILE* of which the lengh shall be determined
  * \return size_t file length, including terminating zero and additional buffer

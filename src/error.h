@@ -19,6 +19,13 @@
 #ifndef SRC_MYPERROR_H_
 #define SRC_MYPERROR_H_
 
+/** \brief Print into error stream
+ *
+ * For the first run of this function an specific error msg is printed containing debug information.
+ *
+ * \param msg Error msg
+ *
+ */
 void myperror(char const*const msg);
 
 #endif /* SRC_MYPERROR_H_ */

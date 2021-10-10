@@ -385,7 +385,7 @@ int diyanet_update_file(City* city, bool preserve_old_data)
  * \return char const* actual new
  *
  */
-static char const* replace_false_names(char const* name)
+static char const* replace_wrong_names(char const* name)
 {
     char const* ret = name;
     if(name) {
@@ -546,7 +546,7 @@ char* diyanet_get_country_codes(enum Languages lang)
         const cJSON* element = 0;
         cJSON_ArrayForEach(element, json) {
             cJSON* name = cJSON_GetObjectItem(element, json_identifier_country);
-            strcat(ret, replace_false_names(name->valuestring));
+            strcat(ret, replace_wrong_names(name->valuestring));
             strcat(ret, ",");
             strcat(ret, cJSON_GetObjectItem(element, "UlkeID")->valuestring);
             strcat(ret, ";");

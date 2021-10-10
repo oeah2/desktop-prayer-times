@@ -26,8 +26,21 @@ enum Version {
     VERSION_MAIN_MINOR = 1,
 };
 
+/** \brief Check if update is available
+ *
+ */
 bool update_check_is_available(void);
+
+/** \brief Get current installed version of this application
+ *
+ * \return char* string of installed version. Calling function takes ownership
+ */
 char* update_get_current_version(void);
+
+/** \brief Get available version from internet
+ *
+ * \return char* string of available version. Calling function takes ownership.
+ */
 char* update_get_available_version(void);
 
 #endif // UPDATE_H_INCLUDED

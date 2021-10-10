@@ -16,6 +16,9 @@ extern char const*const hadith_api_key;
 static char const*const start = "\"body\":\"";
 static char const*const end = "\",\"grades\"";
 
+/** \brief Check if string @hadith is valid, cut out only english part
+ *
+ */
 static bool hadith_is_valid(char* hadith) {
 	bool ret = false;
 	if(hadith) {
@@ -26,6 +29,9 @@ static bool hadith_is_valid(char* hadith) {
 	return ret;
 }
 
+/** \brief Detect markup letters
+ *
+ */
 static bool hadith_letter_is_markup(char letter) {
 	bool ret = false;
 	switch(letter) {
@@ -40,6 +46,9 @@ static bool hadith_letter_is_markup(char letter) {
 	return ret;
 }
 
+/** \brief Detect possible markup letters
+ *
+ */
 static bool hadith_letter_could_be_markup(char letter) {
 	bool ret = false;
 	switch(letter) {
@@ -55,10 +64,16 @@ static bool hadith_letter_could_be_markup(char letter) {
 	return ret;
 }
 
+/** \brief Decide if salawat is present
+ *
+ */
 static bool hadith_contains_salawat(char* hadith) {
 	return strstr(hadith, "(\\ufdfa)");
 }
 
+/** \brief Detect salawat.
+ *
+ */
 static bool hadith_letter_is_salawat(char* start_pos) {
 	return start_pos == strstr(start_pos, "\\ufdfa");
 }
@@ -84,6 +99,9 @@ static void hadith_replace_salawat(size_t len, char position[len]) {
 }
 #endif
 
+/** \brief Determine markup length at @p start_pos
+ *
+ */
 static size_t hadith_find_markup_length(size_t len, char start_pos[len]) {
 	size_t ret = 0;
 	assert(hadith_letter_is_markup(*start_pos));
@@ -97,6 +115,9 @@ static size_t hadith_find_markup_length(size_t len, char start_pos[len]) {
 	return ret;
 }
 
+/** \brief Remove next markup from @p start_pos
+ *
+ */
 static void hadith_remove_markup(size_t len, char start_pos[len]) {
 	assert(hadith_letter_is_markup(start_pos[0]));
 	size_t markup_length = hadith_find_markup_length(len, start_pos);
@@ -107,6 +128,9 @@ static void hadith_remove_markup(size_t len, char start_pos[len]) {
 	strcpy(start_pos, buffer);
 }
 
+/** \brief Remove all markups from @p hadith
+ *
+ */
 static void hadith_remove_all_markups(size_t len, char hadith[len]) {
 	for(size_t i = 0; i < strlen(hadith); i++) {
 		if(hadith_letter_is_markup(hadith[i]) &&
@@ -119,6 +143,9 @@ static void hadith_remove_all_markups(size_t len, char hadith[len]) {
 	}
 }
 
+/** \brief Take english part of @p hadith and remove all markups
+ *
+ */
 static char* hadith_cut_relevant(char* hadith) {
 	char* ret = 0;
 	if(hadith) {

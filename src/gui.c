@@ -99,6 +99,9 @@ void label_set_text(enum GUI_IDS id, char* text)
     gtk_label_set_text(GTK_LABEL(labels[id]), text);
 }
 
+/** \brief Calc prayers for @p city and write into @p prayer_times
+ *
+ */
 static int gui_calc_prayer(City city, prayer prayer_times[prayers_num])
 {
     calc_function* calc = calc_functions[city.pr_time_provider];
@@ -109,6 +112,9 @@ static int gui_calc_prayer(City city, prayer prayer_times[prayers_num])
     return ret;
 }
 
+/** \brief Calc prayers for @p city and write into @p dest and @p dest_hijri_date and @p dest_julian_date
+ *
+ */
 static int gui_calc_prayer_times(City city, size_t dest_len, char dest[prayers_num][dest_len], size_t buff_len, char dest_julian_date[buff_len], char dest_hijri_date[buff_len])
 {
     prayer prayer_times[prayers_num];
@@ -125,6 +131,9 @@ static int gui_calc_prayer_times(City city, size_t dest_len, char dest[prayers_n
     return ret;
 }
 
+/** \brief Calc prayers for @p city and display this city on main window
+ *
+ */
 void display_city(City city)
 {
     size_t buff_len = 20;
@@ -141,12 +150,19 @@ void display_city(City city)
     gtk_label_set_text(labels[gui_id_hijridate], hijri_date);
 }
 
+/** \brief Display empty city on main window
+ *
+ */
 void display_empty_city(void) {
 	City c = {0};
 	c = *city_init_empty(&c);
 	display_city(c);
 }
 
+/** \brief Calc prayer-previews (for @p days in future) for @p city and write into @p prayer_times.
+ *
+ * \param days can be negative for past days
+ */
 static int gui_calc_preview(City city, prayer prayer_times[prayers_num], int days)
 {
     preview_function* preview = preview_functions[city.pr_time_provider];
@@ -160,6 +176,10 @@ static int gui_calc_preview(City city, prayer prayer_times[prayers_num], int day
     return ret;
 }
 
+/** \brief Calc prayer-previews (for @p days in future) for @p city and write into @p dest and @p dest_julian_date and @p dest_hijri_date.
+ *
+ * \param days can be negative for past days
+ */
 static int gui_calcpreview_prayer(City city, size_t dest_len, char dest[prayers_num][dest_len], size_t buff_len, char dest_julian_date[buff_len], char dest_hijri_date[buff_len], int days)
 {
     prayer prayer_times[prayers_num];
@@ -174,6 +194,10 @@ static int gui_calcpreview_prayer(City city, size_t dest_len, char dest[prayers_
     return ret;
 }
 
+/** \brief Display preview (for @p days in future) for @p city on main window
+ *
+ * \param days can be negative for past days
+ */
 static int display_preview(City city, int days)
 {
     size_t buff_len = 20;
@@ -206,6 +230,9 @@ bool Callback_Minutes(gpointer data)
     return ret;
 }
 
+/** \brief Callback function for secondly update of main window
+ *
+ */
 bool Callback_Seconds(gpointer data)
 {
     prayer prayer_times[prayers_num];
@@ -269,6 +296,9 @@ CALC_REMAINING:
     return true;
 }
 
+/** \brief Handler for previous city button.
+ *
+ */
 void on_btn_prev_city_clicked(GtkWidget* widget, gpointer data)
 {
     if(city_ptr > 0) {
@@ -287,6 +317,9 @@ void on_btn_prev_city_clicked(GtkWidget* widget, gpointer data)
     }
 }
 
+/** \brief Handler for next city button.
+ *
+ */
 void on_btn_next_city_clicked(GtkWidget* widget, gpointer data)
 {
     if(city_ptr < cfg->num_cities - 1) {
@@ -310,6 +343,9 @@ void on_btn_next_city_clicked(GtkWidget* widget, gpointer data)
     }
 }
 
+/** \brief Handler for previous date button.
+ *
+ */
 void on_btn_prev_date_clicked(GtkWidget* widget, gpointer data)
 {
     if(day_ptr <= 0 && cfg->cities[city_ptr].pr_time_provider == prov_calc) {
@@ -329,6 +365,9 @@ void on_btn_prev_date_clicked(GtkWidget* widget, gpointer data)
     }
 }
 
+/** \brief Handler for next city button.
+ *
+ */
 void on_btn_next_date_clicked(GtkWidget* widget, gpointer data)
 {
     day_ptr++;
@@ -344,6 +383,9 @@ void on_btn_next_date_clicked(GtkWidget* widget, gpointer data)
     gtk_widget_set_sensitive(button_prev_date, true);
 }
 
+/** \brief Main function for Calculation error dialog.
+ *
+ */
 static void dlg_calc_error_main(GtkDialog* dlg_calc_error) {
 	assert(dlg_calc_error);
 
@@ -382,6 +424,9 @@ RUN:
 	gtk_widget_hide(GTK_WIDGET(dlg_calc_error));
 }
 
+/** \brief Handler for Hadith-Update
+ *
+ */
 void on_label_randomhadith_clicked(GtkWidget* widget, gpointer data) {
 	GtkLabel* random_hadith = GTK_LABEL(widget);
 	assert(GTK_IS_LABEL(random_hadith));
@@ -402,6 +447,9 @@ void on_label_randomhadith_clicked(GtkWidget* widget, gpointer data) {
 	}
 }
 
+/** \brief Handler for closing of main window.
+ *
+ */
 void on_window_close(GtkWidget* window, gpointer data)
 {
     if(cfg->save_position) {
@@ -419,6 +467,9 @@ void on_window_close(GtkWidget* window, gpointer data)
     gtk_main_quit();
 }
 
+/** \brief Assistant for glade
+ *
+ */
 void build_assistant_glade(void)
 {
     GtkBuilder          *builder;
@@ -448,6 +499,9 @@ void show_moonphase(unsigned char* data)
 }
 #endif // SHOW_MOON
 
+/** \brief Handler for click of status icon
+ *
+ */
 void statusicon_clicked(GtkWidget* widget, gpointer data)
 {
     gtk_window_present(GTK_WINDOW(widget));
@@ -461,6 +515,9 @@ void statusicon_clicked(GtkWidget* widget, gpointer data)
     }                       \
  } while(false)
 
+/** \brief Load glade GUI file, read buttons and connect signals.
+ *
+ */
 void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char* strings[num_strings])
 {
     GtkBuilder      *builder;

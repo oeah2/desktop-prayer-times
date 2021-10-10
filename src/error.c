@@ -18,9 +18,11 @@
 
 #include <time.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <error.h>
 #include "error.h"
+#include "update.h"
 
 
 void myperror(char const*const msg) {
@@ -30,9 +32,11 @@ void myperror(char const*const msg) {
 			firstrun = true;
 			time_t t = time(0);
 			struct tm tm = *localtime(&t);
-			char buffer[50];
-			sprintf(buffer, "\n\nToday: %02d.%02d.%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+			char buffer[100];
+			char* version = update_get_current_version();
+			sprintf(buffer, "\n\nToday: %02d.%02d.%d, version: %s", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, version);
 			perror(buffer);
+			free(version);
 		}
 	perror(msg);
 	}

@@ -22,7 +22,7 @@
 
 #define FILE_ADDITIONAL_BUFFER 10
 
-/** \brief Returns length of file
+/** \brief Returns real length of file
  *
  * \param file FILE* of which the lengh shall be determined
  * \return size_t file length, including terminating zero

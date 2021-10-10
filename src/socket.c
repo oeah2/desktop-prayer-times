@@ -51,6 +51,9 @@ enum {
     SOCK_ERR_ADDRINFO,
 };
 
+/** \brief Initialize socket
+ *
+ */
 static int socket_init(void)
 {
 #ifdef _WIN32
@@ -64,6 +67,9 @@ static int socket_init(void)
     return SOCK_OK;
 }
 
+/** \brief Deinitialize socket
+ *
+ */
 static int socket_deinit(void)
 {
 #ifdef _WIN32
