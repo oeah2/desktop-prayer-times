@@ -1,7 +1,7 @@
 # desktop-prayer-times
 
 Known Issues:
-- Socket implementation is buggy and blocking
+- Socket implementation can be buggy and blocking
 - moving and editing cities not implemented.
 
 
@@ -10,5 +10,5 @@ Todo:
 - Rework update checking
 - Create distribution files
 - Create language files
-- Improve makefile
+- Rework makefile
 - Run valgrind
