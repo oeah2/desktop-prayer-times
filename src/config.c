@@ -551,8 +551,6 @@ Config* config_init(Config* cfg)
             .lang = LANG_EN,
             .config_changed = false,
         };
-        //cfg->lang = LANG_EN;
-        //cfg->config_changed = false;
     }
     return cfg;
 }
