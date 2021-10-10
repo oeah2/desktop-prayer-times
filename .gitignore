@@ -6,3 +6,4 @@
 /.project
 /Config.cfg
 *.cfg
+src/hadith_key.c
