@@ -5,8 +5,9 @@ Known Issues:
 - moving and editing cities not implemented.
 
 
+
 Todo:
-- Switch from own socket implementation to library
+- Switch from own socket implementation to library?
 - Rework update checking
 - Create distribution files
 - Create language files
