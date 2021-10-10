@@ -51,6 +51,9 @@ enum {
     SOCK_ERR_ADDRINFO,
 };
 
+static size_t http_find_header_length(char const*const http_response);
+static size_t http_find_resp_length(char const*const http_response);
+
 /** \brief Initialize socket
  *
  */
@@ -266,7 +269,7 @@ static bool http_is_response_ok(char const*const http_response)
     bool ret = false;
     if(http_response) {
         if(strstr(http_response, "HTTP/1.1 200 OK")) {
-            ret = true;
+			ret = true;
         }
     }
     return ret;
@@ -305,6 +308,23 @@ static size_t http_find_header_length(char const*const http_response)
         if(pos_header_end) {
             ptrdiff_t length = pos_header_end - http_response;
             ret = length;
+        }
+    }
+    return ret;
+}
+
+static bool http_is_response_complete(char const*const http_response)
+{
+    bool ret = false;
+	puts("Checking for complete");
+    if(http_response) {
+        if(strstr(http_response, "HTTP/1.1 200 OK")) {
+			size_t header_length = http_find_header_length(http_response);
+			size_t resp_setpoint = http_find_resp_length(http_response);
+			int actual_resp = strlen(http_response) - header_length;
+			if(actual_resp > 0 && actual_resp == resp_setpoint) {
+				ret = true;
+			}
         }
     }
     return ret;
@@ -468,16 +488,19 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         size_t buf_len = 100E3;
         buffer = calloc(buf_len, sizeof(char));
         if(!buffer) goto ERR_SEND;
+		size_t received_bytes = 0;
+	RECV:
 #ifdef SOCKET_RECVALL
-        size_t received_bytes = socket_receiveall(s, buffer, buf_len, 0);
+        received_bytes += socket_receiveall(s, buffer, buf_len, 0);
 #else
-        size_t received_bytes = http_receiveall(s, buffer, buf_len, 0);
+        received_bytes += http_receiveall(s, buffer + received_bytes, buf_len, 0);
 #endif // HTTP_RECVALL
         //assert(received_bytes);
 #ifdef DEBUG
         printf("HTTP_Get Received bytes: %zu\n", received_bytes);
         printf("HTTP_Get Received data: \n%s\n", buffer);
 #endif // DEBUG
+		if(!http_is_response_complete(buffer)) goto RECV;
         if(!received_bytes || !http_is_response_ok(buffer)) goto ERR_RECV;
         buffer = http_remove_header(buffer);
         assert(buffer);
@@ -653,6 +676,7 @@ char* https_get(char const*const host, char const*const file, char const*const a
     http_request = NULL;
 
     char* http_response = https_receive(bio);
+	http_is_response_complete(http_response);
 #ifdef DEBUG
     printf("HTTPS_Get response: %s\n", http_response);
 #endif // DEBUG
