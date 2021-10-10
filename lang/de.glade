@@ -132,7 +132,7 @@ Author: Ahmet Öztürk
   <object class="GtkWindow" id="window_main">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Desktop Prayer Times App</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -755,14 +755,14 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <property name="can-focus">False</property>
     <property name="resizable">False</property>
     <property name="destroy-with-parent">True</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <property name="program-name">Desktop Prayer Times</property>
     <property name="version">0.1</property>
     <property name="website">https://github.com/oeah2/desktop-prayer-times</property>
     <property name="authors">Ahmet Öztürk</property>
-    <property name="logo">Graphics\Logo_small.png</property>
+    <property name="logo">../Graphics/Logo_small.png</property>
     <property name="license-type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -795,7 +795,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <property name="window-position">center</property>
     <property name="default-width">300</property>
     <property name="default-height">75</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -897,7 +897,7 @@ Füge entweder eine neue Stadt hinzu, oder
   <object class="GtkFileChooserDialog" id="dlg_loadfile">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Datei auswählen</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -1062,7 +1062,7 @@ Füge entweder eine neue Stadt hinzu, oder
   <object class="GtkFileChooserDialog" id="dlg_savefile">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Datei wählen</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -1125,7 +1125,7 @@ Füge entweder eine neue Stadt hinzu, oder
   <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Einstellungen</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <child internal-child="vbox">
@@ -1436,7 +1436,7 @@ Füge entweder eine neue Stadt hinzu, oder
       </packing>
     </child>
     <child>
-      <!-- n-columns=2 n-rows=3 -->
+      <!-- n-columns=2 n-rows=2 -->
       <object class="GtkGrid" id="assistant_addcity_page1_grid">
         <property name="name">assistant_addcity_page1_grid</property>
         <property name="visible">True</property>
@@ -1499,12 +1499,6 @@ Füge entweder eine neue Stadt hinzu, oder
             <property name="left-attach">1</property>
             <property name="top-attach">1</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
       <packing>
