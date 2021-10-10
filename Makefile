@@ -5,7 +5,8 @@ OUT_DEBUG_LINUX = ./bin/Debug/Prayer_Times.a
 OBJ_DEBUG_PATH = ./obj/Debug
 OBJ_RELEASE_PATH = ./obj/Release
 SRC_PATH = ./src
-CFLAGS_DEBUG = -Wall -std=c11 -g -O0 -fsanitize=address
+CFLAGS_DEBUG = -Wall -std=c11 -g -O0
+#CFLAGS_DEBUG += -fsanitize=address
 CFLAGS_RELEASE = -Wall -std=c11 -O3 
 
 all: DebugLinux
