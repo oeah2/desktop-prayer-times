@@ -132,7 +132,7 @@ Author: Ahmet Öztürk
   <object class="GtkWindow" id="window_main">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Desktop Prayer Times App</property>
-    <property name="icon">../Graphics/Logo_small.png</property>
+    <property name="icon">..\Graphics\Logo_small.png</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -264,7 +264,7 @@ Author: Ahmet Öztürk
                       <object class="GtkMenuItem" id="menuitm_remove_city">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label">Delete City</property>
+                        <property name="label" translatable="yes">Delete City</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_removecity_activate" object="dlg_remove_city" swapped="no"/>
                       </object>
@@ -274,7 +274,7 @@ Author: Ahmet Öztürk
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">False</property>
-                        <property name="label">Change City Order</property>
+                        <property name="label" translatable="yes">Change City Order</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_movecities_activate" object="dlg_savefile" swapped="no"/>
                       </object>
@@ -755,14 +755,14 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <property name="can-focus">False</property>
     <property name="resizable">False</property>
     <property name="destroy-with-parent">True</property>
-    <property name="icon">../Graphics/Logo_small.png</property>
+    <property name="icon">..\Graphics\Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <property name="program-name">Desktop Prayer Times</property>
     <property name="version">0.1</property>
     <property name="website">https://github.com/oeah2/desktop-prayer-times</property>
     <property name="authors">Ahmet Öztürk</property>
-    <property name="logo">../Graphics/Logo_small.png</property>
+    <property name="logo">..\Graphics\Logo_small.png</property>
     <property name="license-type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -795,7 +795,7 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <property name="window-position">center</property>
     <property name="default-width">300</property>
     <property name="default-height">75</property>
-    <property name="icon">../Graphics/Logo_small.png</property>
+    <property name="icon">..\Graphics\Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -897,7 +897,7 @@ internet connection.</property>
   <object class="GtkFileChooserDialog" id="dlg_loadfile">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Load file</property>
-    <property name="icon">../Graphics/Logo_small.png</property>
+    <property name="icon">..\Graphics\Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -1061,8 +1061,8 @@ internet connection.</property>
   </object>
   <object class="GtkFileChooserDialog" id="dlg_savefile">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Save File</property>
-    <property name="icon">../Graphics/Logo_small.png</property>
+    <property name="title" translatable="yes">Save Config</property>
+    <property name="icon">..\Graphics\Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -1125,7 +1125,7 @@ internet connection.</property>
   <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Settings</property>
-    <property name="icon">../Graphics/Logo_small.png</property>
+    <property name="icon">..\Graphics\Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <child internal-child="vbox">
@@ -1348,14 +1348,14 @@ internet connection.</property>
     <property name="name">img_logo_diyanet</property>
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="pixbuf">../Graphics/Diyanet_Logo.png</property>
+    <property name="pixbuf">..\Graphics\Diyanet_Logo.png</property>
   </object>
   <object class="GtkAssistant" id="assistant_addcity">
     <property name="name">assistant_addcity</property>
     <property name="width-request">500</property>
     <property name="height-request">200</property>
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Stadt hinzufügen</property>
+    <property name="title" translatable="yes">Add a new city</property>
     <property name="transient-for">window_main</property>
     <signal name="cancel" handler="on_assistant_addcity_cancel" swapped="no"/>
     <signal name="prepare" handler="on_assistant_addcity_prepare" swapped="no"/>
@@ -1465,7 +1465,7 @@ internet connection.</property>
             <property name="can-focus">False</property>
             <property name="valign">start</property>
             <property name="margin-end">6</property>
-            <property name="label" translatable="yes">Results:</property>
+            <property name="label" translatable="yes" context="These are the results of cities, which are found for the search query.">Results:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1481,7 +1481,7 @@ internet connection.</property>
             <property name="primary-icon-name">edit-find-symbolic</property>
             <property name="primary-icon-activatable">False</property>
             <property name="primary-icon-sensitive">False</property>
-            <property name="placeholder-text" translatable="yes">Name of City</property>
+            <property name="placeholder-text" translatable="yes" context="This is a placeholder for an search entry">Name of City</property>
             <signal name="search-changed" handler="on_assistant_add_city_page1_search_search_changed" object="assistant_addcity" swapped="no"/>
           </object>
           <packing>
@@ -1620,7 +1620,7 @@ internet connection.</property>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Country:</property>
+            <property name="label" translatable="yes" context="This is a dropdown menu of countries, for the diyanet search">Country:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1631,7 +1631,7 @@ internet connection.</property>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Province:</property>
+            <property name="label" translatable="yes" context="This is a dropdown menu of provinces, for the diyanet search">Province:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1642,7 +1642,7 @@ internet connection.</property>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">City:</property>
+            <property name="label" translatable="yes" context="This is a dropdown menu of cities, for the diyanet search">City:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
