@@ -48,7 +48,7 @@ static bool dlg_settings_apply_config(GtkDialog* dlg_settings) {
 
 ERR:
     sprintf(buffer, "Error in function %s looking for widget %s", __func__, widget_name);
-	myperror(buffer);
+	myperror(__FILE__, __LINE__, buffer);
     return false;
 }
 
@@ -106,6 +106,6 @@ RUN_DIALOG:
     return;
 
 ERR_WIDGET:
-	myperror("Error finding widget!");
+	myperror(__FILE__, __LINE__, "Error finding widget!");
     gtk_widget_hide(GTK_WIDGET(dlg_settings));
 }

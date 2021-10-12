@@ -47,7 +47,7 @@ static struct tm diyanet_mk_prayer_time(char* hr, char* date)
 
     struct tm tm = {0};
     if(sscanf(current_pos, "%d.%d.%d", &tm.tm_mday, &tm.tm_mon, &tm.tm_year) != 3) {       // 3 numbers to be detected
-    	myperror("Error: mk_prayer_time could not parse date");
+    	myperror(__FILE__, __LINE__, "Error: mk_prayer_time could not parse date");
         exit(EXIT_FAILURE);
     }
     tm.tm_mon--;
@@ -59,7 +59,7 @@ static struct tm diyanet_mk_prayer_time(char* hr, char* date)
     } while(!isdigit(*current_pos));
 
     if(sscanf(current_pos, "%d:%d", &tm.tm_hour, &tm.tm_min) != 2) {                  // 2 number to be detected
-    	myperror("Error: mk_prayer_time could not parse hours");
+    	myperror(__FILE__, __LINE__, "Error: mk_prayer_time could not parse hours");
         exit(EXIT_FAILURE);
     }
     return tm;
@@ -74,7 +74,7 @@ static struct tm diyanet_mk_hijri_date(char* string_in)
 
     struct tm tm = {0};
     if(sscanf(current_pos, "%d.%d.%d", &tm.tm_mday, &tm.tm_mon, &tm.tm_year) != 3) {       // 3 numbers to be detected
-    	myperror("Error: mk_prayer_time could not parse date");
+    	myperror(__FILE__, __LINE__, "Error: mk_prayer_time could not parse date");
         exit(EXIT_FAILURE);
     }
 
@@ -93,7 +93,7 @@ static struct tm diyanet_mk_prayer_time(char* hr, char* date)
 {
     struct tm tm = {0};
     if(sscanf(date, "%d.%d.%d", &tm.tm_mday, &tm.tm_mon, &tm.tm_year) != 3) {
-    	myperror("Error: mk_prayer_time could not prase date");
+    	myperror(__FILE__, __LINE__, "Error: mk_prayer_time could not prase date");
         exit(EXIT_FAILURE);
     }
 
@@ -101,7 +101,7 @@ static struct tm diyanet_mk_prayer_time(char* hr, char* date)
     tm.tm_year -= 1900;
 
     if(sscanf(hr, "%d:%d", &tm.tm_hour, &tm.tm_min) != 2) {
-    	myperror("Error: mk_prayer_time could not parse hours");
+    	myperror(__FILE__, __LINE__, "Error: mk_prayer_time could not parse hours");
         exit(EXIT_FAILURE);
     }
     return tm;
@@ -128,7 +128,7 @@ static int diyanet_parse_prayer_times(char* str, prayer times[prayers_num], size
                 || !pos_prayers[pr_maghreb]
                 || !pos_prayers[pr_ishaa]
                 || !strstr(str, "MiladiTarihKisa\"")) {
-        	myperror("Format not accepted.");
+        	myperror(__FILE__, __LINE__, "Format not accepted.");
             assert(pos_prayers[pr_fajr]);
             assert(pos_prayers[pr_sunrise]);
             assert(pos_prayers[pr_dhuhr]);
@@ -171,18 +171,18 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
 
 GET_PRAYER_TIMES:
     if(!fgets(buffer, buffer_length, file_times)) {
-    	myperror("Error reading file.");
+    	myperror(__FILE__, __LINE__, "Error reading file.");
     }
 
     if(EOF == fgetc(file_times) && feof(file_times)) {
         /* end of file reached, update file */
-    	myperror("End of file reached.");
+    	myperror(__FILE__, __LINE__, "End of file reached.");
         return EOF;
     }
 
     size_t rewind_neg = 0;
     if(EXIT_FAILURE == diyanet_parse_prayer_times(buffer, times, &rewind_neg)) {
-    	myperror("Error while prasing prayer times.");
+    	myperror(__FILE__, __LINE__, "Error while prasing prayer times.");
         exit(EXIT_FAILURE);
     }
 
@@ -225,14 +225,14 @@ static int diyanet_get_prayer_times_for_date(FILE* file_times, prayer times[pray
     char* file_content = malloc(sizeof(char) * (file_length));
     if(!file_read_all(file_times, file_length, file_content)) {
         ret = ENOFILE;
-    	myperror("Error reading file");
+    	myperror(__FILE__, __LINE__, "Error reading file");
         goto FREE_FILE_CONTENT;
     }
 
     cJSON* json = cJSON_Parse(file_content);
     if(!json) {
         ret = EFAULT;
-    	myperror("Error parsing JSON");
+    	myperror(__FILE__, __LINE__, "Error parsing JSON");
         goto FREE_JSON;
     }
 
@@ -295,7 +295,7 @@ int diyanet_get_todays_prayers(City city, prayer prayer_times[prayers_num])
             diyanet_update_file(&city, false);
             return diyanet_get_todays_prayers(city, prayer_times);
         } else {
-        	myperror("Error getting file!");
+        	myperror(__FILE__, __LINE__, "Error getting file!");
             return ENETDOWN;
         }
     case EXIT_SUCCESS:
@@ -327,7 +327,7 @@ int diyanet_get_preview_prayers(City city, size_t days, prayer prayer_times[days
     int ret = EXIT_SUCCESS;
 
     if(days > max_days) {
-    	myperror("Date too far away.");
+    	myperror(__FILE__, __LINE__, "Date too far away.");
         return EXIT_FAILURE;
     }
 
@@ -536,7 +536,7 @@ char* diyanet_get_country_codes(enum Languages lang)
 
     cJSON* json = cJSON_Parse(http_response);
     if(!json) {
-    	myperror("Error parsing JSON.");
+    	myperror(__FILE__, __LINE__, "Error parsing JSON.");
         return ret;
     }
 
@@ -572,7 +572,7 @@ char* diyanet_get_provinces(size_t country_code, enum Languages lang)
 
 cJSON* json = cJSON_Parse(http_response);
         if(!json) {
-        	myperror("Error parsing JSON.");
+        	myperror(__FILE__, __LINE__, "Error parsing JSON.");
             return ret;
         }
 
@@ -621,7 +621,7 @@ char* diyanet_get_cities(size_t province_code, enum Languages lang)
 
         cJSON* json = cJSON_Parse(http_response);
         if(!json) {
-        	myperror("Error parsing JSON.");
+        	myperror(__FILE__, __LINE__, "Error parsing JSON.");
             return ret;
         }
 

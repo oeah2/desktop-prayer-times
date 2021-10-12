@@ -202,13 +202,15 @@ static size_t assistant_get_diyanet_code(char const*const str) {
 /** \brief Parse @p str of diyanet and add elements to @p combobox_dest
  */
 static void assistant_apply_diyanet_to_combobox(GtkComboBoxText* combobox_dest, char* str) {
-	if(combobox_dest && str) {
+	if(combobox_dest) {
 		gtk_combo_box_text_remove_all(combobox_dest);
-		char* name = 0;
-		name = strtok(str, ";");
-		gtk_combo_box_text_append_text(combobox_dest, name);
-		while((name = strtok(0, ";"))) {
+		if(str) {
+			char* name = 0;
+			name = strtok(str, ";");
 			gtk_combo_box_text_append_text(combobox_dest, name);
+			while((name = strtok(0, ";"))) {
+				gtk_combo_box_text_append_text(combobox_dest, name);
+			}
 		}
 		gtk_combo_box_set_active(GTK_COMBO_BOX(combobox_dest), -1);
 	}
@@ -499,7 +501,7 @@ void on_assistant_add_city_page1_search_search_changed(GtkWidget* widget, gpoint
     return;
 
 ERR:
-	myperror("Error on_assistant_add_city_page1_search_search_changed");
+	myperror(__FILE__, __LINE__, "Error on_assistant_add_city_page1_search_search_changed");
     free(geolocation_string);
     return;
 }

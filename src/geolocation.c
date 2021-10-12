@@ -44,8 +44,8 @@ char* geolocation_get(char const*const city_name)
     http_response = 0;
 
     if(!json) {
-    	myperror("Error parsing JSON!");
-    	myperror(cJSON_GetErrorPtr());
+    	myperror(__FILE__, __LINE__, "Error parsing JSON!");
+    	myperror(__FILE__, __LINE__, cJSON_GetErrorPtr());
         return ret;
     }
 

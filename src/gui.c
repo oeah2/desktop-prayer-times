@@ -394,12 +394,12 @@ RUN:
 	    city = &(cfg->cities[city_ptr]);
 	    if(city->pr_time_provider == prov_diyanet) {
 	        if(!socket_check_connection()) {
-	            myperror("dlg_calc_error_retry_btn_clicked: No internet connection");
+	            myperror(__FILE__, __LINE__, "dlg_calc_error_retry_btn_clicked: No internet connection");
 	    	    GtkLabel* label = GTK_LABEL(find_child(GTK_WIDGET(dlg_calc_error), "dlg_calc_error_label"));
 	    	    label_append_text(label, language_specific_strings[LangStrings_CalcError_NoConnection]);
 	        }
 	    } else if(city->pr_time_provider == prov_calc) {
-	    	myperror("dlg_calc_error_retry_btn_clicked, Error for prov_calc");
+	    	myperror(__FILE__, __LINE__, "dlg_calc_error_retry_btn_clicked, Error for prov_calc");
     	    GtkLabel* label = GTK_LABEL(find_child(GTK_WIDGET(dlg_calc_error), "dlg_calc_error_label"));
     	    label_append_text(label, language_specific_strings[LangStrings_CalcError_Unknown]);
 	    }
@@ -523,7 +523,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     {
         int gtk_builder_ret = gtk_builder_add_from_file(builder, glade_filename, NULL);
         if(!gtk_builder_ret) {
-        	myperror("Error parsing GUI file!");
+        	myperror(__FILE__, __LINE__, "Error parsing GUI file!");
             assert(gtk_builder_ret);
         }
     }
@@ -632,7 +632,7 @@ void build_glade(Config* cfg_in, size_t num_strings, char* glade_filename, char*
     return;
 
 ERR_OBJ:
-	myperror("Error finding object with gtk_builder_get_object");
-	myperror(err_msg);
+	myperror(__FILE__, __LINE__, "Error finding object with gtk_builder_get_object");
+	myperror(__FILE__, __LINE__, err_msg);
     return;
 }

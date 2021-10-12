@@ -112,7 +112,7 @@ static GtkWidget* gui_create_and_add_child_to_listbox(GtkListBox* listbox, enum 
 	}
 	return ret;
 ERR:
-	myperror("gui_create_and_add_child_to_listbox: Error creating element");
+	myperror(__FILE__, __LINE__, "gui_create_and_add_child_to_listbox: Error creating element");
 	return ret;
 }
 

@@ -63,7 +63,7 @@ static int socket_init(void)
     WSADATA wsaData;
 
     if(WSAStartup(MAKEWORD(1,1), &wsaData)) {
-    	myperror("Error during Socket initialization.");
+    	myperror(__FILE__, __LINE__, "Error during Socket initialization.");
         return SOCK_ERR_INIT;
     }
 #endif
@@ -110,7 +110,7 @@ static int socket_connect(char const*const addr)
     hints.ai_socktype = SOCK_STREAM;
 
     if(getaddrinfo(addr, "http", &hints, &res)) {
-    	myperror("Error getting addrinfo.");
+    	myperror(__FILE__, __LINE__, "Error getting addrinfo.");
         return SOCK_ERR_ADDRINFO;
     }
 
@@ -322,7 +322,7 @@ static bool http_is_response_complete(char const*const http_response)
 			size_t header_length = http_find_header_length(http_response);
 			size_t resp_setpoint = http_find_resp_length(http_response);
 			int actual_resp = strlen(http_response) - header_length;
-			if(actual_resp > 0 && actual_resp == resp_setpoint) {
+			if(actual_resp > 0 && header_length && resp_setpoint && actual_resp == resp_setpoint) {
 				ret = true;
 			}
         }
@@ -493,14 +493,17 @@ char* http_get(char const*const host, char const*const file, char const*const ad
 #ifdef SOCKET_RECVALL
         received_bytes += socket_receiveall(s, buffer, buf_len, 0);
 #else
-        received_bytes += http_receiveall(s, buffer + received_bytes, buf_len, 0);
+        received_bytes += http_receiveall(s, buffer + received_bytes, buf_len, MSG_WAITALL);
 #endif // HTTP_RECVALL
         //assert(received_bytes);
 #ifdef DEBUG
         printf("HTTP_Get Received bytes: %zu\n", received_bytes);
         printf("HTTP_Get Received data: \n%s\n", buffer);
 #endif // DEBUG
-		if(!http_is_response_complete(buffer)) goto RECV;
+		if(!http_is_response_complete(buffer)) {
+			myperror(__FILE__, __LINE__, "Error during http_get receive");
+			goto ERR_RECV;
+		}
         if(!received_bytes || !http_is_response_ok(buffer)) goto ERR_RECV;
         buffer = http_remove_header(buffer);
         assert(buffer);
@@ -513,7 +516,7 @@ char* http_get(char const*const host, char const*const file, char const*const ad
     return ret;
 
 ERR_RECV:
-	myperror("Error during receive");
+	myperror(__FILE__, __LINE__, "Error during receive");
     free(buffer);
 ERR_SEND:
     free(http_request);
@@ -533,7 +536,7 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         res = curl_easy_perform(curl);
 
         if(res != CURLE_OK) {
-        	myperror("Error performing curl operationg!");
+        	myperror(__FILE__, __LINE__, "Error performing curl operationg!");
 
         }
         curl_easy_cleanup(curl);
@@ -556,7 +559,7 @@ bool socket_check_connection()      // Das ist keine schoene Loesung, sollte abe
  */
 static void report_and_exit(const char* msg)
 {
-	myperror(msg);
+	myperror(__FILE__, __LINE__, msg);
     ERR_print_errors_fp(stderr);
     exit(-1);
 }
@@ -668,7 +671,7 @@ char* https_get(char const*const host, char const*const file, char const*const a
     char* http_request = http_create_request(host, file, add_info);
     int sent_bytes = BIO_puts(bio, http_request);
     if(sent_bytes == -1 || sent_bytes == 0) {
-    	myperror("Error while sending data over HTTPS socket!");
+    	myperror(__FILE__, __LINE__, "Error while sending data over HTTPS socket!");
         return 0;
     }
     assert(strlen(http_request) == sent_bytes);
@@ -676,10 +679,9 @@ char* https_get(char const*const host, char const*const file, char const*const a
     http_request = NULL;
 
     char* http_response = https_receive(bio);
-	http_is_response_complete(http_response);
-#ifdef DEBUG
-    printf("HTTPS_Get response: %s\n", http_response);
-#endif // DEBUG
+	if(!http_is_response_complete(http_response)) {
+		myperror(__FILE__, __LINE__, "Error during receiving of https_get");
+	}
     https_cleanup(ctx, bio);
     if(http_is_response_ok(http_response)) {
     	http_response = http_remove_header(http_response);

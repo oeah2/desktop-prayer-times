@@ -26,16 +26,16 @@
 #include "update.h"
 
 
-void myperror(char const*const msg) {
+void myperror(char const*const file, const int line, char const*const msg) {
 	static bool firstrun = false;
-	if(msg) {
+	if(msg && file) {
 		if(!firstrun) {
 			firstrun = true;
 			time_t t = time(0);
 			struct tm tm = *localtime(&t);
-			char buffer[100];
+			char buffer[150];
 			char* version = update_get_current_version();
-			sprintf(buffer, "\n\nToday: %02d.%02d.%d, version: %s", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, version);
+			sprintf(buffer, "\n\nDesktop Prayer Times App\nToday: %02d.%02d.%d, version: %s", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, version);
 
 			int prev_error = errno;
 			errno = 0;
@@ -43,7 +43,9 @@ void myperror(char const*const msg) {
 			errno = prev_error;
 			free(version);
 		}
-	perror(msg);
+	char buffer[150];
+	sprintf(buffer, "%s %d: %s", file, line, msg);
+	perror(buffer);
 	errno = 0;
 	}
 }
