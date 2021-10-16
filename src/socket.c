@@ -39,11 +39,6 @@
 #include "update.h"
 #include "error.h"
 
-//#define USE_LIBCURL
-#ifdef USE_LIBCURL
-#include <curl/curl.h>
-#endif // USE_LIBCURL
-
 //#define DEBUG 1
 
 enum {
@@ -191,97 +186,6 @@ static int socket_receive(int sock_id, char* msg, size_t max_len, int flags)
     return recv(sock_id, msg, max_len, flags);
 }
 
-/** \brief Receive whole message from host
- *
- * \param sock_id int id of socket
- * \param msg char* destination array
- * \param max_len size_t max length of @p msg
- * \param flags int additional flags
- * \return int
- *
- */
-#if OLDRECVALL
-static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
-{
-    int received = 0, buff_pos = 0;
-    while((received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags))) {
-        if(received <= -1) {
-#ifdef _WIN32
-            int ret = WSAGetLastError();
-#else
-            int ret = errno;
-#endif // _WIN32
-            if(!buff_pos)
-                return ret;
-            else
-                break;
-        }
-        buff_pos += received;
-    }
-    return buff_pos;
-}
-#elif NEWRECVALL
-static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
-{
-    int last_val = 0, received = 0;
-    while(received = socket_receive(sock_id, msg, max_len, MSG_PEEK)) {
-        if(received == -1) {
-#ifdef _WIN32
-            int ret = WSAGetLastError();
-#else
-            int ret = errno;
-#endif // _WIN32
-            return ret;
-        }
-        if(received != last_val)
-            last_val = received;
-        else
-            break;
-    }
-    if(last_val > max_len) return -1;
-
-    int ret = socket_receive(sock_id, msg, last_val, flags);
-    http_find_resp_length(msg);
-    http_find_header_length(msg);
-    return ret;
-}
-#elif NEWESTRECVALL
-static int socket_receiveall(int sock_id, char* msg, size_t max_len, int flags)
-{
-    int received = 0;
-    int buff_pos = 0;
-    size_t header_length = 0;
-
-    do {
-        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
-        if(received == -1) goto ERR_RECV;
-        buff_pos += received;
-        if(!http_is_response_ok(msg)) break;                        // error in response
-        if((header_length = http_find_header_length(msg))) break;     // header complete
-    } while(received != -1);
-
-    size_t resp_length = http_find_resp_length(msg);
-
-    while(buff_pos < resp_length + header_length) {
-        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
-        if(received == -1) goto ERR_RECV;
-        buff_pos += received;
-    }
-    return buff_pos;
-
-    int ret = 0;
-ERR_RECV:
-#ifdef _WIN32
-    ret = WSAGetLastError();
-#else
-    ret = errno;
-#endif // _WIN32
-    if(!buff_pos)
-        return ret;
-    return ret;
-}
-#endif // NEWRECVALL
-
 /** \brief Checks http response for validity ("200 OK")
  *
  * \param http_response char const*const http response to be checked
@@ -380,13 +284,7 @@ static char* http_create_request(char const*const host, char const*const file, c
     char const*const keep = "keep-alive";
     char const*const method = keep;
     if(request) {
-#ifdef OLDRECVALL
-        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
-#else
         sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, method, add_info ? add_info : "");
-
-//        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
-#endif // OLDRECVALL
         char* new_req = realloc(request, strlen(request) + 1);
         if(new_req) {
             request = new_req;
@@ -434,11 +332,20 @@ static int http_receiveall(int sock_id, char* msg, size_t max_len, int flags)
 {
     int received = 0;
     int buff_pos = 0;
+    int err_ret = 0;
 
-RECV:
     do {
         received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
-        if(received == -1) goto ERR_RECV;
+        if(received == -1) {
+#ifdef _WIN32
+        	err_ret = WSAGetLastError();
+			if(err_ret != WSAEWOULDBLOCK) {
+				goto ERR_RECV;
+			}
+#else
+			goto ERR_RECV; // Linux implementation is blocking, therefore received == -1 is an error
+#endif
+        }
         buff_pos += received;
         if(http_is_response_ok(msg)) {
         	if(http_is_response_complete(msg) || received == 0) {
@@ -453,10 +360,7 @@ RECV:
     int ret = 0;
 ERR_RECV:
 #ifdef _WIN32
-    ret = WSAGetLastError();
-    if(ret == WSAEWOULDBLOCK) {
-    	goto RECV;
-    }
+    ret = err_ret;
 #else
     ret = errno;
 #endif // _WIN32
@@ -493,7 +397,6 @@ static char* socket_get_useragent(void)
  * \return char* server response, http header removed. 0 if no valid response
  *
  */
-#ifndef USE_LIBCURL
 char* http_get(char const*const host, char const*const file, char const*const add_info)
 {
     char* ret = 0;
@@ -505,28 +408,17 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         http_request = http_create_request(host, file, add_info);
         if(!http_request) goto ERR_SOCKET;
         if(!socket_sendall(s, http_request, strlen(http_request) + 1)) goto ERR_SEND;
-#ifdef DEBUG
-        printf("HTTP_Get: Sent Request: %s\n", http_request);
-#endif // DEBUG
         size_t buf_len = 100E3;
         buffer = calloc(buf_len, sizeof(char));
         if(!buffer) goto ERR_SEND;
 		size_t received_bytes = 0;
+#ifdef _WIN32
 		if(!socket_set_blocking(s, false)) {
 			myperror(__FILE__, __LINE__, "Error setting socket to nonblocking");
 			return ret;
 		}
-	RECV:
-#ifdef SOCKET_RECVALL
-        received_bytes += socket_receiveall(s, buffer, buf_len, 0);
-#else
+#endif
         received_bytes += http_receiveall(s, buffer + received_bytes, buf_len, 0); // Todo: Set MSG_WAITALL?
-#endif // HTTP_RECVALL
-        //assert(received_bytes);
-#ifdef DEBUG
-        printf("HTTP_Get Received bytes: %zu\n", received_bytes);
-        printf("HTTP_Get Received data: \n%s\n", buffer);
-#endif // DEBUG
 		if(!http_is_response_complete(buffer)) {
 			myperror(__FILE__, __LINE__, "Error during http_get receive");
 			goto ERR_RECV;
@@ -551,25 +443,6 @@ ERR_SOCKET:
     socket_close(s);
     return 0;
 }
-#else
-char* http_get(char const*const host, char const*const file, char const*const add_info)
-{
-    CURL* curl;
-    CURLcode res;
-
-    curl = curl_easy_init();
-    if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, host);
-        res = curl_easy_perform(curl);
-
-        if(res != CURLE_OK) {
-        	myperror(__FILE__, __LINE__, "Error performing curl operationg!");
-
-        }
-        curl_easy_cleanup(curl);
-    }
-}
-#endif
 
 bool socket_check_connection()      // Das ist keine schoene Loesung, sollte aber funktionieren.
 {
