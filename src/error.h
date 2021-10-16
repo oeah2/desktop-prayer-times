@@ -26,6 +26,6 @@
  * \param msg Error msg
  *
  */
-void myperror(char const*const msg);
+void myperror(char const*const file, const int line, char const*const msg);
 
 #endif /* SRC_MYPERROR_H_ */

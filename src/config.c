@@ -369,7 +369,7 @@ int config_read(char const* filename, Config* cfg)
 
     cJSON* json = cJSON_Parse(cfg_content);
     if(!json) {
-    	myperror("Error parsing Config.");
+    	myperror(__FILE__, __LINE__, "Error parsing Config.");
         return EXIT_FAILURE;
     }
 
@@ -403,7 +403,7 @@ int config_read(char const* filename, Config* cfg)
             cfg->counter_parsed_cities++;
         }
         if(cfg->counter_parsed_cities != cfg->num_cities) {
-        	myperror("Something went wrong while parsing cities. Not all cities could be parsed.\n");
+        	myperror(__FILE__, __LINE__, "Something went wrong while parsing cities. Not all cities could be parsed.\n");
         }
     }
 
@@ -527,7 +527,7 @@ int config_json_save(char const*const filename, Config*const cfg) {
 
     char* string = cJSON_Print(json);
     if(!string) {
-    	myperror("Error printing json");
+    	myperror(__FILE__, __LINE__, "Error printing json");
         goto ERR;
     }
     fprintf(cfg_file, "%s\n", string);
@@ -537,7 +537,7 @@ int config_json_save(char const*const filename, Config*const cfg) {
     cfg->config_changed = false;
     goto END;
 ERR:
-	myperror("Error while printing config json");
+	myperror(__FILE__, __LINE__, "Error while printing config json");
 END:
     cJSON_Delete(json);
     fclose(cfg_file);

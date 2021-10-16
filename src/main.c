@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 #ifdef ENABLE_LOG
     char const*const log_filename = "errors.log";
     if(!freopen(log_filename, "a+", stderr)) {
-    	myperror("Error opening log file");
+    	myperror(__FILE__, __LINE__, "Error opening log file");
     }
 #endif // ENABLE_LOG
 
@@ -262,17 +262,18 @@ int main(int argc, char** argv)
     char* glade_filename = 0;
     if(lang_is_available(config.lang)) {
     	glade_filename = lang_get_filename(config.lang);
+		lang_strings_init(config.lang);
     } else {
     	char buffer[100];
-    	sprintf(buffer, "%s: %d, Error finding glade file. Lang: %ld", __FILE__, __LINE__, config.lang);
-    	myperror(buffer);
+    	sprintf(buffer, "%s: %d, Error finding glade file. Lang: %zu", __FILE__, __LINE__, config.lang);
+    	myperror(__FILE__, __LINE__, buffer);
 
     	// Switch to english
         if(lang_is_available(LANG_EN)) {
         	glade_filename = lang_get_filename(LANG_EN);
-
+			lang_strings_init(LANG_EN);
         	sprintf(buffer, "%s: %d, English is available, switching to english.", __FILE__, __LINE__);
-        	myperror(buffer);
+        	myperror(__FILE__, __LINE__, buffer);
         }
         else
         	return EXIT_FAILURE;

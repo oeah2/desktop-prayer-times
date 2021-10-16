@@ -30,6 +30,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <fcntl.h>
 #endif
 #include <openssl/bio.h>
 #include <openssl/err.h>
@@ -51,6 +52,9 @@ enum {
     SOCK_ERR_ADDRINFO,
 };
 
+static size_t http_find_header_length(char const*const http_response);
+static size_t http_find_resp_length(char const*const http_response);
+
 /** \brief Initialize socket
  *
  */
@@ -60,7 +64,7 @@ static int socket_init(void)
     WSADATA wsaData;
 
     if(WSAStartup(MAKEWORD(1,1), &wsaData)) {
-    	myperror("Error during Socket initialization.");
+    	myperror(__FILE__, __LINE__, "Error during Socket initialization.");
         return SOCK_ERR_INIT;
     }
 #endif
@@ -94,6 +98,29 @@ static int socket_close(int sock_id)
 #endif
 }
 
+
+/** \brief Set socket to non blocking
+ *
+ * \param fd socket
+ * \param blocking true for blocking
+ * \return true on success
+ *
+ */
+bool socket_set_blocking(int fd, bool blocking)
+{
+   if (fd < 0) return false;
+
+#ifdef _WIN32
+   unsigned long mode = blocking ? 0 : 1;
+   return (ioctlsocket(fd, FIONBIO, &mode) == 0) ? true : false;
+#else
+   int flags = fcntl(fd, F_GETFL, 0);
+   if (flags == -1) return false;
+   flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+   return (fcntl(fd, F_SETFL, flags) == 0) ? true : false;
+#endif
+}
+
 /** \brief Connect to socket
  *
  * \param addr char const*const address information
@@ -107,7 +134,7 @@ static int socket_connect(char const*const addr)
     hints.ai_socktype = SOCK_STREAM;
 
     if(getaddrinfo(addr, "http", &hints, &res)) {
-    	myperror("Error getting addrinfo.");
+    	myperror(__FILE__, __LINE__, "Error getting addrinfo.");
         return SOCK_ERR_ADDRINFO;
     }
 
@@ -263,13 +290,13 @@ ERR_RECV:
  */
 static bool http_is_response_ok(char const*const http_response)
 {
-    bool ret = false;
-    if(http_response) {
-        if(strstr(http_response, "HTTP/1.1 200 OK")) {
-            ret = true;
-        }
-    }
-    return ret;
+	bool ret = false;
+	if(http_response) {
+		if(strstr(http_response, "HTTP/1.1 200 OK")) {
+			ret = true;
+		}
+	}
+	return ret;
 }
 
 /** \brief Returns the content length of the http response according to the http header
@@ -310,6 +337,29 @@ static size_t http_find_header_length(char const*const http_response)
     return ret;
 }
 
+/** \brief Checks whether the http response is complete.
+ * The actual content length must match the content length given in the http header.
+ *
+ * \param http_response char const*const http response of the server
+ * \return bool true if complete, false otherwise
+ *
+ */
+static bool http_is_response_complete(char const*const http_response)
+{
+    bool ret = false;
+    if(http_response) {
+    	if(http_is_response_ok(http_response)) {
+			size_t header_length = http_find_header_length(http_response);
+			size_t resp_setpoint = http_find_resp_length(http_response);
+			int actual_resp = strlen(http_response) - header_length;
+			if(actual_resp > 0 && header_length && resp_setpoint && actual_resp >= resp_setpoint) { // Todo tbe last comparison should be == instead of >=
+				ret = true;
+			}
+        }
+    }
+    return ret;
+}
+
 /** \brief Creates http request. needs to be freed by the user
  *
  * \param host char const*const host to be connected
@@ -326,11 +376,14 @@ static char* http_create_request(char const*const host, char const*const file, c
 
     size_t const header_max = 2000;
     char* request = calloc(header_max, sizeof(char));
+    char const*const close = "close";
+    char const*const keep = "keep-alive";
+    char const*const method = keep;
     if(request) {
 #ifdef OLDRECVALL
         sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
 #else
-        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
+        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nConnection: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, method, add_info ? add_info : "");
 
 //        sprintf(request, "GET %s HTTP/1.1\r\nHost: %s\r\nAccept: text/plain\r\n%s\r\n\r\n", file, host, add_info ? add_info : "");
 #endif // OLDRECVALL
@@ -381,42 +434,32 @@ static int http_receiveall(int sock_id, char* msg, size_t max_len, int flags)
 {
     int received = 0;
     int buff_pos = 0;
-    size_t header_length = 0;
 
+RECV:
     do {
         received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
         if(received == -1) goto ERR_RECV;
         buff_pos += received;
+        if(http_is_response_ok(msg)) {
+        	if(http_is_response_complete(msg) || received == 0) {
+        		break;
+        	}
+        }
         if(!http_is_response_ok(msg)) break;                        // error in response
-        if((header_length = http_find_header_length(msg))) break;     // header complete
     } while(received != -1);
 
-    size_t resp_length = http_find_resp_length(msg);
-
-#ifdef DEBUG
-    printf("HTTP_Recvall resp length: %zu\n", resp_length);
-#endif // DEBUG
-
-    while(buff_pos < resp_length + header_length) {
-        received = socket_receive(sock_id, msg + buff_pos, max_len - buff_pos, flags);
-        if(received == -1) goto ERR_RECV;
-        buff_pos += received;
-    }
-#ifdef DEBUG
-    printf("HTTP_Recvall received bytes: %d\n", buff_pos);
-    printf("HTTP_Rectall received data: %s\n", msg);
-#endif // DEBUG
     return buff_pos;
 
     int ret = 0;
 ERR_RECV:
 #ifdef _WIN32
     ret = WSAGetLastError();
+    if(ret == WSAEWOULDBLOCK) {
+    	goto RECV;
+    }
 #else
     ret = errno;
 #endif // _WIN32
-    if(!buff_pos)
-        return ret;
     return ret;
 }
 
@@ -468,16 +511,26 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         size_t buf_len = 100E3;
         buffer = calloc(buf_len, sizeof(char));
         if(!buffer) goto ERR_SEND;
+		size_t received_bytes = 0;
+		if(!socket_set_blocking(s, false)) {
+			myperror(__FILE__, __LINE__, "Error setting socket to nonblocking");
+			return ret;
+		}
+	RECV:
 #ifdef SOCKET_RECVALL
-        size_t received_bytes = socket_receiveall(s, buffer, buf_len, 0);
+        received_bytes += socket_receiveall(s, buffer, buf_len, 0);
 #else
-        size_t received_bytes = http_receiveall(s, buffer, buf_len, 0);
+        received_bytes += http_receiveall(s, buffer + received_bytes, buf_len, 0); // Todo: Set MSG_WAITALL?
 #endif // HTTP_RECVALL
         //assert(received_bytes);
 #ifdef DEBUG
         printf("HTTP_Get Received bytes: %zu\n", received_bytes);
         printf("HTTP_Get Received data: \n%s\n", buffer);
 #endif // DEBUG
+		if(!http_is_response_complete(buffer)) {
+			myperror(__FILE__, __LINE__, "Error during http_get receive");
+			goto ERR_RECV;
+		}
         if(!received_bytes || !http_is_response_ok(buffer)) goto ERR_RECV;
         buffer = http_remove_header(buffer);
         assert(buffer);
@@ -490,7 +543,7 @@ char* http_get(char const*const host, char const*const file, char const*const ad
     return ret;
 
 ERR_RECV:
-	myperror("Error during receive");
+	myperror(__FILE__, __LINE__, "Error during receive");
     free(buffer);
 ERR_SEND:
     free(http_request);
@@ -510,7 +563,7 @@ char* http_get(char const*const host, char const*const file, char const*const ad
         res = curl_easy_perform(curl);
 
         if(res != CURLE_OK) {
-        	myperror("Error performing curl operationg!");
+        	myperror(__FILE__, __LINE__, "Error performing curl operationg!");
 
         }
         curl_easy_cleanup(curl);
@@ -533,7 +586,7 @@ bool socket_check_connection()      // Das ist keine schoene Loesung, sollte abe
  */
 static void report_and_exit(const char* msg)
 {
-	myperror(msg);
+	myperror(__FILE__, __LINE__, msg);
     ERR_print_errors_fp(stderr);
     exit(-1);
 }
@@ -645,7 +698,7 @@ char* https_get(char const*const host, char const*const file, char const*const a
     char* http_request = http_create_request(host, file, add_info);
     int sent_bytes = BIO_puts(bio, http_request);
     if(sent_bytes == -1 || sent_bytes == 0) {
-    	myperror("Error while sending data over HTTPS socket!");
+    	myperror(__FILE__, __LINE__, "Error while sending data over HTTPS socket!");
         return 0;
     }
     assert(strlen(http_request) == sent_bytes);
@@ -653,9 +706,9 @@ char* https_get(char const*const host, char const*const file, char const*const a
     http_request = NULL;
 
     char* http_response = https_receive(bio);
-#ifdef DEBUG
-    printf("HTTPS_Get response: %s\n", http_response);
-#endif // DEBUG
+	if(!http_is_response_complete(http_response)) {
+		myperror(__FILE__, __LINE__, "Error during receiving of https_get");
+	}
     https_cleanup(ctx, bio);
     if(http_is_response_ok(http_response)) {
     	http_response = http_remove_header(http_response);

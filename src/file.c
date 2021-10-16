@@ -57,7 +57,7 @@ bool file_read_all(FILE* file, size_t max_len, char dest[max_len])
         assert(max_len > read_bytes);
         dest[read_bytes] = '\0';
         if(read_bytes < (file_length - 1) && !feof(file)) {
-            myperror("file_read_all: Error while reading config file.");
+            myperror(__FILE__, __LINE__, "file_read_all: Error while reading config file.");
             return false;    // depends on library implementation(?)
         }
         ret = true;
