@@ -25,4 +25,4 @@ Todo:
 
 
 If you want to contribute, don't be shocked about the core of the application. It evolved over an considerable amount of time. Some parts are pretty messy but need reworking in future.
-Feel free to read the documentation of functions and interfaces.
+Feel free to read the documentation of functions and interfaces. The documentation is generally available in the header files. The Source code is located in the "src" directory.
