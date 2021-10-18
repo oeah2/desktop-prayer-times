@@ -16,16 +16,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef SRC_HADITH_H_
+#define SRC_HADITH_H_
 
-#ifndef GEOLOCATION_H_INCLUDED
-#define GEOLOCATION_H_INCLUDED
-
-/** \brief Fetch the geolocation of a city
+/** \brief Get random hadith
  *
- * \param city_name char* the name of the city
- * \return char* A string containing all matching cities and their latitudes and longitudes. (Format: Cityname lat long). Must be freed by calling function.
- *
+ * \return char* containing hadith. Caller function takes ownership *
  */
-char* geolocation_get(char const*const city_name);
+char* hadith_get_random(void);
 
-#endif // GEOLOCATION_H_INCLUDED
+#endif /* SRC_HADITH_H_ */

@@ -30,7 +30,7 @@ Author: Ahmet Öztürk
   <object class="GtkDialog" id="dlg_hadith">
     <property name="name">dlg_hadith</property>
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Zufälliger Hadith</property>
+    <property name="title" translatable="yes">Random Hadith</property>
     <property name="default-width">600</property>
     <property name="default-height">300</property>
     <property name="type-hint">dialog</property>
@@ -132,7 +132,7 @@ Author: Ahmet Öztürk
   <object class="GtkWindow" id="window_main">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Desktop Prayer Times App</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -150,7 +150,7 @@ Author: Ahmet Öztürk
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Datei</property>
+                <property name="label" translatable="yes">_File</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -184,7 +184,7 @@ Author: Ahmet Öztürk
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Einstellungen</property>
+                <property name="label" translatable="yes">_Settings</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -194,7 +194,7 @@ Author: Ahmet Öztürk
                       <object class="GtkMenuItem" id="menuitm_settings">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">_Einstellungen</property>
+                        <property name="label" translatable="yes">_Settings</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_settings_activate" object="dlg_settings" swapped="no"/>
                       </object>
@@ -245,7 +245,7 @@ Author: Ahmet Öztürk
                       <object class="GtkMenuItem" id="menuitm_add_city">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Stadt hinzufügen</property>
+                        <property name="label" translatable="yes">Add City</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_addcity_activate" object="assistant_addcity" swapped="no"/>
                       </object>
@@ -255,7 +255,7 @@ Author: Ahmet Öztürk
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Stadt bearbeiten</property>
+                        <property name="label" translatable="yes">Edit City</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_edit_city_activate" swapped="no"/>
                       </object>
@@ -264,7 +264,7 @@ Author: Ahmet Öztürk
                       <object class="GtkMenuItem" id="menuitm_remove_city">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label">Städte löschen</property>
+                        <property name="label">Delete City</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_removecity_activate" object="dlg_remove_city" swapped="no"/>
                       </object>
@@ -274,7 +274,7 @@ Author: Ahmet Öztürk
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">False</property>
-                        <property name="label">Städte umordnen</property>
+                        <property name="label">Change City Order</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_movecities_activate" object="dlg_savefile" swapped="no"/>
                       </object>
@@ -287,7 +287,7 @@ Author: Ahmet Öztürk
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Hilfe</property>
+                <property name="label" translatable="yes">_Help</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -307,7 +307,7 @@ Author: Ahmet Öztürk
                       <object class="GtkMenuItem" id="menutim_report_error">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Fehler melden</property>
+                        <property name="label" translatable="yes">Report Error</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menutim_report_error_activate" swapped="no"/>
                       </object>
@@ -317,7 +317,7 @@ Author: Ahmet Öztürk
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="tooltip-text" translatable="yes">Unterstütze uns bei der Entwicklung dieses Programms</property>
-                        <property name="label" translatable="yes">Mitmachen</property>
+                        <property name="label" translatable="yes">Participate</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuitm_participate_activate" swapped="no"/>
                       </object>
@@ -348,7 +348,7 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Zeige vorherige Stadt</property>
+                    <property name="tooltip-text" translatable="yes">Show previous City</property>
                     <property name="image">img-go-back</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
@@ -363,7 +363,7 @@ Author: Ahmet Öztürk
                   <object class="GtkLabel" id="label_cityname">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Stadtname</property>
+                    <property name="label" translatable="yes">City name</property>
                     <property name="width-chars">24</property>
                     <property name="max-width-chars">24</property>
                   </object>
@@ -378,7 +378,7 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Zeige nächste Stadt</property>
+                    <property name="tooltip-text" translatable="yes">Show next City</property>
                     <property name="image">img-go-forward</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
@@ -406,7 +406,7 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Zeige vorherigen Tag</property>
+                    <property name="tooltip-text" translatable="yes">Show previous Day</property>
                     <property name="image">img-go-back-2</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
@@ -421,7 +421,7 @@ Author: Ahmet Öztürk
                   <object class="GtkLabel" id="label_date">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Datum</property>
+                    <property name="label" translatable="yes">Date</property>
                     <property name="width-chars">13</property>
                     <property name="max-width-chars">13</property>
                   </object>
@@ -436,7 +436,7 @@ Author: Ahmet Öztürk
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
-                    <property name="tooltip-text" translatable="yes">Zeige nächsten Tag</property>
+                    <property name="tooltip-text" translatable="yes">Show next day</property>
                     <property name="image">img-go-forward-2</property>
                     <property name="relief">none</property>
                     <property name="always-show-image">True</property>
@@ -471,7 +471,7 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_name_fajr">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Morgengebet</property>
+                <property name="label" translatable="yes">Fajr</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -482,7 +482,7 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_name_sunrise">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Ende Morgengebet</property>
+                <property name="label" translatable="yes">End of Fajr</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -493,7 +493,7 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_name_dhuhr">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Mittagsgebet</property>
+                <property name="label" translatable="yes">Dhuhr</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -504,7 +504,7 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_name_asr">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Nachmittagsgebet</property>
+                <property name="label" translatable="yes">Asr</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -515,7 +515,7 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_name_maghrib">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Abendgebet</property>
+                <property name="label" translatable="yes">Maghrib</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -526,7 +526,7 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_name_isha">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Nachtgebet</property>
+                <property name="label" translatable="yes">Isha</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -617,9 +617,9 @@ Author: Ahmet Öztürk
               <object class="GtkLabel" id="label_hicridate">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Hijri Datum</property>
+                <property name="tooltip-text" translatable="yes">Hijri Date</property>
                 <property name="margin-top">5</property>
-                <property name="label" translatable="yes">Hijri Datum</property>
+                <property name="label" translatable="yes">Hijri Date</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
@@ -630,7 +630,7 @@ Author: Ahmet Öztürk
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Sonnenaufgang</property>
+                <property name="tooltip-text" translatable="yes">Sunrise</property>
                 <property name="halign">start</property>
                 <child>
                   <object class="GtkImage">
@@ -667,7 +667,7 @@ Author: Ahmet Öztürk
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Sonnenuntergang</property>
+                <property name="tooltip-text" translatable="yes">Sunset</property>
                 <property name="halign">end</property>
                 <child>
                   <object class="GtkLabel" id="label_time_sunset">
@@ -711,9 +711,9 @@ Author: Ahmet Öztürk
           <object class="GtkLabel" id="label_remaining_time">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="tooltip-text" translatable="yes">Verbleibende Zeit zum nächsten Gebet</property>
+            <property name="tooltip-text" translatable="yes">Remaining time for next prayer</property>
             <property name="margin-top">5</property>
-            <property name="label" translatable="yes">Verbleibende Zeit zum nächsten Gebet</property>
+            <property name="label" translatable="yes">Remaining time for next prayer</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -734,7 +734,7 @@ Author: Ahmet Öztürk
                 <property name="name">label_randomhadith</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Klick für zufälligen Hadith</property>
+                <property name="tooltip-text" translatable="yes">Click for random hadith</property>
                 <property name="label" translatable="yes">Narrated 'Umar bin Al-Khattab:
 I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for." </property>
                 <property name="wrap">True</property>
@@ -755,14 +755,14 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
     <property name="can-focus">False</property>
     <property name="resizable">False</property>
     <property name="destroy-with-parent">True</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <property name="program-name">Desktop Prayer Times</property>
     <property name="version">0.1</property>
     <property name="website">https://github.com/oeah2/desktop-prayer-times</property>
     <property name="authors">Ahmet Öztürk</property>
-    <property name="logo">Graphics\Logo_small.png</property>
+    <property name="logo">../Graphics/Logo_small.png</property>
     <property name="license-type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox">
@@ -791,11 +791,11 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
   </object>
   <object class="GtkDialog" id="dlg_calc_error">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Fehler</property>
+    <property name="title" translatable="yes">Error</property>
     <property name="window-position">center</property>
     <property name="default-width">300</property>
     <property name="default-height">75</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -869,10 +869,10 @@ I heard Allah's Messenger (ﷺ) saying, "The reward of deeds depends upon the in
                 <property name="name">dlg_calc_error_label</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Fehler beim Berechnen der Gebetszeiten!
+                <property name="label" translatable="yes">Error during calculation of prayer times!
 
-Füge entweder eine neue Stadt hinzu, oder 
-überprüfe deine Internetverbindung.</property>
+Please add another city or check your
+internet connection.</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -896,8 +896,8 @@ Füge entweder eine neue Stadt hinzu, oder
   </object>
   <object class="GtkFileChooserDialog" id="dlg_loadfile">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Datei auswählen</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="title" translatable="yes">Load file</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -961,7 +961,7 @@ Füge entweder eine neue Stadt hinzu, oder
     <property name="name">dlg_remove_city</property>
     <property name="height-request">200</property>
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Stadt löschen</property>
+    <property name="title" translatable="yes">Delete City</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <child internal-child="vbox">
@@ -1030,7 +1030,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Wähle die Städte zum Löschen aus</property>
+            <property name="label" translatable="yes">Please select the cities you would like to delete:</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1061,8 +1061,8 @@ Füge entweder eine neue Stadt hinzu, oder
   </object>
   <object class="GtkFileChooserDialog" id="dlg_savefile">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Datei wählen</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="title" translatable="yes">Save File</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="deletable">False</property>
     <property name="transient-for">window_main</property>
@@ -1124,8 +1124,8 @@ Füge entweder eine neue Stadt hinzu, oder
   </object>
   <object class="GtkDialog" id="dlg_settings">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Einstellungen</property>
-    <property name="icon">Graphics\Logo_small.png</property>
+    <property name="title" translatable="yes">Settings</property>
+    <property name="icon">../Graphics/Logo_small.png</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">window_main</property>
     <child internal-child="vbox">
@@ -1200,7 +1200,7 @@ Füge entweder eine neue Stadt hinzu, oder
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Sprache</property>
+                <property name="label" translatable="yes">Language</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -1212,7 +1212,7 @@ Füge entweder eine neue Stadt hinzu, oder
                 <property name="name">combobox_lang</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Wähle die Sprache aus, in der das Programm dargestellt wird.</property>
+                <property name="tooltip-text" translatable="yes">Change the language of this application</property>
                 <property name="active">1</property>
                 <items>
                   <item id="en" translatable="yes">English</item>
@@ -1230,7 +1230,7 @@ Füge entweder eine neue Stadt hinzu, oder
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
-                <property name="tooltip-text" translatable="yes">Neue Sprache hinzufügen</property>
+                <property name="tooltip-text" translatable="yes">Add a new language</property>
                 <property name="halign">end</property>
                 <property name="always-show-image">True</property>
                 <child>
@@ -1248,12 +1248,11 @@ Füge entweder eine neue Stadt hinzu, oder
             </child>
             <child>
               <object class="GtkCheckButton">
-                <property name="label" translatable="yes">Merke die Position des Fensters</property>
+                <property name="label" translatable="yes">Restore window position at startup</property>
                 <property name="name">checkbutton_saveposition</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">Stellt beim Starten des Programms die Position wieder her, die beim Beenden gespeichert wurde.</property>
                 <property name="draw-indicator">True</property>
               </object>
               <packing>
@@ -1263,7 +1262,7 @@ Füge entweder eine neue Stadt hinzu, oder
             </child>
             <child>
               <object class="GtkCheckButton">
-                <property name="label" translatable="yes">Beim Starten auf Updates überprüfen</property>
+                <property name="label" translatable="yes">Check for updates at startup</property>
                 <property name="name">checkbutton_checkforupdates</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
@@ -1277,13 +1276,13 @@ Füge entweder eine neue Stadt hinzu, oder
             </child>
             <child>
               <object class="GtkCheckButton">
-                <property name="label" translatable="yes">Aktiviere Benachrichtigungen zum Gebet.</property>
+                <property name="label" translatable="yes">Notify for prayer</property>
                 <property name="name">checkbutton_enable_notification</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">False</property>
-                <property name="tooltip-text" translatable="yes">Noch nicht implementiert.</property>
+                <property name="tooltip-text" translatable="yes">Not implemented.</property>
                 <property name="draw-indicator">True</property>
               </object>
               <packing>
@@ -1293,11 +1292,12 @@ Füge entweder eine neue Stadt hinzu, oder
             </child>
             <child>
               <object class="GtkCheckButton">
-                <property name="label" translatable="yes">Automatisch mit dem Betriebssystem starten</property>
+                <property name="label" translatable="yes">Start with operating system</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">False</property>
+                <property name="tooltip-text" translatable="yes">Not implemented.</property>
                 <property name="draw-indicator">True</property>
               </object>
               <packing>
@@ -1373,7 +1373,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Wähle die Method zur Bestimmung der Gebetszeiten aus.</property>
+            <property name="label" translatable="yes">Select the calculation method to determine prayer times for new city.</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1391,7 +1391,7 @@ Füge entweder eine neue Stadt hinzu, oder
                 <property name="can-focus">True</property>
                 <child>
                   <object class="GtkRadioButton" id="assistant_addcity_radiobutton_calc">
-                    <property name="label" translatable="yes">Berechnung</property>
+                    <property name="label" translatable="yes">Calculation</property>
                     <property name="name">assistant_addcity_radiobutton_calc</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -1408,7 +1408,7 @@ Füge entweder eine neue Stadt hinzu, oder
                 <property name="can-focus">True</property>
                 <child>
                   <object class="GtkRadioButton">
-                    <property name="label" translatable="yes">Diyanet</property>
+                    <property name="label" translatable="yes">Turkish Presidency of Religious Affairs (Diyanet)</property>
                     <property name="name">assistant_addcity_radiobutton_diyanet</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -1436,7 +1436,7 @@ Füge entweder eine neue Stadt hinzu, oder
       </packing>
     </child>
     <child>
-      <!-- n-columns=2 n-rows=3 -->
+      <!-- n-columns=2 n-rows=2 -->
       <object class="GtkGrid" id="assistant_addcity_page1_grid">
         <property name="name">assistant_addcity_page1_grid</property>
         <property name="visible">True</property>
@@ -1452,7 +1452,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Stadt:</property>
+            <property name="label" translatable="yes">Cityname:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1465,7 +1465,7 @@ Füge entweder eine neue Stadt hinzu, oder
             <property name="can-focus">False</property>
             <property name="valign">start</property>
             <property name="margin-end">6</property>
-            <property name="label" translatable="yes">Ergebnisse:</property>
+            <property name="label" translatable="yes">Results:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1481,7 +1481,7 @@ Füge entweder eine neue Stadt hinzu, oder
             <property name="primary-icon-name">edit-find-symbolic</property>
             <property name="primary-icon-activatable">False</property>
             <property name="primary-icon-sensitive">False</property>
-            <property name="placeholder-text" translatable="yes">Name der Stadt</property>
+            <property name="placeholder-text" translatable="yes">Name of City</property>
             <signal name="search-changed" handler="on_assistant_add_city_page1_search_search_changed" object="assistant_addcity" swapped="no"/>
           </object>
           <packing>
@@ -1500,12 +1500,6 @@ Füge entweder eine neue Stadt hinzu, oder
             <property name="top-attach">1</property>
           </packing>
         </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
       </object>
       <packing>
         <property name="has-padding">False</property>
@@ -1523,7 +1517,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Berechnungsmethod:</property>
+            <property name="label" translatable="yes">Calculation method:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1534,7 +1528,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Nachmittagsgebet:</property>
+            <property name="label" translatable="yes">Method for Asr:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1545,7 +1539,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Anpassung für hohe Breitengrade:</property>
+            <property name="label" translatable="yes">Adjustment for High Latitudes:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1565,7 +1559,7 @@ Füge entweder eine neue Stadt hinzu, oder
               <item id="Muslim World League" translatable="yes">Muslim World League (MWL)</item>
               <item id="Makkah" translatable="yes">Umm al-Qura, Makkah</item>
               <item id="Egypt" translatable="yes">Egyptian General Authority of Survey</item>
-              <item id="Custom" translatable="yes">Eigene Parameter</item>
+              <item id="Custom" translatable="yes">Custom Parameters</item>
             </items>
           </object>
           <packing>
@@ -1597,10 +1591,10 @@ Füge entweder eine neue Stadt hinzu, oder
             <property name="can-focus">False</property>
             <property name="active">0</property>
             <items>
-              <item id="none" translatable="yes">Keine Anpassung</item>
-              <item id="midnight" translatable="yes">Mitternacht</item>
-              <item id="one_seventh" translatable="yes">Ein Siebtel Regel</item>
-              <item id="angle" translatable="yes">Winkelbasiert</item>
+              <item id="none" translatable="yes">No Adjustment</item>
+              <item id="midnight" translatable="yes">Midnight</item>
+              <item id="one_seventh" translatable="yes">One-Seventh Rule</item>
+              <item id="angle" translatable="yes">Anglebased</item>
             </items>
           </object>
           <packing>
@@ -1626,7 +1620,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Land:</property>
+            <property name="label" translatable="yes">Country:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1637,7 +1631,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Provinz:</property>
+            <property name="label" translatable="yes">Province:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>
@@ -1648,7 +1642,7 @@ Füge entweder eine neue Stadt hinzu, oder
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Stadt:</property>
+            <property name="label" translatable="yes">City:</property>
           </object>
           <packing>
             <property name="left-attach">0</property>

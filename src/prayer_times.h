@@ -1,3 +1,21 @@
+/*
+   Desktop Prayer Times app
+   Copyright (C) 2021 Ahmet Öztürk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef PRAYER_TIMES_H_INCLUDED
 #define PRAYER_TIMES_H_INCLUDED
 
@@ -54,14 +72,10 @@ enum pr_time_providers { /**< enum for indexing prayer times providers */
     prov_num
 };
 
-//extern enum ST_calculation_method;
-//extern enum ST_juristic_method;
-//extern enum ST_adjusting_method;
-
-
 extern char const*const prayer_names[prayers_num]; /**< Referenced to prayer names */
 extern char const*const provider_names[prov_num]; /**< Referencing to prayer times providers names */
 extern char const*const ST_cm_names[ST_cm_num];
+extern char const*const diyanet_prayer_times_file_destination;
 
 typedef struct prayer prayer;
 

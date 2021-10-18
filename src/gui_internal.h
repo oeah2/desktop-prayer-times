@@ -16,16 +16,30 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef SRC_GUI_INTERNAL_H_
+#define SRC_GUI_INTERNAL_H_
 
-#ifndef GEOLOCATION_H_INCLUDED
-#define GEOLOCATION_H_INCLUDED
+#include <stdlib.h>
+#include <stdbool.h>
+//#define NDEBUG 1
+#include <assert.h>
+#include <pthread.h>
+#include <gtk/gtk.h>
+#include "gui.h"
+#include "geolocation.h"
+#include "cJSON.h"
+#include "config.h"
+#include "socket.h"
+#include "update.h"
+#include "error.h"
+#include "hadith.h"
 
-/** \brief Fetch the geolocation of a city
- *
- * \param city_name char* the name of the city
- * \return char* A string containing all matching cities and their latitudes and longitudes. (Format: Cityname lat long). Must be freed by calling function.
- *
- */
-char* geolocation_get(char const*const city_name);
 
-#endif // GEOLOCATION_H_INCLUDED
+extern Config* cfg;
+extern size_t city_ptr;
+extern int day_ptr;
+extern GtkButton* btn_next_city;
+extern GtkButton* btn_next_date;
+extern GtkButton* btn_prev_city;
+
+#endif /* SRC_GUI_INTERNAL_H_ */

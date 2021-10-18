@@ -1,6 +1,9 @@
 
 *.o
+!hadith_key.o
 *.res
 /.cproject
 /.project
 /Config.cfg
+*.cfg
+src/hadith_key.c

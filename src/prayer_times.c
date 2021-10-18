@@ -1,3 +1,21 @@
+/*
+   Desktop Prayer Times app
+   Copyright (C) 2021 Ahmet Öztürk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "prayer_times.h"
 #include <stdio.h>
 
@@ -18,7 +36,7 @@ char const*const provider_names[prov_num] = {
     [prov_empty] = "",
 };
 
-void prayer_print_times(char const*const city_name, prayer times[prayers_num])
+void prayer_print_times(char const*const city_name, prayer times[prayers_num]) // Todo check if this function is depreciated
 {
     size_t buffer_length = 200;
     char buffer[buffer_length];
@@ -33,12 +51,11 @@ void prayer_print_times(char const*const city_name, prayer times[prayers_num])
 int empty_get_todays_prayers(City city, prayer prayer_times[prayers_num])
 {
     for(size_t i = 0; i < prayers_num; i++) {
-        prayer_times[i].time_at = (struct tm) {
-            0
-        };
-        prayer_times[i].hicri_date = (struct tm) {
-            0
-        };
+    	prayer_times[i] = (prayer) {
+    		.time_at = (struct tm) {0},
+    		.hicri_date = (struct tm) {0},
+			.name = city.name,
+    	};
     }
     return EXIT_SUCCESS;
 }
@@ -85,6 +102,10 @@ int sprint_prayer_remaining(size_t buff_len, char dest[buff_len], int hours, int
 #endif
 }
 
+/** \brief Get print format for @p date
+ *
+ * \return char* format for printf
+ */
 static char const*const sprint_get_format(struct tm date, bool hijri) {
     char const* format = 0;
     if(date.tm_mday < 10 && date.tm_mon + (hijri ? 0 : 1) < 10) format = "0%d.0%d.%d";

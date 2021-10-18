@@ -1,3 +1,21 @@
+/*
+   Desktop Prayer Times app
+   Copyright (C) 2021 Ahmet Öztürk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "config.h"
 #include "error.h"
 #include "cJSON.h"
@@ -198,6 +216,97 @@ enum ST_calculation_method config_get_calc_method(const cJSON* element) {
 	return ret;
 }
 
+/** \brief Copy @p num cities from @p src to @p dest
+ *
+ * \param num number of cities
+ * \param dest desination array
+ * \param src source array
+ * \return int EXIT_SUCCESS on success, EXIT_FAILURE otherwise
+ *
+ */
+static int config_copy_cities(size_t num, City dest[num], City src[num]) {
+	int ret = EXIT_FAILURE;
+	if(num) {
+		for(size_t i = 0; i < num; i++) {
+			dest[i] = src[i];
+		}
+		ret = EXIT_SUCCESS;
+	}
+	return ret;
+}
+
+/** \brief Determine the smaller of two positions
+ *
+ */
+static size_t min(size_t const pos1, size_t const pos2) {
+	assert(pos1 != pos2);
+	if(pos1 < pos2) return pos1;
+	return pos2;
+}
+
+/** \brief Determine the greater of two positions
+ *
+ */
+static size_t max(size_t const pos1, size_t const pos2) {
+	assert(pos1 != pos2);
+	if(pos1 > pos2) return pos1;
+	return pos2;
+}
+
+/** \brief Move a city in Config @p cfg from position @p id_initial to @p id_after
+ *
+ */
+int config_move_city(size_t const id_initial, size_t const id_after, Config*const cfg) { // Todo verify function
+	int ret = EXIT_FAILURE;
+	if(cfg) {
+		if(id_initial < cfg->num_cities && id_after < cfg->num_cities && id_initial != id_after) {
+			int len = abs(id_initial - id_after);
+			size_t start = min(id_initial, id_after);
+			size_t end = max(id_initial, id_after);
+			City buffer[len];
+
+			size_t copy_start = start == id_initial ? start + 1 : start; // Copy from cfg to buffer. If city is to be moved backwards, copy from buffer to cfg startign at position start + 1.
+			size_t fill_start = start == id_initial ? start : start + 1; // Copy from buffer to cfg. If city is to be moved backwards, copy from buffer to cfg startign at position start.
+			City buffer2 = cfg->cities[id_initial];
+			config_copy_cities(len, buffer, &(cfg->cities[copy_start]));
+			config_copy_cities(len, &(cfg->cities[fill_start]), buffer);
+			cfg->cities[id_after] = buffer2;
+
+			for(size_t i = start; i <= end; i++) {
+				cfg->cities[i].id = i;
+			}/*
+			for(size_t i = 0; i < cfg->num_cities; i++) {
+				cfg->cities[i].id = i;
+			}*/
+			cfg->config_changed = true;
+			ret = EXIT_SUCCESS;
+		}
+	}
+	return ret;
+}
+
+/** \brief Swap two cities in Config @p cfg
+ *
+ */
+int config_swap_cities(size_t const city1, size_t const city2, Config*const cfg) {
+	int ret = EXIT_FAILURE;
+	if(cfg) {
+		if(city1 < cfg->num_cities && city2 < cfg->num_cities) {
+			City city_buffer = cfg->cities[city1];
+			cfg->cities[city1] = cfg->cities[city2];
+			cfg->cities[city2] = city_buffer;
+			cfg->cities[city1].id = city1; // Adjust ID of previously city 2
+			cfg->cities[city2].id = city2; // Adjist ID of previously city 1
+			cfg->config_changed = true;
+			ret = EXIT_SUCCESS;
+		}
+	}
+	return ret;
+}
+
+/** \brief Parse City (calculation) from JSON
+ *
+ */
 static bool config_calc_read_city(const cJSON* element, char* name, City* city) {
     bool ret = false;
     if(!element || !city || !name)
@@ -218,6 +327,9 @@ static bool config_calc_read_city(const cJSON* element, char* name, City* city) 
     return ret;
 }
 
+/** \brief Parse City (diyanet) from JSON
+ *
+ */
 static bool config_diyanet_read_city(const cJSON* element, char* name, City* city) {
     bool ret = false;
     if(!element || !city || !name)
@@ -227,7 +339,6 @@ static bool config_diyanet_read_city(const cJSON* element, char* name, City* cit
     cJSON* prayer_file = cJSON_GetObjectItem(element, config_format_json_specifiers[json_filename]);
     assert(prayer_file); assert(id);
 
-    printf("config_diyanet_read_city: id: %d", id->valueint);
     City* c = city_init_diyanet(city, name, prov_diyanet, prayer_file->valuestring, id->valueint);
     if(c) ret = true;
 
@@ -258,7 +369,7 @@ int config_read(char const* filename, Config* cfg)
 
     cJSON* json = cJSON_Parse(cfg_content);
     if(!json) {
-    	myperror("Error parsing Config.");
+    	myperror(__FILE__, __LINE__, "Error parsing Config.");
         return EXIT_FAILURE;
     }
 
@@ -292,7 +403,7 @@ int config_read(char const* filename, Config* cfg)
             cfg->counter_parsed_cities++;
         }
         if(cfg->counter_parsed_cities != cfg->num_cities) {
-        	printf("Something went wrong while parsing cities. Not all cities could be parsed.\n");
+        	myperror(__FILE__, __LINE__, "Something went wrong while parsing cities. Not all cities could be parsed.\n");
         }
     }
 
@@ -416,10 +527,9 @@ int config_json_save(char const*const filename, Config*const cfg) {
 
     char* string = cJSON_Print(json);
     if(!string) {
-    	myperror("Error printing json");
+    	myperror(__FILE__, __LINE__, "Error printing json");
         goto ERR;
     }
-    puts(string);
     fprintf(cfg_file, "%s\n", string);
     free(string);
     string = 0;
@@ -427,7 +537,7 @@ int config_json_save(char const*const filename, Config*const cfg) {
     cfg->config_changed = false;
     goto END;
 ERR:
-	myperror("Error while printing config json");
+	myperror(__FILE__, __LINE__, "Error while printing config json");
 END:
     cJSON_Delete(json);
     fclose(cfg_file);
@@ -441,8 +551,6 @@ Config* config_init(Config* cfg)
             .lang = LANG_EN,
             .config_changed = false,
         };
-        //cfg->lang = LANG_EN;
-        //cfg->config_changed = false;
     }
     return cfg;
 }
@@ -462,6 +570,16 @@ static bool is_id_valid(size_t city_id, Config const*const cfg)
     return false;
 }
 
+/** \brief Determine last used ID
+ *
+ */
+static size_t config_find_last_used_id(Config const*const cfg) {
+	return cfg->num_cities -1;
+}
+
+/** \brief Determine first free ID
+ *
+ */
 static size_t config_get_first_free_id(Config const*const cfg) {
 	return cfg->num_cities;
 }
@@ -493,7 +611,11 @@ int config_add_city(City c, Config* cfg)
 {
     int ret = EXIT_FAILURE;
     if(cfg) {
-        City* new_pointer = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
+    	City* new_pointer = 0;
+    	if(cfg->num_cities)
+    		new_pointer = realloc(cfg->cities, (cfg->num_cities + 1) * sizeof(City));
+    	else
+    		new_pointer = malloc((cfg->num_cities + 1) * sizeof(City));
         if(!new_pointer) return EXIT_FAILURE;
         cfg->cities = new_pointer;
         c.id = config_get_first_free_id(cfg);
@@ -510,93 +632,26 @@ int config_remove_city(size_t city_id, Config* cfg)
 {
     int ret = EXIT_FAILURE;
     if(cfg) {
+    	config_move_city(city_id, config_find_last_used_id(cfg), cfg);
+
         City buffer[cfg->num_cities - 1];
-        for(size_t i = 0, counter = 0; i < cfg->num_cities; i++) {       // Copy cities to array
-            if(cfg->cities[i].id == city_id) continue;
-            buffer[counter] = cfg->cities[i];
-            buffer[counter].id = counter; // Adjust IDs
-            counter++;
+        for(size_t i = 0; i < cfg->num_cities - 1; i++) {
+            buffer[i] = cfg->cities[i];
+            buffer[i].id = i;
         }
+
         cfg->num_cities--;
         City* new_pointer = realloc(cfg->cities, cfg->num_cities * sizeof(City));     // Shrink size, should not fail
-        if(!new_pointer) return EXIT_FAILURE;
-        cfg->cities = new_pointer;
+		if(!new_pointer) return EXIT_FAILURE;
+		cfg->cities = new_pointer;
 
-        for(size_t i = 0; i < cfg->num_cities; i++) {           // Copy array back to config
-            cfg->cities[i] = buffer[i];
-        }
-        cfg->config_changed = true;
-        ret = EXIT_SUCCESS;
+		for(size_t i = 0; i < cfg->num_cities; i++) {
+			cfg->cities[i] = buffer[i];
+		}
+		cfg->config_changed = true;
+		ret = EXIT_SUCCESS;
     }
     return ret;
-}
-
-int config_swap_cities(size_t const city1, size_t const city2, Config*const cfg) {
-	int ret = EXIT_FAILURE;
-	if(cfg) {
-		if(city1 < cfg->num_cities && city2 < cfg->num_cities) {
-			City city_buffer = cfg->cities[city1];
-			cfg->cities[city1] = cfg->cities[city2];
-			cfg->cities[city2] = city_buffer;
-			cfg->cities[city1].id = city1; // Adjust ID of previously city 2
-			cfg->cities[city2].id = city2; // Adjist ID of previously city 1
-			cfg->config_changed = true;
-			ret = EXIT_SUCCESS;
-		}
-	}
-	return ret;
-}
-
-static int config_copy_cities(size_t num, City dest[num], City src[num]) {
-	int ret = EXIT_FAILURE;
-	if(num) {
-		for(size_t i = 0; i < num; i++) {
-			dest[i] = src[i];
-		}
-		ret = EXIT_SUCCESS;
-	}
-	return ret;
-}
-
-static size_t min(size_t const pos1, size_t const pos2) {
-	assert(pos1 != pos2);
-	if(pos1 < pos2) return pos1;
-	return pos2;
-}
-
-static size_t max(size_t const pos1, size_t const pos2) {
-	assert(pos1 != pos2);
-	if(pos1 > pos2) return pos1;
-	return pos2;
-}
-
-int config_move_city(size_t const id_initial, size_t const id_after, Config*const cfg) { // Todo verify function
-	int ret = EXIT_FAILURE;
-	if(cfg) {
-		if(id_initial < cfg->num_cities && id_after < cfg->num_cities && id_initial != id_after) {
-			int len = abs(id_initial - id_after);
-			size_t start = min(id_initial, id_after);
-			size_t end = max(id_initial, id_after);
-			City buffer[len];
-
-			size_t copy_start = start == id_initial ? start + 1 : start; // Copy from cfg to buffer. If city is to be moved backwards, copy from buffer to cfg startign at position start + 1.
-			size_t fill_start = start == id_initial ? start : start + 1; // Copy from buffer to cfg. If city is to be moved backwards, copy from buffer to cfg startign at position start.
-			City buffer2 = cfg->cities[id_initial];
-			config_copy_cities(len, buffer, &(cfg->cities[copy_start]));
-			config_copy_cities(len, &(cfg->cities[fill_start]), buffer);
-			cfg->cities[id_after] = buffer2;
-
-			for(size_t i = start; i <= end; i++) {
-				cfg->cities[i].id = i;
-			}/*
-			for(size_t i = 0; i < cfg->num_cities; i++) {
-				cfg->cities[i].id = i;
-			}*/
-			cfg->config_changed = true;
-			ret = EXIT_SUCCESS;
-		}
-	}
-	return ret;
 }
 
 Config* config_clear(Config* cfg)

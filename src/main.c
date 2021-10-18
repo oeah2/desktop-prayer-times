@@ -1,3 +1,21 @@
+/*
+   Desktop Prayer Times app
+   Copyright (C) 2021 Ahmet Öztürk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include <stdio.h>
 //#define NDEBUG 1
 #include <assert.h>
@@ -37,7 +55,7 @@ int main(int argc, char** argv)
 #ifdef ENABLE_LOG
     char const*const log_filename = "errors.log";
     if(!freopen(log_filename, "a+", stderr)) {
-    	myperror("Error opening log file");
+    	myperror(__FILE__, __LINE__, "Error opening log file");
     }
 #endif // ENABLE_LOG
 
@@ -45,12 +63,15 @@ int main(int argc, char** argv)
     char* config_file = "Config.cfg";
     prayer prayer_times[prayers_num];
 
-    if(config_read(config_file, &config) == EXIT_FAILURE) {
-        config = *config_init(&config);
-        // Create Makkah as reference city
-        City c;
-        city_init_calc(&c, "Makkah", prov_calc, ST_cm_Makkah, 0, 39.814838, 21.427378, ST_jm_Shafii, ST_am_None);
-        config_add_city(c, &config);
+    {
+		int cfg_read_result = config_read(config_file, &config);
+		if(cfg_read_result == EXIT_FAILURE || !config.num_cities) {
+			if(cfg_read_result == EXIT_FAILURE) config = *config_init(&config);
+			// Create Makkah as reference city
+			City c;
+			city_init_calc(&c, "Makkah", prov_calc, ST_cm_Makkah, 0, 39.814838, 21.427378, ST_jm_Shafii, ST_am_None);
+			config_add_city(c, &config);
+		}
     }
 
 #define SKIP_UPDATE
@@ -177,14 +198,16 @@ int main(int argc, char** argv)
             prayer_print_times(curr_city->name, prayer_times);
         }
 #else // CALC_ALL_CITIES
-        curr_city = &config.cities[0];
-        calc_func = calc_functions[curr_city->pr_time_provider];
-        int CALC_RESULT = calc_func(config.cities[0], prayer_times);
-        if(CALC_RESULT == ENETDOWN) {
-            config.cities[0].pr_time_provider = prov_empty;
-            calc_functions[curr_city->pr_time_provider](config.cities[0], prayer_times);              // Reset to 00:00
-        } else if(CALC_RESULT != EXIT_SUCCESS) {
-            assert(0);
+        if(config.num_cities) {
+			curr_city = &config.cities[0];
+			calc_func = calc_functions[curr_city->pr_time_provider];
+			int CALC_RESULT = calc_func(config.cities[0], prayer_times);
+			if(CALC_RESULT == ENETDOWN) {
+				config.cities[0].pr_time_provider = prov_empty;
+				calc_functions[curr_city->pr_time_provider](config.cities[0], prayer_times);              // Reset to 00:00
+			} else if(CALC_RESULT != EXIT_SUCCESS) {
+				assert(0);
+			}
         }
 #endif // CALC_ALL_CITIES
 
@@ -209,7 +232,7 @@ int main(int argc, char** argv)
     }
     char puffer_julian_date[buff_len];
     char puffer_hijri_date[buff_len];
-    prayer pr_hijri_date = {0}, pr_julian_date = {0};
+    prayer pr_hijri_date = {0};
     if(config.cities[0].pr_time_provider == prov_calc) {
         time_t now = time(0);
         struct tm tm = *localtime(&now);
@@ -232,20 +255,31 @@ int main(int argc, char** argv)
         [gui_id_datename]       = puffer_julian_date,
         [gui_id_hijridate]      = puffer_hijri_date,
         [gui_id_remainingtime]  = "",
-        //[gui_id_randomhadith]   = "Hadith",
     };
 
     /* Now GUI Stuff */
     gtk_init(&argc, &argv);
-    char* glade_filename = "./bin/Prayer_times_GTK.glade";
-    //char* glade_filename = lang_get_filename(config.lang);
-#ifdef RELEASE
-    char* glade_filename = lang_get_filename(LANG_DE);
-#endif // RELEASE
+    char* glade_filename = 0;
+    if(lang_is_available(config.lang)) {
+    	glade_filename = lang_get_filename(config.lang);
+		lang_strings_init(config.lang);
+    } else {
+    	char buffer[100];
+    	sprintf(buffer, "%s: %d, Error finding glade file. Lang: %zu", __FILE__, __LINE__, config.lang);
+    	myperror(__FILE__, __LINE__, buffer);
+
+    	// Switch to english
+        if(lang_is_available(LANG_EN)) {
+        	glade_filename = lang_get_filename(LANG_EN);
+			lang_strings_init(LANG_EN);
+        	sprintf(buffer, "%s: %d, English is available, switching to english.", __FILE__, __LINE__);
+        	myperror(__FILE__, __LINE__, buffer);
+        }
+        else
+        	return EXIT_FAILURE;
+    }
     build_glade(&config, gui_id_num, glade_filename, gui_strings);
-#ifdef RELEASE
     free(glade_filename);
-#endif // RELEASE
 
 #ifdef WAIT_USER
 #ifdef _WIN32
@@ -257,7 +291,8 @@ int main(int argc, char** argv)
     if(config.config_changed)
         config_json_save(config.cfg_filename, &config);
 
-    free(config.cities);
+    if(config.num_cities)
+    	free(config.cities);
     free(config.cfg_filename);
 
     return 0;

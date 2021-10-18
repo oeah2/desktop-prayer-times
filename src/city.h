@@ -1,3 +1,22 @@
+/*
+   Desktop Prayer Times app
+   Copyright (C) 2021 Ahmet Öztürk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
 #ifndef CITY_H_INCLUDED
 #define CITY_H_INCLUDED
 
@@ -48,6 +67,23 @@ City* city_init_diyanet(City* c, char const*const name, size_t pr_time_provider,
  *
  */
 City* city_init_calc(City* c, char const*const name, size_t pr_time_provider, size_t method, size_t id, double longitude, double latitude, size_t asr_juristic, size_t adjust_high_lats);
+
+/** \brief Initializes an empty city
+ *
+ * \param c city to be initialized
+ * \return pointer to initialized city
+ *
+ */
+City* city_init_empty(City* c);
+
+/** \brief Set name of city by copying into own storage
+ *
+ * \param c whose name is to be set
+ * \param name new name
+ * \return pointer to modified city
+ *
+ */
+City* city_set_name(City* c, char const*const name);
 
 /** \brief Destroys city element, without freeing c
  *
