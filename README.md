@@ -15,7 +15,9 @@ Currently known Issues:
 
 
 Todo:
-- Switch from own socket implementation to library?
+- Fix bug in windows socket implementation
+- Make sockets also not blocking in linux
+- Rework socket so the internet connection is handled in a second thread.
 - Rework update checking
 - Create distribution files
 - Rework makefile
