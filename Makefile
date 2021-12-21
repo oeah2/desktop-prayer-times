@@ -1,5 +1,5 @@
 OUT_RELEASE	= ./bin/Release/Prayer_times.exe
-OUT_RELEASE_LINUX = ./bin/Release/Prayer_times.a
+OUT_RELEASE_LINUX = ./bin/Release/Prayer_times
 OUT_DEBUG = ./bin/Debug/Prayer_Times.exe
 OUT_DEBUG_LINUX = ./bin/Debug/Prayer_Times.a
 OBJ_DEBUG_PATH = ./obj/Debug
